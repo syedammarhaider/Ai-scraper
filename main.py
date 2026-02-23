@@ -87,23 +87,31 @@ async def health():
 
 @app.post("/scrape")
 async def scrape(request: Request):
-    form = await request.form()
-    url = form.get("url")
-    mode = form.get("mode", "comprehensive")
+    try:
+        form = await request.form()
+        url = form.get("url")
+        mode = form.get("mode", "comprehensive")
 
-    if not url:
-        return {"success": False, "error": "URL required"}
+        if not url:
+            return {"success": False, "error": "URL required"}
 
-    if not url.startswith("http"):
-        url = "https://" + url
+        if not url.startswith("http"):
+            url = "https://" + url
 
-    data = scraper.scrape_website(url, mode)
-    if "error" in data: 
-        return {"success": False, "error": data["error"]}
+        print(f"🔍 Scraping URL: {url}, Mode: {mode}")
+        data = scraper.scrape_website(url, mode)
+        print(f"✅ Scraping completed for: {url}")
+        
+        if "error" in data: 
+            return {"success": False, "error": data["error"]}
+        
+        # Add session_id for frontend compatibility
+        data["session_id"] = data.get("scrape_id", str(uuid.uuid4()))
+        return {"success": True, "data": data}
     
-    # Add session_id for frontend compatibility
-    data["session_id"] = data.get("scrape_id", str(uuid.uuid4()))
-    return {"success": True, "data": data}
+    except Exception as e:
+        print(f"❌ Scraping error: {str(e)}")
+        return {"success": False, "error": f"Scraping failed: {str(e)}"}
 
 @app.post("/groq-chat")
 async def chat(request: Request):
