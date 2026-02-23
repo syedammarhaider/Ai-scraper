@@ -75,6 +75,10 @@ def initialize_grok_clients():
             grok_mode = None
             return False
 
+# Global variables for Groq clients
+groq_ai = None
+grok_mode = None
+
 # Initialize clients at startup
 initialize_grok_clients()
 
