@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>ULTRA AI SCRAPER PRO · ENTERPRISE EDITION</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+:root {
+    --bg-color: #ffffff;
+    --card-bg: #ffffff;
+    --card-border: #e2e8f0;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+    --text-primary: #1a1a2e;
+    --text-muted: #4a5568;
+    --accent-primary: #4158D0;
+    --accent-secondary: #C850C0;
+    --accent-gradient: linear-gradient(135deg, #4158D0, #C850C0);
+    --border-color: #e2e8f0;
+    --input-bg: #f8fafc;
+    --input-border: #e2e8f0;
+    --input-focus: #4158D0;
+    --chat-user: linear-gradient(135deg, #4158D0, #C850C0);
+    --chat-assistant: #f8fafc;
+    --header-bg: #ffffff;
+    --code-bg: #f1f5f9;
+    --code-color: #4158D0;
+    --badge-bg: linear-gradient(135deg, #4158D0, #C850C0);
+}
+
+[data-theme="dark"] {
+    --bg-color: #0f0c29;
+    --card-bg: #1a1a2e;
+    --card-border: #2d2d4a;
+    --card-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    --text-primary: #ffffff;
+    --text-muted: #b0b0b0;
+    --accent-primary: #6b4eff;
+    --accent-secondary: #b146c2;
+    --accent-gradient: linear-gradient(135deg, #6b4eff, #b146c2);
+    --border-color: #2d2d4a;
+    --input-bg: #16213e;
+    --input-border: #2d2d4a;
+    --input-focus: #6b4eff;
+    --chat-user: linear-gradient(135deg, #6b4eff, #b146c2);
+    --chat-assistant: #16213e;
+    --header-bg: #1a1a2e;
+    --code-bg: #16213e;
+    --code-color: #b146c2;
+    --badge-bg: linear-gradient(135deg, #6b4eff, #b146c2);
+}
+
+body {
+    background: var(--bg-color);
+    color: var(--text-primary);
+    min-height: 100vh;
+    padding: 12px 10px;
+    line-height: 1.4;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: var(--header-bg);
+    padding: 10px 16px;
+    border-radius: 30px;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+}
+
+.header h1 {
+    font-size: clamp(16px, 4vw, 22px);
+    font-weight: 700;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.header h1 i {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.theme-toggle {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 30px;
+    background: var(--accent-gradient);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.theme-toggle:hover {
+    opacity: 0.9;
+}
+
+.card {
+    background: var(--card-bg);
+    padding: 16px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+}
+
+.card h2 {
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    font-size: clamp(16px, 3.5vw, 20px);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.card h2 i {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.input-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.input-group input,
+.input-group select {
+    flex: 1 1 120px;
+    padding: 12px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    outline: none;
+    width: 100%;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    border-color: var(--input-focus);
+}
+
+.primary-btn {
+    padding: 12px 16px;
+    border: none;
+    border-radius: 20px;
+    background: var(--accent-gradient);
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    width: 100%;
+}
+
+.primary-btn:hover {
+    opacity: 0.9;
+}
+
+.scrape-btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 25px;
+    background: var(--accent-gradient);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+.scrape-btn:hover {
+    opacity: 0.9;
+}
+
+.loading {
+    display: none;
+    text-align: center;
+    margin-top: 12px;
+}
+
+.loading-spinner {
+    width: 30px;
+    height: 30px;
+    border: 2px solid var(--border-color);
+    border-top: 2px solid var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin: 8px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading p {
+    color: var(--accent-primary);
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.preview-content {
+    background: var(--input-bg);
+    padding: 14px;
+    border-radius: 16px;
+    max-height: 300px;
+    overflow: auto;
+    font-size: 12px;
+    border: 1px solid var(--border-color);
+    white-space: pre-wrap;
+    font-family: monospace;
+    line-height: 1.5;
+}
+
+.export-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.export-btn {
+    flex: 1 0 auto;
+    min-width: 60px;
+    padding: 8px 6px;
+    border: none;
+    border-radius: 20px;
+    background: var(--badge-bg);
+    color: white;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    cursor: pointer;
+    font-size: 10px;
+}
+
+.export-btn:hover {
+    opacity: 0.9;
+}
+
+.chat-container {
+    background: var(--input-bg);
+    padding: 12px;
+    border-radius: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.message {
+    display: flex;
+}
+
+.message.user {
+    justify-content: flex-end;
+}
+
+.message-content {
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 16px;
+    max-width: 85%;
+    font-size: 12px;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.user .message-content {
+    background: var(--chat-user);
+    color: white;
+}
+
+.assistant .message-content {
+    background: var(--chat-assistant);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.message-content h1 { font-size: 1.2em; margin: 0.3em 0; }
+.message-content h2 { font-size: 1.1em; margin: 0.3em 0; }
+.message-content p { margin: 0.4em 0; }
+.message-content ul, .message-content ol { padding-left: 1.2em; margin: 0.3em 0; }
+.message-content li { margin: 0.2em 0; }
+.message-content code {
+    background: var(--code-bg);
+    color: var(--code-color);
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-size: 0.85em;
+}
+
+.typing {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+}
+.typing span {
+    width: 6px;
+    height: 6px;
+    background: var(--accent-gradient);
+    border-radius: 50%;
+    display: inline-block;
+    animation: blink 1s infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.2s; }
+.typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}
+
+.model-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    background: linear-gradient(135deg, #4158D0, #C850C0);
+    color: white;
+    border-radius: 30px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-left: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .model-badge {
+    background: linear-gradient(135deg, #6b4eff, #b146c2);
+}
+
+.card p {
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    font-size: 12px;
+}
+
+.card p i {
+    color: var(--accent-primary);
+    margin-right: 3px;
+}
+
+/* Toggle Buttons Style */
+.toggle-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    background: var(--input-bg);
+    padding: 5px;
+    border-radius: 50px;
+    border: 1px solid var(--border-color);
+}
+
+.toggle-btn {
+    flex: 1;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 50px;
+    background: transparent;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.toggle-btn i {
+    font-size: 14px;
+}
+
+.toggle-btn.active {
+    background: var(--accent-gradient);
+    color: white;
+}
+
+.toggle-btn.active i {
+    color: white;
+}
+
+.chat-section {
+    display: none;
+}
+
+.chat-section.active {
+    display: block;
+}
+
+.mode-header {
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--accent-primary);
+}
+.mode-header h2 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+}
+.mode-header p {
+    margin: 0;
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--input-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-primary);
+    border-radius: 4px;
+}
+
+@media (min-width: 480px) {
+    body { padding: 15px; }
+    .primary-btn { width: auto; }
+    .export-btn { min-width: 70px; font-size: 11px; }
+}
+
+@media (min-width: 640px) {
+    body { padding: 18px; }
+    .scrape-btn { font-size: 16px; }
+    .export-btn { min-width: 80px; font-size: 12px; }
+}
+
+@media (min-width: 768px) {
+    body { padding: 20px; }
+    .card h2 { font-size: 22px; }
+    .preview-content { max-height: 350px; }
+}
+
+@media (min-width: 1024px) {
+    body { padding: 25px; }
+    .preview-content { max-height: 400px; }
+    .export-btn { min-width: 100px; }
+}
+
+@media (max-width: 360px) {
+    body { padding: 8px; }
+    .header { padding: 8px 12px; }
+    .header h1 { font-size: 14px; }
+    .theme-toggle { padding: 6px 10px; font-size: 11px; }
+    .card { padding: 12px 10px; }
+    .card h2 { font-size: 14px; }
+    .input-group input, .input-group select { padding: 10px; font-size: 12px; }
+    .primary-btn { padding: 10px; font-size: 12px; }
+    .scrape-btn { padding: 12px; font-size: 14px; }
+    .model-badge { font-size: 8px; padding: 3px 6px; }
+    .export-btn { min-width: 100%; }
+}
+</style>
+</head>
+
+<body data-theme="light">
+
+<div class="container">
+
+<div class="header">
+<h1><i class="fas fa-crown"></i> ULTRA AI SCRAPER PRO </h1>
+<button class="theme-toggle" onclick="toggleTheme()">
+<i class="fas fa-moon"></i> <span id="themeText">Dark</span>
+</button>
+</div>
+
+<!-- SCRAPER SECTION -->
+<div class="card">
+<h2><i class="fas fa-globe-americas"></i> Website Scraper</h2>
+
+<div class="input-group">
+<input type="url" id="urlInput" placeholder="Enter URL (e.g., example.com)" value="https://example.com">
+<button class="primary-btn" onclick="previewUrl()"><i class="fas fa-eye"></i> Preview</button>
+</div>
+
+<div class="input-group">
+<select id="scrapeMode">
+<option value="comprehensive">🔍 Comprehensive</option>
+<option value="smart">⚡ Smart Mode</option>
+<option value="basic">📄 Basic Mode</option>
+</select>
+
+<select id="jsMode">
+<option value="false">🚫 JS Disabled</option>
+<option value="true">⚡ JS Enabled</option>
+</select>
+</div>
+
+<button class="scrape-btn" onclick="scrapeWebsite()">
+<i class="fas fa-search"></i> SCRAPE NOW
+</button>
+<div id="loading" class="loading">
+<div class="loading-spinner"></div>
+<p>Processing...</p>
+</div>
+</div>
+
+<!-- SCRAPED DATA CARD -->
+<div class="card" id="dataCard" style="display:none">
+<h2><i class="fas fa-database"></i> Scraped Data <span class="model-badge">Preview</span></h2>
+<div id="previewContent" class="preview-content"></div>
+
+<!-- EXPORT BUTTONS -->
+<div class="export-grid">
+<button class="export-btn" onclick="exportData('json')"><i class="fas fa-code"></i> JSON</button>
+<button class="export-btn" onclick="exportData('csv')"><i class="fas fa-table"></i> CSV</button>
+<button class="export-btn" onclick="exportData('excel')"><i class="fas fa-file-excel"></i> Excel</button>
+<button class="export-btn" onclick="exportData('txt')"><i class="fas fa-file-alt"></i> Text</button>
+<button class="export-btn" onclick="exportData('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
+</div>
+</div>
+
+<!-- COMBINED AI CHAT CARD - BOTH IN ONE DIV WITH TOGGLE -->
+<div class="card" id="combinedChatCard" style="display:none">
+    <h2><i class="fas fa-robot"></i> AI Assistants <span class="model-badge">Dual Mode</span></h2>
+    
+    <!-- Toggle Buttons -->
+    <div class="toggle-container">
+        <button class="toggle-btn active" id="groqToggle" onclick="switchMode('groq')">
+            <i class="fas fa-brain"></i> Groq AI Chat (scraped data)
+        </button>
+        <button class="toggle-btn" id="grokToggle" onclick="switchMode('grok')">
+            <i class="fas fa-bolt"></i> Grok Mode (web search)
+        </button>
+    </div>
+
+    <!-- Groq AI Chat Section - EXACTLY ORIGINAL -->
+    <div id="groqSection" class="chat-section active">
+        <p><i class="fas fa-info-circle"></i> Answers based only on scraped data.</p>
+        <div id="chatContainer" class="chat-container"></div>
+        <div class="input-group">
+            <input type="text" id="questionInput" placeholder="Ask about the website..." onkeypress="if(event.key==='Enter') askGroq()">
+            <button class="primary-btn" onclick="askGroq()"><i class="fas fa-paper-plane"></i> Send</button>
+        </div>
+    </div>
+
+    <!-- Grok Mode Section - EXACTLY ORIGINAL -->
+    <div id="grokSection" class="chat-section">
+        <p><i class="fas fa-info-circle"></i> Deep reasoning AI for precise answers.</p>
+        <div id="grokChatContainer" class="chat-container"></div>
+        <div class="input-group">
+            <input type="text" id="grokQuestionInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') askGrokMode()">
+            <button class="primary-btn" onclick="askGrokMode()"><i class="fas fa-bolt"></i> Grok</button>
+        </div>
+        <button class="export-btn" style="margin-top:8px;width:100%;" onclick="getGrokSummary()">Quick Summary</button>
+    </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+let scrapedData = null;
+let sessionId = null;
+
+function toggleTheme() {
+    const body = document.body;
+    const themeText = document.getElementById('themeText');
+    const icon = document.querySelector('.theme-toggle i');
+    if(body.getAttribute('data-theme') === 'light') {
+        body.setAttribute('data-theme', 'dark');
+        themeText.textContent = 'Light';
+        icon.className = 'fas fa-sun';
+    } else {
+        body.setAttribute('data-theme', 'light');
+        themeText.textContent = 'Dark';
+        icon.className = 'fas fa-moon';
+    }
+}
+
+function previewUrl() {
+    const url = document.getElementById('urlInput').value;
+    if(!url) { alert("Please enter a URL first"); return; }
+    let fullUrl = url;
+    if(!url.startsWith('http')) { fullUrl = 'https://' + url; }
+    window.open(fullUrl, '_blank');
+}
+
+async function scrapeWebsite() {
+    const url = document.getElementById('urlInput').value;
+    if(!url) { alert("Please enter a URL first"); return; }
+    let fullUrl = url;
+    if(!url.startsWith('http')) { fullUrl = 'https://' + url; }
+    document.getElementById('loading').style.display = 'block';
+    document.querySelector('.scrape-btn').disabled = true;
+    try {
+        const formData = new FormData();
+        formData.append('url', fullUrl);
+        formData.append('mode', document.getElementById('scrapeMode').value);
+        formData.append('js', document.getElementById('jsMode').value);
+        const response = await fetch('/scrape', { method: 'POST', body: formData });
+        const result = await response.json();
+        if(result.success) {
+            scrapedData = result.data;
+            sessionId = result.session_id;
+            document.getElementById('previewContent').innerHTML = '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
+            document.getElementById('dataCard').style.display = 'block';
+            // Show combined card instead of separate ones
+            document.getElementById('combinedChatCard').style.display = 'block';
+            addMessage('assistant', 'Scraped: ' + (result.data.title || url));
+        } else {
+            alert('Error: ' + (result.error || 'Unknown error'));
+        }
+    } catch(error) {
+        alert('Error: ' + error.message);
+    } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.querySelector('.scrape-btn').disabled = false;
+    }
+}
+
+async function askGroq() {
+    const question = document.getElementById('questionInput').value;
+    if(!question) { alert("Please enter a question"); return; }
+    if(!scrapedData) { addMessage('assistant', 'Scrape a website first!'); return; }
+    addMessage('user', question);
+    document.getElementById('questionInput').value = '';
+    const typingId = 'typing-' + Date.now();
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message assistant';
+    typingDiv.id = typingId;
+    typingDiv.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Analyzing...</div>';
+    document.getElementById('chatContainer').appendChild(typingDiv);
+    try {
+        const formData = new FormData();
+        formData.append('message', question);
+        formData.append('scraped_data', JSON.stringify(scrapedData));
+        const response = await fetch('/groq-chat', { method: 'POST', body: formData });
+        const result = await response.json();
+        document.getElementById(typingId)?.remove();
+        if(result.success) { addMessage('assistant', marked.parse(result.response)); }
+        else { addMessage('assistant', 'Error: ' + (result.error || 'Unknown')); }
+    } catch(error) { document.getElementById(typingId)?.remove(); addMessage('assistant', 'Error: ' + error.message); }
+}
+
+function addMessage(role, content) {
+    const chatContainer = document.getElementById('chatContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message ' + role;
+    messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function addGrokMessage(role, content) {
+    const chatContainer = document.getElementById('grokChatContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message ' + role;
+    messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+async function askGrokMode() {
+    const q = document.getElementById('grokQuestionInput').value;
+    if(!q) return;
+    if(!scrapedData) { addGrokMessage('assistant','Scrape first'); return; }
+    addGrokMessage('user',q);
+    document.getElementById('grokQuestionInput').value = '';
+    const tid='gt'+Date.now();
+    const td=document.createElement('div');
+    td.className='message assistant';
+    td.id=tid;
+    td.innerHTML='<div class="message-content typing"><span></span><span></span><span></span> Grok...</div>';
+    document.getElementById('grokChatContainer').appendChild(td);
+    try{
+        const fd=new FormData();
+        fd.append('message',q);
+        fd.append('scraped_data',JSON.stringify(scrapedData));
+        fd.append('analysis_type','comprehensive');
+        const r=await fetch('/grok-mode',{method:'POST',body:fd});
+        const res=await r.json();
+        document.getElementById(tid)?.remove();
+        if(res.success) addGrokMessage('assistant',marked.parse(res.response));
+        else addGrokMessage('assistant','Error');
+    }catch(e){document.getElementById(tid)?.remove();addGrokMessage('assistant','Error');}
+}
+
+async function getGrokSummary() {
+    if(!scrapedData){return;}
+    addGrokMessage('user','Summary');
+    const tid='gs'+Date.now();
+    const td=document.createElement('div');
+    td.className='message assistant';
+    td.id=tid;
+    td.innerHTML='<div class="message-content typing"><span></span><span></span><span></span>...</div>';
+    document.getElementById('grokChatContainer').appendChild(td);
+    try{
+        const fd=new FormData();
+        fd.append('scraped_data',JSON.stringify(scrapedData));
+        const r=await fetch('/grok-summary',{method:'POST',body:fd});
+        const res=await r.json();
+        document.getElementById(tid)?.remove();
+        if(res.success) addGrokMessage('assistant',marked.parse(res.summary));
+        else addGrokMessage('assistant','Error');
+    }catch(e){document.getElementById(tid)?.remove();addGrokMessage('assistant','Error');}
+}
+
+async function exportData(format) {
+    if(!scrapedData) { alert("Scrape first"); return; }
+    try {
+        const response = await fetch('/export', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ format: format, data: scrapedData })
+        });
+        if(response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'scraped_data.' + format;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        } else { alert('Export failed'); }
+    } catch(error) { alert('Error: ' + error.message); }
+}
+
+// Toggle between Groq and Grok modes
+function switchMode(mode) {
+    const groqSection = document.getElementById('groqSection');
+    const grokSection = document.getElementById('grokSection');
+    const groqToggle = document.getElementById('groqToggle');
+    const grokToggle = document.getElementById('grokToggle');
+    
+    if(mode === 'groq') {
+        groqSection.classList.add('active');
+        grokSection.classList.remove('active');
+        groqToggle.classList.add('active');
+        grokToggle.classList.remove('active');
+    } else {
+        grokSection.classList.add('active');
+        groqSection.classList.remove('active');
+        grokToggle.classList.add('active');
+        groqToggle.classList.remove('active');
+    }
+}
+
+window.onload = async function() {
+    try {
+        const response = await fetch('/health');
+        const data = await response.json();
+        if(data.status === 'healthy') console.log('Server connected');
+    } catch(error) { console.error('Server error:', error); }
+    document.body.setAttribute('data-theme', 'light');
+}
+</script>
+
+</body>
+</html>

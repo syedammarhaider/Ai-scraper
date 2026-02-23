@@ -1,0 +1,235 @@
+TITLE: SYED AMMAR HAIDER INTERN CMIT - Google Sheets
+URL: https://docs.google.com/spreadsheets/d/1hGoQpr81W8U9d3JEt4JdE7b2Bdd6cgKoro6TA8oawYw/edit?gid=0#gid=0
+DESCRIPTION: N/A
+SCRAPED AT: 2026-02-20T11:11:30.874432
+==================================================
+
+FULL TEXT:
+--------------------
+# TITLE: SYED AMMAR HAIDER INTERN CMIT - Google Sheets
+
+
+## TABLES
+
+### Table 1
+ | A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z
+--------------------------------------------------------------------------------------------------------
+DATE | DAY | TASK | Tomorrow Tasks | Blockers | Status | Notes |  |  |  |  |  |  |  |  |  |  | 
+8-Jan | Thursday | Understood services, actions, jobs, and the fundamentals of queue-based asynchronous processing. | Developer codes, engineer designs; functional what, non-functional how. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+9-Jan | Friday | Differences between developer vs engineer, development vs engineering, and functional vs non-functional requirements. | Built validated Todo workflow with responsive UI smooth. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+10-Jan | Saturday | OFF |  |  |  |  |  |  |  |  |  |  | 
+11-Jan | Sunday | OFF |  |  |  |  |  |  |  |  |  |  | 
+12-Jan | Monday | Implemented and verified a complete Todo workflow with validated create and edit functionality, improved responsive UI, and smooth flow. | Built a Todo application using PHP Laravel, without using CSS | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+13-Jan | Tuesday | Built a Todo application using PHP Laravel, without using CSS | Added CSS styling and generated 1.5M records via Laravel. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+14-Jan | Wednesday | I implemented CSS styling and used Laravel factories and seeders to generate 1,500,000 fake records for my Todo application | https://github.com/syedammarhaider/Pro-ToDo | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+15-Jan | Thursday | Learning JavaScript and improving my Pro Todo app. | Improving JavaScript skills and testing Todo app deployment on AWS | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+16-Jan | Friday | Enhancing my JavaScript skills while working on deploying and testing my Todo application on AWS server. | Working on Todo app deployment and testing on AWS | Yes | Done |  |  |  |  |  |  |  |  |  |  |  | 
+17-Jan | Saturday | OFF |  |  |  |  |  |  |  |  |  |  | 
+18-Jan | Sunday | OFF |  |  |  |  |  |  |  |  |  |  | 
+19-Jan | Monday | I learned most of the advanced JavaScript topics and also tried to deploy my Todo project. | Learn JS and trying to make account on AWS | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+20-Jan | Tuesday | I can update my todo app and GitHub code and push changes to repository | AWS deployment pending; bugs fixed and GitHub updated. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+21-Jan | Wednesday | I will trying to deploy my project on AWS, and I updated my code to fix all bugs and update github my code . | I will try to deploy my ToDo app on AWS as planned. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+22-Jan | Thursday | I am trying to deploy a Laravel todo application on AWS, but I am facing several issues. | AWS deployment is in progress, but database connection issues are causing errors. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+23-Jan | Friday | Working on AWS deployment; database connection issues causing errors | Working on AWS deployment; database connection issues causing errors | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+24-Jan | Saturday | OFF |  |  |  |  |  |  |  |  |  |  | 
+25-Jan | Sunday | OFF |  |  |  |  |  |  |  |  |  |  | 
+26-Jan | Monday | I have successfully deployed my todo app, but I am facing issues where todos cannot be deleted, and mark/unmark actions are not working properly. | Deployed the Todo app and fixed delete and mark/unmark issues | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+27-Jan | Tuesday | My Todo app is deployed successfully, but the delete and mark/unmark features are not working correctly, so I fixed these issues today. | https://100.53.28.191 | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+28-Jan | Wednesday | Leave |  |  |  |  |  |  |  |  |  |  | 
+29-Jan | Thursday | Backend response issues caused several features to malfunction. I identified and resolved these issues to restore full functionality. | https://100.53.28.191 | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+30-Jan | Friday | I am deploying my project from the local development environment to the live production domain today for public access. | https://ammar.mi3afzal.com/todos | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+31-Jan | Saturday | OFF |  |  |  |  |  |  |  |  |  |  | 
+1-Feb | Sunday | OFF |  |  |  |  |  |  |  |  |  |  | 
+2-Feb | Monday | My project is being launched today from local development to the live production domain | https://ammar.mi3afzal.com/todos | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+3-Feb | Tuesday | After deployment, several issues were identified and resolved to ensure stable performance. | https://ammar.mi3afzal.com/todos | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+4-Feb | Wednesday | The project continues to encounter issues because the .env file is missing. | https://ammar.mi3afzal.com/todos | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+5-Feb | Thursday | KASHMIR DAY |  |  |  |  |  |  |  |  |  |  | 
+6-Feb | Friday | OFF BY GOVT. |  |  |  |  |  |  |  |  |  |  |  | 
+7-Feb | Saturday | OFF |  |  |  |  |  |  |  |  |  |  | 
+8-Feb | Sunday | OFF |  |  |  |  |  |  |  |  |  |  | 
+9-Feb | Monday | The application continues to face technical issues that require further investigation | https://ammar.mi3afzal.com/todos try to solve errors | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+10-Feb | Tuesday | The application encountered CSS styling issues and backend data was not functioning properly | try to solve the backend erros | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+11-Feb | Wednesday | The authentication system works correctly, but data cannot be stored on the EC2 server. | Further troubleshooting will be carried out to fix this problem. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+12-Feb | Thursday | Backend problems were fixed successfully; however, CSS is still not working properly. | Backend issues have been addressed, but CSS styling remains problematic | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+13-Feb | Friday | I have thoroughly addressed and fixed all prior issues, ensuring that the application is now operating without any problems | I plan to build an AI-powered scraper for data extraction. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+14-Feb | Saturday | OFF |  |  |  |  |  |  |  |  |  |  |  | 
+15-Feb | Sunday | OFF |  |  |  |  |  |  |  |  |  |  |  | 
+16-Feb | Monday | I plan to create a sophisticated AI-based scraping system that can automatically analyze, and organize information efficiently from targeted websites | Integrate a chatbot to process user queries and provide intelligent responses. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+17-Feb | Tuesday | Next step is to implement a conversational AI chatbot that can handle user queries efficiently and improve overall user experience | Debug AI data handling and ensure responses match the source data accurately | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+18-Feb | Wednesday | The system is experiencing issues where the AI responses do not correctly reflect the underlying data |  | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+19-Feb | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+20-Feb | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+21-Feb | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+22-Feb | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+23-Feb | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+24-Feb | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+25-Feb | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+26-Feb | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+27-Feb | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+28-Feb | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+1-Mar | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+2-Mar | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+3-Mar | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+4-Mar | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+5-Mar | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+6-Mar | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+7-Mar | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+8-Mar | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+9-Mar | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+10-Mar | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+11-Mar | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+12-Mar | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+13-Mar | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+14-Mar | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+15-Mar | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+16-Mar | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+17-Mar | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+18-Mar | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+19-Mar | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+20-Mar | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+21-Mar | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+22-Mar | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+23-Mar | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+24-Mar | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+25-Mar | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+26-Mar | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+27-Mar | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+28-Mar | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+29-Mar | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+30-Mar | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+31-Mar | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+1-Apr | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+2-Apr | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+3-Apr | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+4-Apr | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+5-Apr | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+6-Apr | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+7-Apr | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+8-Apr | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+9-Apr | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+10-Apr | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+11-Apr | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+12-Apr | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+13-Apr | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+14-Apr | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+15-Apr | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+16-Apr | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+### Table 2
+Quotes are not sourced from all markets and may be delayed by up to 20 minutes. Information is provided 'as is' and solely for informational purposes, not for trading purposes or advice.Disclaimer
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ |  | Sheet1Sheet2 |  | 
+
+### Table 3
+ | A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z
+--------------------------------------------------------------------------------------------------------
+DATE | DAY | TASK | Tomorrow Tasks | Blockers | Status | Notes |  |  |  |  |  |  |  |  |  |  | 
+8-Jan | Thursday | Understood services, actions, jobs, and the fundamentals of queue-based asynchronous processing. | Developer codes, engineer designs; functional what, non-functional how. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+9-Jan | Friday | Differences between developer vs engineer, development vs engineering, and functional vs non-functional requirements. | Built validated Todo workflow with responsive UI smooth. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+10-Jan | Saturday | OFF |  |  |  |  |  |  |  |  |  |  | 
+11-Jan | Sunday | OFF |  |  |  |  |  |  |  |  |  |  | 
+12-Jan | Monday | Implemented and verified a complete Todo workflow with validated create and edit functionality, improved responsive UI, and smooth flow. | Built a Todo application using PHP Laravel, without using CSS | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+13-Jan | Tuesday | Built a Todo application using PHP Laravel, without using CSS | Added CSS styling and generated 1.5M records via Laravel. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+14-Jan | Wednesday | I implemented CSS styling and used Laravel factories and seeders to generate 1,500,000 fake records for my Todo application | https://github.com/syedammarhaider/Pro-ToDo | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+15-Jan | Thursday | Learning JavaScript and improving my Pro Todo app. | Improving JavaScript skills and testing Todo app deployment on AWS | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+16-Jan | Friday | Enhancing my JavaScript skills while working on deploying and testing my Todo application on AWS server. | Working on Todo app deployment and testing on AWS | Yes | Done |  |  |  |  |  |  |  |  |  |  |  | 
+17-Jan | Saturday | OFF |  |  |  |  |  |  |  |  |  |  | 
+18-Jan | Sunday | OFF |  |  |  |  |  |  |  |  |  |  | 
+19-Jan | Monday | I learned most of the advanced JavaScript topics and also tried to deploy my Todo project. | Learn JS and trying to make account on AWS | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+20-Jan | Tuesday | I can update my todo app and GitHub code and push changes to repository | AWS deployment pending; bugs fixed and GitHub updated. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+21-Jan | Wednesday | I will trying to deploy my project on AWS, and I updated my code to fix all bugs and update github my code . | I will try to deploy my ToDo app on AWS as planned. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+22-Jan | Thursday | I am trying to deploy a Laravel todo application on AWS, but I am facing several issues. | AWS deployment is in progress, but database connection issues are causing errors. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+23-Jan | Friday | Working on AWS deployment; database connection issues causing errors | Working on AWS deployment; database connection issues causing errors | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+24-Jan | Saturday | OFF |  |  |  |  |  |  |  |  |  |  | 
+25-Jan | Sunday | OFF |  |  |  |  |  |  |  |  |  |  | 
+26-Jan | Monday | I have successfully deployed my todo app, but I am facing issues where todos cannot be deleted, and mark/unmark actions are not working properly. | Deployed the Todo app and fixed delete and mark/unmark issues | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+27-Jan | Tuesday | My Todo app is deployed successfully, but the delete and mark/unmark features are not working correctly, so I fixed these issues today. | https://100.53.28.191 | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+28-Jan | Wednesday | Leave |  |  |  |  |  |  |  |  |  |  | 
+29-Jan | Thursday | Backend response issues caused several features to malfunction. I identified and resolved these issues to restore full functionality. | https://100.53.28.191 | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+30-Jan | Friday | I am deploying my project from the local development environment to the live production domain today for public access. | https://ammar.mi3afzal.com/todos | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+31-Jan | Saturday | OFF |  |  |  |  |  |  |  |  |  |  | 
+1-Feb | Sunday | OFF |  |  |  |  |  |  |  |  |  |  | 
+2-Feb | Monday | My project is being launched today from local development to the live production domain | https://ammar.mi3afzal.com/todos | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+3-Feb | Tuesday | After deployment, several issues were identified and resolved to ensure stable performance. | https://ammar.mi3afzal.com/todos | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+4-Feb | Wednesday | The project continues to encounter issues because the .env file is missing. | https://ammar.mi3afzal.com/todos | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+5-Feb | Thursday | KASHMIR DAY |  |  |  |  |  |  |  |  |  |  | 
+6-Feb | Friday | OFF BY GOVT. |  |  |  |  |  |  |  |  |  |  |  | 
+7-Feb | Saturday | OFF |  |  |  |  |  |  |  |  |  |  | 
+8-Feb | Sunday | OFF |  |  |  |  |  |  |  |  |  |  | 
+9-Feb | Monday | The application continues to face technical issues that require further investigation | https://ammar.mi3afzal.com/todos try to solve errors | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+10-Feb | Tuesday | The application encountered CSS styling issues and backend data was not functioning properly | try to solve the backend erros | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+11-Feb | Wednesday | The authentication system works correctly, but data cannot be stored on the EC2 server. | Further troubleshooting will be carried out to fix this problem. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+12-Feb | Thursday | Backend problems were fixed successfully; however, CSS is still not working properly. | Backend issues have been addressed, but CSS styling remains problematic | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+13-Feb | Friday | I have thoroughly addressed and fixed all prior issues, ensuring that the application is now operating without any problems | I plan to build an AI-powered scraper for data extraction. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+14-Feb | Saturday | OFF |  |  |  |  |  |  |  |  |  |  |  | 
+15-Feb | Sunday | OFF |  |  |  |  |  |  |  |  |  |  |  | 
+16-Feb | Monday | I plan to create a sophisticated AI-based scraping system that can automatically analyze, and organize information efficiently from targeted websites | Integrate a chatbot to process user queries and provide intelligent responses. | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+17-Feb | Tuesday | Next step is to implement a conversational AI chatbot that can handle user queries efficiently and improve overall user experience | Debug AI data handling and ensure responses match the source data accurately | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+18-Feb | Wednesday | The system is experiencing issues where the AI responses do not correctly reflect the underlying data |  | None | Done |  |  |  |  |  |  |  |  |  |  |  | 
+19-Feb | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+20-Feb | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+21-Feb | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+22-Feb | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+23-Feb | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+24-Feb | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+25-Feb | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+26-Feb | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+27-Feb | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+28-Feb | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+1-Mar | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+2-Mar | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+3-Mar | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+4-Mar | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+5-Mar | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+6-Mar | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+7-Mar | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+8-Mar | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+9-Mar | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+10-Mar | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+11-Mar | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+12-Mar | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+13-Mar | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+14-Mar | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+15-Mar | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+16-Mar | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+17-Mar | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+18-Mar | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+19-Mar | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+20-Mar | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+21-Mar | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+22-Mar | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+23-Mar | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+24-Mar | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+25-Mar | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+26-Mar | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+27-Mar | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+28-Mar | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+29-Mar | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+30-Mar | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+31-Mar | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+1-Apr | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+2-Apr | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+3-Apr | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+4-Apr | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+5-Apr | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+6-Apr | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+7-Apr | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+8-Apr | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+9-Apr | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+10-Apr | Friday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+11-Apr | Saturday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+12-Apr | Sunday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+13-Apr | Monday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+14-Apr | Tuesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+15-Apr | Wednesday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+16-Apr | Thursday |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  | 
+
+### Table 4
+Quotes are not sourced from all markets and may be delayed by up to 20 minutes. Information is provided 'as is' and solely for informational purposes, not for trading purposes or advice.Disclaimer
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ |  | Sheet1Sheet2 |  | 
+
+## LINKS
+- https://docs.google.com/spreadsheets/?usp=sheets_web
+- https://accounts.google.com/ServiceLogin?service=wise&passive=1209600&osid=1&continue=https://docs.google.com/spreadsheets/d/1hGoQpr81W8U9d3JEt4JdE7b2Bdd6cgKoro6TA8oawYw/edit?gid%3D0&followup=https://docs.google.com/spreadsheets/d/1hGoQpr81W8U9d3JEt4JdE7b2Bdd6cgKoro6TA8oawYw/edit?gid%3D0&ltmpl=sheets&ec=GAZAmwI
+- http://www.google.com/googlefinance/disclaimer/

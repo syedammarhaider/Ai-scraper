@@ -1,0 +1,39 @@
+{
+  "scrape_id": "1d77a505-68eb-4f7a-b8a7-34f6fda5baa8",
+  "url": "https://example.com",
+  "title": "Example Domain",
+  "headings": {
+    "h1": [
+      "Example Domain"
+    ],
+    "h2": [],
+    "h3": [],
+    "h4": [],
+    "h5": [],
+    "h6": []
+  },
+  "paragraphs": [
+    "This domain is for use in documentation examples without needing permission. Avoid use in operations."
+  ],
+  "structured_data": {
+    "tables": [],
+    "lists": []
+  },
+  "external_links": [
+    {
+      "url": "https://iana.org/domains/example",
+      "text": "Learn more"
+    }
+  ],
+  "full_text": "# TITLE: Example Domain\n\n# Example Domain\n\nThis domain is for use in documentation examples without needing permission. Avoid use in operations.\n\n## LINKS\n- https://iana.org/domains/example",
+  "stats": {
+    "paragraph_count": 1,
+    "image_count": 0,
+    "internal_links_count": 0,
+    "external_links_count": 1,
+    "table_count": 0,
+    "list_count": 0,
+    "scrape_time": 0.37
+  },
+  "scraped_at": "2026-02-20T12:16:18.607343"
+}
