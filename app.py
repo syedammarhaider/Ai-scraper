@@ -17,7 +17,7 @@ scraper = UltraScraper()
 # ---------- GROQ ----------
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 MODEL = "llama-3.3-70b-versatile"
-MODEL_DEEP = "llama-3.3-70b-versatile"
+MODEL_DEEP = "deepseek-r1-distill-llama-70b"
 client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 # ---------- HOME ----------
