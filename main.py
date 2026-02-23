@@ -50,9 +50,14 @@ class GroqDirectClient:
         except Exception as e:
             raise Exception(f"Groq API error: {str(e)}")
 
-# Initialize Groq client
+# Initialize Groq clients with error handling
 try:
-    client = GroqDirectClient(GROQ_API_KEY) if GROQ_API_KEY else None
+    groq_ai = GroqDirectClient(GROQ_API_KEY)
+    grok_mode = GroqDirectClient(GROQ_API_KEY)
+except Exception as e:
+    print(f"Error initializing Groq clients: {e}")
+    groq_ai = None
+    grok_mode = None
     print("Groq client initialized successfully using direct API calls")
 except Exception as e:
     print(f"Warning: Groq client initialization failed: {e}")
@@ -93,8 +98,8 @@ async def chat(request: Request):
     scraped = form.get("scraped_data")
     if not message or not scraped:
         return {"success": False, "error": "Missing data"}
-    if not client:
-        return {"success": False, "error": "GROQ_API_KEY not set or invalid"}
+    if not groq_ai:
+        return {"success": False, "error": "Groq AI client not initialized"}
 
     data = json.loads(scraped)
     system_prompt = """
@@ -162,8 +167,8 @@ async def grok_mode(request: Request):
     
     if not message or not scraped:
         return {"success": False, "error": "Missing message or scraped data"}
-    if not client:
-        return {"success": False, "error": "GROQ_API_KEY not set or invalid"}
+    if not groq_mode:
+        return {"success": False, "error": "Grok Mode client not initialized"}
     
     try:
         data = json.loads(scraped)
@@ -253,8 +258,8 @@ async def grok_summary(request: Request):
     
     if not scraped:
         return {"success": False, "error": "Missing scraped data"}
-    if not client:
-        return {"success": False, "error": "GROQ_API_KEY not set or invalid"}
+    if not groq_ai:
+        return {"success": False, "error": "Groq AI client not initialized"}
     
     data = json.loads(scraped)
     
