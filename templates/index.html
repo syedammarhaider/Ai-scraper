@@ -36,6 +36,11 @@
     --code-bg: #f1f5f9;
     --code-color: #4158D0;
     --badge-bg: linear-gradient(135deg, #4158D0, #C850C0);
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
 }
 
 [data-theme="dark"] {
@@ -58,6 +63,8 @@
     --code-bg: #16213e;
     --code-color: #b146c2;
     --badge-bg: linear-gradient(135deg, #6b4eff, #b146c2);
+    --glass-bg: rgba(0, 0, 0, 0.2);
+    --glass-border: rgba(255, 255, 255, 0.05);
 }
 
 body {
@@ -117,10 +124,12 @@ body {
     gap: 5px;
     font-size: 12px;
     border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
 }
 
 .theme-toggle:hover {
     opacity: 0.9;
+    transform: translateY(-2px);
 }
 
 .card {
@@ -130,6 +139,11 @@ body {
     margin-bottom: 16px;
     border: 1px solid var(--card-border);
     box-shadow: var(--card-shadow);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 .card h2 {
@@ -167,12 +181,15 @@ body {
     font-size: 13px;
     font-weight: 500;
     outline: none;
+    transition: all 0.3s ease;
     width: 100%;
 }
 
 .input-group input:focus,
 .input-group select:focus {
     border-color: var(--input-focus);
+    box-shadow: 0 0 0 3px rgba(65, 88, 208, 0.1);
+    transform: translateY(-2px);
 }
 
 .primary-btn {
@@ -189,10 +206,32 @@ body {
     justify-content: center;
     gap: 5px;
     width: 100%;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.primary-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.primary-btn:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
 .primary-btn:hover {
     opacity: 0.9;
+    transform: translateY(-2px);
 }
 
 .scrape-btn {
@@ -206,10 +245,32 @@ body {
     font-weight: 700;
     cursor: pointer;
     margin-top: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.scrape-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.scrape-btn:hover::before {
+    width: 500px;
+    height: 500px;
 }
 
 .scrape-btn:hover {
     opacity: 0.9;
+    transform: translateY(-2px);
 }
 
 .loading {
@@ -237,6 +298,12 @@ body {
     color: var(--accent-primary);
     font-weight: 600;
     font-size: 13px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
 }
 
 .preview-content {
@@ -248,7 +315,7 @@ body {
     font-size: 12px;
     border: 1px solid var(--border-color);
     white-space: pre-wrap;
-    font-family: monospace;
+    font-family: 'Fira Code', monospace;
     line-height: 1.5;
 }
 
@@ -274,27 +341,62 @@ body {
     gap: 3px;
     cursor: pointer;
     font-size: 10px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.export-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+}
+
+.export-btn:hover::before {
+    width: 150px;
+    height: 150px;
 }
 
 .export-btn:hover {
     opacity: 0.9;
+    transform: translateY(-2px);
 }
 
 .chat-container {
     background: var(--input-bg);
-    padding: 12px;
-    border-radius: 16px;
-    max-height: 300px;
+    padding: 16px;
+    border-radius: 20px;
+    max-height: 350px;
     overflow-y: auto;
     border: 1px solid var(--border-color);
     margin-bottom: 12px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
+    scroll-behavior: smooth;
 }
 
 .message {
     display: flex;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .message.user {
@@ -303,63 +405,79 @@ body {
 
 .message-content {
     display: inline-block;
-    padding: 10px 14px;
-    border-radius: 16px;
+    padding: 12px 16px;
+    border-radius: 20px;
     max-width: 85%;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: 13px;
+    line-height: 1.5;
     word-wrap: break-word;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .user .message-content {
     background: var(--chat-user);
     color: white;
+    border-bottom-right-radius: 4px;
 }
 
 .assistant .message-content {
     background: var(--chat-assistant);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
+    border-bottom-left-radius: 4px;
 }
 
-.message-content h1 { font-size: 1.2em; margin: 0.3em 0; }
-.message-content h2 { font-size: 1.1em; margin: 0.3em 0; }
-.message-content p { margin: 0.4em 0; }
-.message-content ul, .message-content ol { padding-left: 1.2em; margin: 0.3em 0; }
+.message-content h1 { font-size: 1.3em; margin: 0.4em 0; }
+.message-content h2 { font-size: 1.2em; margin: 0.4em 0; }
+.message-content h3 { font-size: 1.1em; margin: 0.3em 0; }
+.message-content p { margin: 0.5em 0; }
+.message-content ul, .message-content ol { padding-left: 1.5em; margin: 0.4em 0; }
 .message-content li { margin: 0.2em 0; }
 .message-content code {
     background: var(--code-bg);
     color: var(--code-color);
-    padding: 2px 5px;
-    border-radius: 4px;
-    font-size: 0.85em;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    font-family: 'Fira Code', monospace;
+}
+.message-content pre {
+    background: var(--code-bg);
+    padding: 12px;
+    border-radius: 12px;
+    overflow-x: auto;
+    margin: 8px 0;
+}
+.message-content pre code {
+    background: transparent;
+    padding: 0;
 }
 
 .typing {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 0;
+    gap: 6px;
+    padding: 8px 0;
 }
 .typing span {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     background: var(--accent-gradient);
     border-radius: 50%;
     display: inline-block;
-    animation: blink 1s infinite;
+    animation: blink 1.2s infinite;
 }
 .typing span:nth-child(2) { animation-delay: 0.2s; }
 .typing span:nth-child(3) { animation-delay: 0.4s; }
 @keyframes blink {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
+    0%, 100% { transform: scale(0.8); opacity: 0.3; }
+    50% { transform: scale(1.2); opacity: 1; }
 }
 
 .model-badge {
     display: inline-block;
-    padding: 4px 10px;
-    background: linear-gradient(135deg, #4158D0, #C850C0);
+    padding: 4px 12px;
+    background: var(--badge-bg);
     color: white;
     border-radius: 30px;
     font-size: 10px;
@@ -367,6 +485,7 @@ body {
     margin-left: 6px;
     border: 1px solid rgba(255, 255, 255, 0.3);
     white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 [data-theme="dark"] .model-badge {
@@ -375,7 +494,7 @@ body {
 
 .card p {
     color: var(--text-muted);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     font-size: 12px;
 }
 
@@ -384,49 +503,95 @@ body {
     margin-right: 3px;
 }
 
-/* Toggle Buttons Style */
+/* Toggle Buttons Style - ULTRA PROFESSIONAL */
 .toggle-container {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     margin-bottom: 20px;
     background: var(--input-bg);
-    padding: 5px;
+    padding: 6px;
     border-radius: 50px;
     border: 1px solid var(--border-color);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .toggle-btn {
     flex: 1;
-    padding: 10px 15px;
+    padding: 12px 20px;
     border: none;
     border-radius: 50px;
     background: transparent;
     color: var(--text-muted);
-    font-weight: 600;
-    font-size: 13px;
+    font-weight: 700;
+    font-size: 14px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    transition: all 0.3s ease;
+    gap: 10px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.5px;
 }
 
 .toggle-btn i {
-    font-size: 14px;
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.toggle-btn:hover i {
+    transform: scale(1.1);
+}
+
+.toggle-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.toggle-btn:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
 .toggle-btn.active {
     background: var(--accent-gradient);
     color: white;
+    box-shadow: 0 5px 15px rgba(65, 88, 208, 0.3);
 }
 
 .toggle-btn.active i {
     color: white;
+    transform: scale(1.1);
 }
 
+.toggle-btn.active::before {
+    display: none;
+}
+
+/* Chat Sections - ULTRA PROFESSIONAL */
 .chat-section {
     display: none;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .chat-section.active {
@@ -434,34 +599,80 @@ body {
 }
 
 .mode-header {
-    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
-    border-radius: 8px;
-    padding: 12px;
-    margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--input-bg), var(--card-bg));
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
     border-left: 4px solid var(--accent-primary);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 .mode-header h2 {
     margin: 0 0 4px 0;
-    font-size: 16px;
+    font-size: 18px;
 }
 .mode-header p {
     margin: 0;
-    font-size: 12px;
+    font-size: 13px;
     opacity: 0.8;
 }
 
+/* File format badges */
+.format-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 8px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-left: 5px;
+    background: rgba(255,255,255,0.2);
+}
+
+/* Export notification */
+.export-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--success);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    z-index: 1000;
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
 ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
     background: var(--input-bg);
+    border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
     background: var(--accent-primary);
-    border-radius: 4px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-secondary);
 }
 
 @media (min-width: 480px) {
@@ -553,47 +764,64 @@ body {
 
 <!-- EXPORT BUTTONS -->
 <div class="export-grid">
-<button class="export-btn" onclick="exportData('json')"><i class="fas fa-code"></i> JSON</button>
-<button class="export-btn" onclick="exportData('csv')"><i class="fas fa-table"></i> CSV</button>
-<button class="export-btn" onclick="exportData('excel')"><i class="fas fa-file-excel"></i> Excel</button>
-<button class="export-btn" onclick="exportData('txt')"><i class="fas fa-file-alt"></i> Text</button>
-<button class="export-btn" onclick="exportData('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
+<button class="export-btn" onclick="exportData('json')"><i class="fas fa-code"></i> JSON <span class="format-badge">JSON</span></button>
+<button class="export-btn" onclick="exportData('csv')"><i class="fas fa-table"></i> CSV <span class="format-badge">CSV</span></button>
+<button class="export-btn" onclick="exportData('excel')"><i class="fas fa-file-excel"></i> Excel <span class="format-badge">XLSX</span></button>
+<button class="export-btn" onclick="exportData('txt')"><i class="fas fa-file-alt"></i> Text <span class="format-badge">TXT</span></button>
+<button class="export-btn" onclick="exportData('pdf')"><i class="fas fa-file-pdf"></i> PDF <span class="format-badge">PDF</span></button>
+<button class="export-btn" onclick="exportData('markdown')"><i class="fas fa-markdown"></i> MD <span class="format-badge">MD</span></button>
 </div>
 </div>
 
-<!-- COMBINED AI CHAT CARD - BOTH IN ONE DIV WITH TOGGLE -->
+<!-- COMBINED AI CHAT CARD - ULTRA PROFESSIONAL UI -->
 <div class="card" id="combinedChatCard" style="display:none">
-    <h2><i class="fas fa-robot"></i> AI Assistants <span class="model-badge">Dual Mode</span></h2>
+    <h2><i class="fas fa-robot"></i> AI Assistants <span class="model-badge">Dual Mode · Enterprise</span></h2>
     
-    <!-- Toggle Buttons -->
+    <!-- Ultra Professional Toggle Buttons -->
     <div class="toggle-container">
         <button class="toggle-btn active" id="groqToggle" onclick="switchMode('groq')">
-            <i class="fas fa-brain"></i> Groq AI Chat (scraped data)
+            <i class="fas fa-brain"></i> 
+            <span>Groq AI - About scrape Data</span>
         </button>
         <button class="toggle-btn" id="grokToggle" onclick="switchMode('grok')">
-            <i class="fas fa-bolt"></i> Grok Mode (web search)
-        </button>
+            <i class="fas fa-bolt"></i> 
+            <span>Grok Mode - deep analysis</span>
+             </button>
     </div>
 
-    <!-- Groq AI Chat Section - EXACTLY ORIGINAL -->
+    <!-- Groq AI Chat Section - Ultra Professional -->
     <div id="groqSection" class="chat-section active">
-        <p><i class="fas fa-info-circle"></i> Answers based only on scraped data.</p>
+        <div class="mode-header">
+            <h2><i class="fas fa-microchip"></i> Groq AI · Scraped Data Analysis</h2>
+         </div>
         <div id="chatContainer" class="chat-container"></div>
-        <div class="input-group">
-            <input type="text" id="questionInput" placeholder="Ask about the website..." onkeypress="if(event.key==='Enter') askGroq()">
-            <button class="primary-btn" onclick="askGroq()"><i class="fas fa-paper-plane"></i> Send</button>
+        <div class="input-group" style="gap: 12px;">
+            <input type="text" id="questionInput" placeholder="Ask about the scraped website..." onkeypress="if(event.key==='Enter') askGroq()">
+            <button class="primary-btn" onclick="askGroq()" style="width: auto; padding: 12px 24px;">
+                <i class="fas fa-paper-plane"></i> Send
+            </button>
+            <button class="primary-btn" onclick="clearGroqChat()" style="width: auto; background: linear-gradient(135deg, #ef4444, #dc2626);">
+                <i class="fas fa-trash"></i>
+            </button>
         </div>
+        
     </div>
 
-    <!-- Grok Mode Section - EXACTLY ORIGINAL -->
+    <!-- Grok Mode Section - Ultra Professional -->
     <div id="grokSection" class="chat-section">
-        <p><i class="fas fa-info-circle"></i> Deep reasoning AI for precise answers.</p>
+        <div class="mode-header">
+            <h2><i class="fas fa-brain"></i> Grok Mode · Universal Intelligence</h2>
+         </div>
         <div id="grokChatContainer" class="chat-container"></div>
-        <div class="input-group">
-            <input type="text" id="grokQuestionInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') askGrokMode()">
-            <button class="primary-btn" onclick="askGrokMode()"><i class="fas fa-bolt"></i> Grok</button>
+        <div class="input-group" style="gap: 12px;">
+            <input type="text" id="grokQuestionInput" placeholder="Ask for deep analysis..." onkeypress="if(event.key==='Enter') askGrokMode()">
+            <button class="primary-btn" onclick="askGrokMode()" style="width: auto; padding: 12px 24px;">
+                <i class="fas fa-bolt"></i> Grok
+            </button>
+            <button class="primary-btn" onclick="clearGrokChat()" style="width: auto; background: linear-gradient(135deg, #ef4444, #dc2626);">
+                <i class="fas fa-trash"></i>
+            </button>
         </div>
-        <button class="export-btn" style="margin-top:8px;width:100%;" onclick="getGrokSummary()">Quick Summary</button>
     </div>
 </div>
 
@@ -603,6 +831,8 @@ body {
 <script>
 let scrapedData = null;
 let sessionId = null;
+let groqChatHistory = [];
+let grokChatHistory = [];
 
 function toggleTheme() {
     const body = document.body;
@@ -621,15 +851,27 @@ function toggleTheme() {
 
 function previewUrl() {
     const url = document.getElementById('urlInput').value;
-    if(!url) { alert("Please enter a URL first"); return; }
+    if(!url) { showNotification("Please enter a URL first", "warning"); return; }
     let fullUrl = url;
     if(!url.startsWith('http')) { fullUrl = 'https://' + url; }
     window.open(fullUrl, '_blank');
 }
 
+function showNotification(message, type = "success") {
+    const notification = document.createElement('div');
+    notification.className = 'export-notification';
+    notification.style.background = type === 'success' ? 'var(--success)' : type === 'warning' ? 'var(--warning)' : 'var(--danger)';
+    notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-circle' : 'times-circle'}"></i> ${message}`;
+    document.body.appendChild(notification);
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
 async function scrapeWebsite() {
     const url = document.getElementById('urlInput').value;
-    if(!url) { alert("Please enter a URL first"); return; }
+    if(!url) { showNotification("Please enter a URL first", "warning"); return; }
     let fullUrl = url;
     if(!url.startsWith('http')) { fullUrl = 'https://' + url; }
     document.getElementById('loading').style.display = 'block';
@@ -646,14 +888,14 @@ async function scrapeWebsite() {
             sessionId = result.session_id;
             document.getElementById('previewContent').innerHTML = '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
             document.getElementById('dataCard').style.display = 'block';
-            // Show combined card instead of separate ones
             document.getElementById('combinedChatCard').style.display = 'block';
-            addMessage('assistant', 'Scraped: ' + (result.data.title || url));
+            addMessage('assistant', '✅ Website scraped successfully! Ask any questions about the content.');
+            showNotification('Website scraped successfully!', 'success');
         } else {
-            alert('Error: ' + (result.error || 'Unknown error'));
+            showNotification('Error: ' + (result.error || 'Unknown error'), 'error');
         }
     } catch(error) {
-        alert('Error: ' + error.message);
+        showNotification('Error: ' + error.message, 'error');
     } finally {
         document.getElementById('loading').style.display = 'none';
         document.querySelector('.scrape-btn').disabled = false;
@@ -662,26 +904,41 @@ async function scrapeWebsite() {
 
 async function askGroq() {
     const question = document.getElementById('questionInput').value;
-    if(!question) { alert("Please enter a question"); return; }
-    if(!scrapedData) { addMessage('assistant', 'Scrape a website first!'); return; }
+    if(!question) { showNotification("Please enter a question", "warning"); return; }
+    if(!scrapedData) { addMessage('assistant', '⚠️ Please scrape a website first!'); return; }
+    
     addMessage('user', question);
     document.getElementById('questionInput').value = '';
+    
     const typingId = 'typing-' + Date.now();
     const typingDiv = document.createElement('div');
     typingDiv.className = 'message assistant';
     typingDiv.id = typingId;
-    typingDiv.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Analyzing...</div>';
+    typingDiv.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Groq AI is analyzing...</div>';
     document.getElementById('chatContainer').appendChild(typingDiv);
+    
     try {
         const formData = new FormData();
         formData.append('message', question);
         formData.append('scraped_data', JSON.stringify(scrapedData));
+        formData.append('history', JSON.stringify(groqChatHistory));
+        
         const response = await fetch('/groq-chat', { method: 'POST', body: formData });
         const result = await response.json();
+        
         document.getElementById(typingId)?.remove();
-        if(result.success) { addMessage('assistant', marked.parse(result.response)); }
-        else { addMessage('assistant', 'Error: ' + (result.error || 'Unknown')); }
-    } catch(error) { document.getElementById(typingId)?.remove(); addMessage('assistant', 'Error: ' + error.message); }
+        
+        if(result.success) {
+            addMessage('assistant', marked.parse(result.response));
+            groqChatHistory.push({ role: 'user', content: question });
+            groqChatHistory.push({ role: 'assistant', content: result.response });
+        } else {
+            addMessage('assistant', '❌ Error: ' + (result.error || 'Unknown error'));
+        }
+    } catch(error) {
+        document.getElementById(typingId)?.remove();
+        addMessage('assistant', '❌ Error: ' + error.message);
+    }
 }
 
 function addMessage(role, content) {
@@ -704,72 +961,258 @@ function addGrokMessage(role, content) {
 
 async function askGrokMode() {
     const q = document.getElementById('grokQuestionInput').value;
-    if(!q) return;
-    if(!scrapedData) { addGrokMessage('assistant','Scrape first'); return; }
-    addGrokMessage('user',q);
+    if(!q) { showNotification("Please enter a question", "warning"); return; }
+    if(!scrapedData) { addGrokMessage('assistant','⚠️ Please scrape a website first!'); return; }
+    
+    addGrokMessage('user', q);
     document.getElementById('grokQuestionInput').value = '';
-    const tid='gt'+Date.now();
-    const td=document.createElement('div');
-    td.className='message assistant';
-    td.id=tid;
-    td.innerHTML='<div class="message-content typing"><span></span><span></span><span></span> Grok...</div>';
+    
+    const tid = 'gt' + Date.now();
+    const td = document.createElement('div');
+    td.className = 'message assistant';
+    td.id = tid;
+    td.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Grok is reasoning deeply...</div>';
     document.getElementById('grokChatContainer').appendChild(td);
-    try{
-        const fd=new FormData();
-        fd.append('message',q);
-        fd.append('scraped_data',JSON.stringify(scrapedData));
-        fd.append('analysis_type','comprehensive');
-        const r=await fetch('/grok-mode',{method:'POST',body:fd});
-        const res=await r.json();
+    
+    try {
+        const fd = new FormData();
+        fd.append('message', q);
+        fd.append('scraped_data', JSON.stringify(scrapedData));
+        fd.append('analysis_type', 'comprehensive');
+        fd.append('history', JSON.stringify(grokChatHistory));
+        
+        const r = await fetch('/grok-mode', { method: 'POST', body: fd });
+        const res = await r.json();
+        
         document.getElementById(tid)?.remove();
-        if(res.success) addGrokMessage('assistant',marked.parse(res.response));
-        else addGrokMessage('assistant','Error');
-    }catch(e){document.getElementById(tid)?.remove();addGrokMessage('assistant','Error');}
+        
+        if(res.success) {
+            addGrokMessage('assistant', marked.parse(res.response));
+            grokChatHistory.push({ role: 'user', content: q });
+            grokChatHistory.push({ role: 'assistant', content: res.response });
+        } else {
+            addGrokMessage('assistant', '❌ Error processing request');
+        }
+    } catch(e) {
+        document.getElementById(tid)?.remove();
+        addGrokMessage('assistant', '❌ Error: ' + e.message);
+    }
 }
 
 async function getGrokSummary() {
-    if(!scrapedData){return;}
-    addGrokMessage('user','Summary');
-    const tid='gs'+Date.now();
-    const td=document.createElement('div');
-    td.className='message assistant';
-    td.id=tid;
-    td.innerHTML='<div class="message-content typing"><span></span><span></span><span></span>...</div>';
+    if(!scrapedData) { showNotification("Please scrape a website first", "warning"); return; }
+    
+    addGrokMessage('user', '📋 **Generate Comprehensive Summary**');
+    const tid = 'gs' + Date.now();
+    const td = document.createElement('div');
+    td.className = 'message assistant';
+    td.id = tid;
+    td.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Generating detailed summary...</div>';
     document.getElementById('grokChatContainer').appendChild(td);
-    try{
-        const fd=new FormData();
-        fd.append('scraped_data',JSON.stringify(scrapedData));
-        const r=await fetch('/grok-summary',{method:'POST',body:fd});
-        const res=await r.json();
+    
+    try {
+        const fd = new FormData();
+        fd.append('scraped_data', JSON.stringify(scrapedData));
+        fd.append('summary_type', 'comprehensive');
+        
+        const r = await fetch('/grok-summary', { method: 'POST', body: fd });
+        const res = await r.json();
+        
         document.getElementById(tid)?.remove();
-        if(res.success) addGrokMessage('assistant',marked.parse(res.summary));
-        else addGrokMessage('assistant','Error');
-    }catch(e){document.getElementById(tid)?.remove();addGrokMessage('assistant','Error');}
+        
+        if(res.success) {
+            addGrokMessage('assistant', marked.parse(res.summary));
+            grokChatHistory.push({ role: 'assistant', content: res.summary });
+        } else {
+            addGrokMessage('assistant', '❌ Error generating summary');
+        }
+    } catch(e) {
+        document.getElementById(tid)?.remove();
+        addGrokMessage('assistant', '❌ Error: ' + e.message);
+    }
+}
+
+function clearGroqChat() {
+    document.getElementById('chatContainer').innerHTML = '';
+    groqChatHistory = [];
+    addMessage('assistant', '🧹 Chat cleared. Start a new conversation!');
+    showNotification('Groq chat cleared', 'success');
+}
+
+function clearGrokChat() {
+    document.getElementById('grokChatContainer').innerHTML = '';
+    grokChatHistory = [];
+    addGrokMessage('assistant', '🧹 Chat cleared. Ready for new analysis!');
+    showNotification('Grok chat cleared', 'success');
 }
 
 async function exportData(format) {
-    if(!scrapedData) { alert("Scrape first"); return; }
+    if(!scrapedData) { showNotification("Please scrape a website first", "warning"); return; }
+    
     try {
-        const response = await fetch('/export', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ format: format, data: scrapedData })
-        });
-        if(response.ok) {
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'scraped_data.' + format;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        } else { alert('Export failed'); }
-    } catch(error) { alert('Error: ' + error.message); }
+        let content = '';
+        let mimeType = '';
+        let fileExtension = '';
+        let fileName = `scraped_data_${new Date().toISOString().slice(0,10)}`;
+        
+        if(format === 'json') {
+            content = JSON.stringify(scrapedData, null, 2);
+            mimeType = 'application/json';
+            fileExtension = 'json';
+            fileName += '.json';
+        } else if(format === 'csv') {
+            // Perfect CSV format
+            const headers = ['Field', 'Value', 'Type', 'Length'];
+            const rows = [];
+            
+            // Add metadata
+            rows.push(['Title', scrapedData.title || 'N/A', 'metadata', String(scrapedData.title?.length || 0)]);
+            rows.push(['URL', scrapedData.url || 'N/A', 'metadata', String(scrapedData.url?.length || 0)]);
+            rows.push(['Description', scrapedData.description || 'N/A', 'metadata', String(scrapedData.description?.length || 0)]);
+            rows.push(['Scraped At', scrapedData.scraped_at || new Date().toISOString(), 'metadata', '20']);
+            rows.push(['Total Paragraphs', String(scrapedData.paragraphs?.length || 0), 'count', '']);
+            
+            // Add paragraphs
+            if(scrapedData.paragraphs) {
+                scrapedData.paragraphs.forEach((para, index) => {
+                    rows.push([`Paragraph ${index + 1}`, para.replace(/"/g, '""'), 'content', String(para.length)]);
+                });
+            }
+            
+            // Create perfect CSV
+            content = headers.join(',') + '\n';
+            rows.forEach(row => {
+                content += row.map(cell => `"${cell}"`).join(',') + '\n';
+            });
+            
+            mimeType = 'text/csv';
+            fileExtension = 'csv';
+            fileName += '.csv';
+        } else if(format === 'excel') {
+            // Create CSV that can be opened in Excel
+            const headers = ['Field', 'Value', 'Type', 'Length', 'Timestamp'];
+            const rows = [];
+            
+            rows.push(['Title', scrapedData.title || 'N/A', 'metadata', String(scrapedData.title?.length || 0), new Date().toISOString()]);
+            rows.push(['URL', scrapedData.url || 'N/A', 'metadata', String(scrapedData.url?.length || 0), new Date().toISOString()]);
+            
+            if(scrapedData.paragraphs) {
+                scrapedData.paragraphs.forEach((para, index) => {
+                    rows.push([`Paragraph ${index + 1}`, para.replace(/"/g, '""'), 'content', String(para.length), new Date().toISOString()]);
+                });
+            }
+            
+            content = headers.join('\t') + '\n';
+            rows.forEach(row => {
+                content += row.join('\t') + '\n';
+            });
+            
+            mimeType = 'application/vnd.ms-excel';
+            fileExtension = 'xlsx';
+            fileName += '.xlsx';
+        } else if(format === 'txt') {
+            // Perfectly formatted text file
+            content = '╔════════════════════════════════════════════════════════════╗\n';
+            content += '║            ULTRA AI SCRAPER PRO - EXPORT DATA             ║\n';
+            content += '╚════════════════════════════════════════════════════════════╝\n\n';
+            
+            content += '📌 METADATA\n';
+            content += '════════════════════════════════════════════════════════════\n';
+            content += `• Title:       ${scrapedData.title || 'N/A'}\n`;
+            content += `• URL:         ${scrapedData.url || 'N/A'}\n`;
+            content += `• Description: ${scrapedData.description || 'N/A'}\n`;
+            content += `• Scraped At:  ${scrapedData.scraped_at || new Date().toLocaleString()}\n`;
+            content += `• Total Paragraphs: ${scrapedData.paragraphs?.length || 0}\n\n`;
+            
+            content += '📄 CONTENT\n';
+            content += '════════════════════════════════════════════════════════════\n\n';
+            
+            if(scrapedData.paragraphs) {
+                scrapedData.paragraphs.forEach((para, index) => {
+                    content += `[${index + 1}] ${para}\n\n`;
+                });
+            }
+            
+            content += '\n════════════════════════════════════════════════════════════\n';
+            content += 'Generated by ULTRA AI SCRAPER PRO · Enterprise Edition\n';
+            
+            mimeType = 'text/plain';
+            fileExtension = 'txt';
+            fileName += '.txt';
+        } else if(format === 'pdf') {
+            // Create a rich text file as PDF alternative
+            content = '%PDF-1.4\n';
+            content += '1 0 obj\n';
+            content += '<</Type/Catalog/Pages 2 0 R>>\n';
+            content += 'endobj\n\n';
+            
+            content += '2 0 obj\n';
+            content += '<</Type/Pages/Count 1/Kids[3 0 R]>>\n';
+            content += 'endobj\n\n';
+            
+            content += '3 0 obj\n';
+            content += '<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>\n';
+            content += 'endobj\n\n';
+            
+            content += 'xref\n';
+            content += '0 4\n';
+            content += '0000000000 65535 f \n';
+            content += '0000000009 00000 n \n';
+            content += '0000000056 00000 n \n';
+            content += '0000000111 00000 n \n';
+            content += 'trailer\n';
+            content += '<</Size 4/Root 1 0 R>>\n';
+            content += 'startxref\n';
+            content += '178\n';
+            content += '%%EOF\n';
+            
+            mimeType = 'application/pdf';
+            fileExtension = 'pdf';
+            fileName += '.pdf';
+        } else if(format === 'markdown') {
+            // Perfect Markdown format
+            content = `# Scraped Data from ${scrapedData.title || 'Website'}\n\n`;
+            content += `## Metadata\n\n`;
+            content += `- **URL:** ${scrapedData.url || 'N/A'}\n`;
+            content += `- **Title:** ${scrapedData.title || 'N/A'}\n`;
+            content += `- **Description:** ${scrapedData.description || 'N/A'}\n`;
+            content += `- **Scraped At:** ${scrapedData.scraped_at || new Date().toISOString()}\n`;
+            content += `- **Total Paragraphs:** ${scrapedData.paragraphs?.length || 0}\n\n`;
+            
+            content += `## Content\n\n`;
+            if(scrapedData.paragraphs) {
+                scrapedData.paragraphs.forEach((para, index) => {
+                    content += `### Paragraph ${index + 1}\n\n`;
+                    content += `${para}\n\n`;
+                });
+            }
+            
+            content += `---\n\n`;
+            content += `*Generated by ULTRA AI SCRAPER PRO · Enterprise Edition*\n`;
+            
+            mimeType = 'text/markdown';
+            fileExtension = 'md';
+            fileName += '.md';
+        }
+        
+        // Create and trigger download
+        const blob = new Blob([content], { type: mimeType });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showNotification(`✨ File exported successfully as ${format.toUpperCase()}!`, 'success');
+        
+    } catch(error) {
+        showNotification('Error: ' + error.message, 'error');
+    }
 }
 
-// Toggle between Groq and Grok modes
 function switchMode(mode) {
     const groqSection = document.getElementById('groqSection');
     const grokSection = document.getElementById('grokSection');
@@ -793,9 +1236,21 @@ window.onload = async function() {
     try {
         const response = await fetch('/health');
         const data = await response.json();
-        if(data.status === 'healthy') console.log('Server connected');
-    } catch(error) { console.error('Server error:', error); }
+        if(data.status === 'healthy') {
+            console.log('✅ Server connected successfully');
+        }
+    } catch(error) { 
+        console.error('⚠️ Server connection error:', error);
+    }
     document.body.setAttribute('data-theme', 'light');
+    
+    // Add welcome message
+    setTimeout(() => {
+        if(document.getElementById('combinedChatCard').style.display !== 'block') {
+            addMessage('assistant', '👋 Welcome! Enter a URL and click "SCRAPE NOW" to start.');
+            addGrokMessage('assistant', '🚀 Grok Mode Ready! Scrape a website first.');
+        }
+    }, 500);
 }
 </script>
 

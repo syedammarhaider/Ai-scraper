@@ -132,7 +132,7 @@ async def export(request: Request):
     if not fmt or not data:
         return {"success": False, "error": "Missing format or data"}
 
-    filename = f"scraped_{int(time.time())}"
+    filename = f"scraped_data"
 
     handlers = {
         "json": scraper.save_as_json,
