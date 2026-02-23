@@ -83,10 +83,6 @@ grok_mode = None
 # Initialize clients at startup
 initialize_grok_clients()
 
-# Global variables for Groq clients
-groq_ai = None
-grok_mode = None
-
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
