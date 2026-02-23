@@ -171,7 +171,7 @@ async def export(request: Request):
 
 # ========== GROK MODE - ENHANCED AI ==========
 @app.post("/grok-mode")
-async def grok_mode(request: Request):
+async def grok_mode_endpoint(request: Request):
     """
     Grok Mode - Enhanced AI with deep reasoning for analyzing scraped data
     """

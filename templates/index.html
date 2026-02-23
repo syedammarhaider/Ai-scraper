@@ -991,7 +991,7 @@ async function askGrokMode() {
             grokChatHistory.push({ role: 'user', content: q });
             grokChatHistory.push({ role: 'assistant', content: res.response });
         } else {
-            addGrokMessage('assistant', '❌ Error processing request');
+            addGrokMessage('assistant', '❌ Error: ' + (res.error || 'Unknown error occurred'));
         }
     } catch(e) {
         document.getElementById(tid)?.remove();
