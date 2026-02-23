@@ -65,8 +65,9 @@ def initialize_grok_clients():
         print(f"⚠️ Direct initialization failed: {e}")
         try:
             # Fallback to standard initialization
-            groq_ai = Groq(api_key=GROQ_API_KEY, mode="ai")
-            grok_mode = Groq(api_key=GROQ_API_KEY, mode="grok")
+            from groq import Groq
+            groq_ai = Groq(api_key=GROQ_API_KEY)
+            grok_mode = Groq(api_key=GROQ_API_KEY)
             print("✅ Groq clients initialized (Standard API)")
             return True
         except Exception as e2:
@@ -77,6 +78,10 @@ def initialize_grok_clients():
 
 # Initialize clients at startup
 initialize_grok_clients()
+
+# Global variables for Groq clients
+groq_ai = None
+grok_mode = None
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
