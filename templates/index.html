@@ -882,6 +882,11 @@ async function scrapeWebsite() {
         formData.append('mode', document.getElementById('scrapeMode').value);
         formData.append('js', document.getElementById('jsMode').value);
         const response = await fetch('/scrape', { method: 'POST', body: formData });
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server error:', errorText);
+            throw new Error(`Server error: ${response.status} - ${errorText}`);
+        }
         const result = await response.json();
         if(result.success) {
             scrapedData = result.data;
