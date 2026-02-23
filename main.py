@@ -50,6 +50,10 @@ class GroqDirectClient:
         except Exception as e:
             raise Exception(f"Groq API error: {str(e)}")
 
+# Global variables for Groq clients
+groq_ai = None
+grok_mode = None
+
 # Initialize Groq clients with robust error handling
 def initialize_grok_clients():
     """Initialize both Groq AI and Grok Mode clients with error handling"""
@@ -75,10 +79,6 @@ def initialize_grok_clients():
             groq_ai = None
             grok_mode = None
             return False
-
-# Global variables for Groq clients
-groq_ai = None
-grok_mode = None
 
 # Initialize clients at startup
 initialize_grok_clients()
