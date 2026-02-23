@@ -129,7 +129,7 @@ Rules:
     context = f"SCRAPED DATA:\n{json.dumps(data, indent=2)[:8000]}\n\nQUESTION:\n{message}"
 
     try:
-        response = client.chat_completions_create(
+        response = groq_ai.chat_completions_create(
             model=MODEL,
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -230,8 +230,26 @@ The scraped data below is for context. Use it when relevant, but feel free to us
         if data['structured_data'].get('lists'):
             context_parts.append(f"- {len(data['structured_data']['lists'])} lists")
     
-    # Build the full prompt
+    # Build the full prompt with data compression
     scraped_context = "\n\n".join(context_parts)
+    
+    # Compress scraped data if too long
+    if len(scraped_context) > 15000:
+        # Keep only essential parts
+        essential_parts = []
+        if data.get('title'):
+            essential_parts.append(f"Title: {data['title']}")
+        if data.get('description'):
+            essential_parts.append(f"Description: {data['description']}")
+        
+        # Add first 10 paragraphs only
+        if data.get('paragraphs'):
+            essential_parts.append("Content (first 10 paragraphs):")
+            for para in data['paragraphs'][:10]:
+                essential_parts.append(para)
+        
+        scraped_context = "\n\n".join(essential_parts)
+    
     full_context = f"{scraped_context}\n\n---\n\nUSER QUESTION:\n{message}\n\n(Note: Use the scraped data above as context when relevant, but feel free to use your full knowledge to provide a comprehensive answer.)"
 
     try:
@@ -240,11 +258,11 @@ The scraped data below is for context. Use it when relevant, but feel free to us
             {"role": "user", "content": full_context[:20000]}  # Increased limit for comprehensive answers
         ]
         
-        response = client.chat_completions_create(
+        response = grok_mode.chat_completions_create(
             model=MODEL_DEEP,
             messages=messages_to_send,
-            temperature=0.4,  # More creative for Grok-like responses
-            max_tokens=2000  # Allow longer, detailed responses
+            temperature=0.4,
+            max_tokens=2000
         )
         
         answer = response.get("choices", [{}])[0].get("message", {}).get("content", None)
@@ -260,6 +278,7 @@ The scraped data below is for context. Use it when relevant, but feel free to us
         }
         
     except Exception as e:
+        print("🔥 Grok Mode Exception:", e)
         return {"success": False, "error": f"Grok Mode error: {str(e)}"}
 
 # ========== GROK MODE SUMMARY ==========
@@ -297,7 +316,7 @@ Only use data from the page. If info missing, say "Not found"."""
         context_parts.append("\nContent:\n" + "\n".join(data['paragraphs'][:15]))
     
     try:
-        response = client.chat_completions_create(
+        response = groq_ai.chat_completions_create(
             model=MODEL_DEEP,
             messages=[
                 {"role": "system", "content": system_prompt},
