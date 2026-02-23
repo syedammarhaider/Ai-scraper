@@ -50,18 +50,33 @@ class GroqDirectClient:
         except Exception as e:
             raise Exception(f"Groq API error: {str(e)}")
 
-# Initialize Groq clients with error handling
-try:
-    groq_ai = GroqDirectClient(GROQ_API_KEY)
-    grok_mode = GroqDirectClient(GROQ_API_KEY)
-except Exception as e:
-    print(f"Error initializing Groq clients: {e}")
-    groq_ai = None
-    grok_mode = None
-    print("Groq client initialized successfully using direct API calls")
-except Exception as e:
-    print(f"Warning: Groq client initialization failed: {e}")
-    client = None
+# Initialize Groq clients with robust error handling
+def initialize_grok_clients():
+    """Initialize both Groq AI and Grok Mode clients with error handling"""
+    global groq_ai, grok_mode
+    
+    try:
+        # Try direct initialization first (most compatible)
+        groq_ai = GroqDirectClient(GROQ_API_KEY)
+        grok_mode = GroqDirectClient(GROQ_API_KEY)
+        print("✅ Groq clients initialized successfully (Direct API)")
+        return True
+    except Exception as e:
+        print(f"⚠️ Direct initialization failed: {e}")
+        try:
+            # Fallback to standard initialization
+            groq_ai = Groq(api_key=GROQ_API_KEY, mode="ai")
+            grok_mode = Groq(api_key=GROQ_API_KEY, mode="grok")
+            print("✅ Groq clients initialized (Standard API)")
+            return True
+        except Exception as e2:
+            print(f"❌ All initialization methods failed: {e2}")
+            groq_ai = None
+            grok_mode = None
+            return False
+
+# Initialize clients at startup
+initialize_grok_clients()
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
