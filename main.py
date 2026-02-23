@@ -204,67 +204,20 @@ async def grok_mode_endpoint(request: Request):
         except:
             return {"success": False, "error": "Invalid scraped data format"}
         
-        # Grok Mode - Flexible: scraped data + general knowledge
-        system_prompt = f"""You are Grok Mode - an advanced AI assistant.
+        # Grok Mode - Universal Questions Only (no scraped data)
+        system_prompt = f"""You are Grok Mode - an advanced AI assistant for universal questions.
 
 Rules:
-1. For questions about scraped data: Use the scraped data primarily
-2. For general questions: Use your knowledge to provide helpful answers
-3. For greetings: Respond naturally and conversationally
+1. ONLY answer universal/general knowledge questions
+2. DO NOT use scraped data - ignore any website content provided
+3. Use your comprehensive knowledge for all answers
 4. Be helpful, detailed, and comprehensive
 5. Analysis Type: {analysis_type}
 
-The scraped data below is for context. Use it when relevant, but feel free to use your knowledge for general questions."""
+Provide expert answers on any topic using your knowledge base. The scraped data is irrelevant - focus on universal knowledge."""
         
-        # Build context - include scraped data as reference but allow AI to use full knowledge
-        context_parts = []
-        context_parts.append(f"User has scraped this URL: {data.get('url', 'Unknown URL')}")
-        
-        if data.get('title'):
-            context_parts.append(f"Page Title: {data['title']}")
-        if data.get('description'):
-            context_parts.append(f"Page Description: {data['description']}")
-        
-        if data.get('paragraphs'):
-            context_parts.append("Page Content (for reference):")
-            for para in data['paragraphs'][:8]:  # Include key content
-                context_parts.append(para)
-        
-        # Add other scraped data as reference
-        if data.get('headings'):
-            context_parts.append("Page Headings:")
-            for level, headings in data['headings'].items():
-                if headings:
-                    context_parts.append(f"{level}: {', '.join(headings[:3])}")
-        
-        if data.get('structured_data'):
-            context_parts.append("Structured Data Found:")
-            if data['structured_data'].get('tables'):
-                context_parts.append(f"- {len(data['structured_data']['tables'])} tables")
-            if data['structured_data'].get('lists'):
-                context_parts.append(f"- {len(data['structured_data']['lists'])} lists")
-        
-        # Build the full prompt with data compression
-        scraped_context = "\n\n".join(context_parts)
-        
-        # Compress scraped data if too long
-        if len(scraped_context) > 15000:
-            # Keep only essential parts
-            essential_parts = []
-            if data.get('title'):
-                essential_parts.append(f"Title: {data['title']}")
-            if data.get('description'):
-                essential_parts.append(f"Description: {data['description']}")
-            
-            # Add first 10 paragraphs only
-            if data.get('paragraphs'):
-                essential_parts.append("Content (first 10 paragraphs):")
-                for para in data['paragraphs'][:10]:
-                    essential_parts.append(para)
-            
-            scraped_context = "\n\n".join(essential_parts)
-        
-        full_context = f"{scraped_context}\n\n---\n\nUSER QUESTION:\n{message}\n\n(Note: Use the scraped data above as context when relevant, but feel free to use your full knowledge to provide a comprehensive answer.)"
+        # Build context - NO scraped data for universal questions only
+        full_context = f"USER QUESTION:\n{message}\n\n(Note: This is a universal knowledge question. Provide comprehensive answer using your knowledge base.)"
 
         try:
             messages_to_send = [

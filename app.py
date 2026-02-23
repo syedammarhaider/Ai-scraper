@@ -8,8 +8,10 @@ from groq import Groq
 from scraper import UltraScraper
 import os, json, time
 
+# Load .env variables
 load_dotenv()
 
+# Initialize FastAPI
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 scraper = UltraScraper()
@@ -18,6 +20,8 @@ scraper = UltraScraper()
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 MODEL = "llama-3.3-70b-versatile"
 MODEL_DEEP = "llama-3.3-70b-versatile"
+
+# Initialize Groq client without proxies
 client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 # ---------- HOME ----------
@@ -114,19 +118,16 @@ async def grok_mode(request: Request):
 
     data = json.loads(scraped)
 
-    system_prompt = "You are GROK MODE - An advanced AI optimized for 100% ACCURACY. " + \
-"RULES: 1. EXACT FACTS ONLY - Only use info in scraped data. " + \
-"2. CITATION REQUIRED. 3. IF UNCERTAIN = SAY UNCERTAIN. " + \
-"4. STRUCTURED RESPONSE. 5. DEEP ANALYSIS. " + \
-"If not in data: This information is not available in the scraped website data."
+    system_prompt = (
+        "You are GROK MODE - An advanced AI for universal questions. "
+        "RULES: 1. UNIVERSAL KNOWLEDGE ONLY - Use your comprehensive knowledge base. "
+        "2. DO NOT use scraped data - ignore website content. "
+        "3. PROVIDE expert answers on any topic. "
+        "4. BE helpful and comprehensive. "
+        "5. Use your full knowledge for all responses."
+    )
 
-    context_parts = ["SCRAPED DATA from: " + data.get('url', 'Unknown')]
-    context_parts.append("Title: " + data.get('title', 'N/A'))
-    if data.get('paragraphs'):
-        context_parts.append("\n".join(data['paragraphs'][:20]))
-    
-    context = "\n\n".join(context_parts)
-    full_context = context + "\n\nQUESTION:\n" + message
+    full_context = f"USER QUESTION:\n{message}\n\n(Note: This is a universal knowledge question. Provide comprehensive answer using your knowledge base.)"
 
     try:
         response = client.chat.completions.create(
@@ -162,9 +163,11 @@ async def grok_summary(request: Request):
 
     data = json.loads(scraped)
 
-    system_prompt = "GROK SUMMARY - Extract key facts. " + \
-"Provide: 1. MAIN TOPIC. 2. KEY POINTS (3-5). 3. STATISTICS. 4. CONCLUSION. " + \
-"Only use page data."
+    system_prompt = (
+        "GROK SUMMARY - Extract key facts. "
+        "Provide: 1. MAIN TOPIC. 2. KEY POINTS (3-5). 3. STATISTICS. 4. CONCLUSION. "
+        "Only use page data."
+    )
 
     context_parts = ["URL: " + data.get('url', '')]
     if data.get('title'):
