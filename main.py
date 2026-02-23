@@ -183,23 +183,24 @@ async def grok_mode_endpoint(request: Request):
     """
     Grok Mode - Enhanced AI with deep reasoning for analyzing scraped data
     """
-    form = await request.form()
-    message = form.get("message")
-    scraped = form.get("scraped_data")
-    analysis_type = form.get("analysis_type", "comprehensive")
-    
-    if not message or not scraped:
-        return {"success": False, "error": "Missing message or scraped data"}
-    if not groq_mode:
-        return {"success": False, "error": "Grok Mode client not initialized"}
-    
     try:
-        data = json.loads(scraped)
-    except:
-        return {"success": False, "error": "Invalid scraped data format"}
-    
-    # Grok Mode - Flexible: scraped data + general knowledge
-    system_prompt = f"""You are Grok Mode - an advanced AI assistant.
+        form = await request.form()
+        message = form.get("message")
+        scraped = form.get("scraped_data")
+        analysis_type = form.get("analysis_type", "comprehensive")
+        
+        if not message or not scraped:
+            return {"success": False, "error": "Missing message or scraped data"}
+        if not groq_mode:
+            return {"success": False, "error": "Grok Mode client not initialized"}
+        
+        try:
+            data = json.loads(scraped)
+        except:
+            return {"success": False, "error": "Invalid scraped data format"}
+        
+        # Grok Mode - Flexible: scraped data + general knowledge
+        system_prompt = f"""You are Grok Mode - an advanced AI assistant.
 
 Rules:
 1. For questions about scraped data: Use the scraped data primarily
@@ -209,85 +210,89 @@ Rules:
 5. Analysis Type: {analysis_type}
 
 The scraped data below is for context. Use it when relevant, but feel free to use your knowledge for general questions."""
-    
-    # Build context - include scraped data as reference but allow AI to use full knowledge
-    context_parts = []
-    context_parts.append(f"User has scraped this URL: {data.get('url', 'Unknown URL')}")
-    
-    if data.get('title'):
-        context_parts.append(f"Page Title: {data['title']}")
-    if data.get('description'):
-        context_parts.append(f"Page Description: {data['description']}")
-    
-    if data.get('paragraphs'):
-        context_parts.append("Page Content (for reference):")
-        for para in data['paragraphs'][:8]:  # Include key content
-            context_parts.append(para)
-    
-    # Add other scraped data as reference
-    if data.get('headings'):
-        context_parts.append("Page Headings:")
-        for level, headings in data['headings'].items():
-            if headings:
-                context_parts.append(f"{level}: {', '.join(headings[:3])}")
-    
-    if data.get('structured_data'):
-        context_parts.append("Structured Data Found:")
-        if data['structured_data'].get('tables'):
-            context_parts.append(f"- {len(data['structured_data']['tables'])} tables")
-        if data['structured_data'].get('lists'):
-            context_parts.append(f"- {len(data['structured_data']['lists'])} lists")
-    
-    # Build the full prompt with data compression
-    scraped_context = "\n\n".join(context_parts)
-    
-    # Compress scraped data if too long
-    if len(scraped_context) > 15000:
-        # Keep only essential parts
-        essential_parts = []
+        
+        # Build context - include scraped data as reference but allow AI to use full knowledge
+        context_parts = []
+        context_parts.append(f"User has scraped this URL: {data.get('url', 'Unknown URL')}")
+        
         if data.get('title'):
-            essential_parts.append(f"Title: {data['title']}")
+            context_parts.append(f"Page Title: {data['title']}")
         if data.get('description'):
-            essential_parts.append(f"Description: {data['description']}")
+            context_parts.append(f"Page Description: {data['description']}")
         
-        # Add first 10 paragraphs only
         if data.get('paragraphs'):
-            essential_parts.append("Content (first 10 paragraphs):")
-            for para in data['paragraphs'][:10]:
-                essential_parts.append(para)
+            context_parts.append("Page Content (for reference):")
+            for para in data['paragraphs'][:8]:  # Include key content
+                context_parts.append(para)
         
-        scraped_context = "\n\n".join(essential_parts)
-    
-    full_context = f"{scraped_context}\n\n---\n\nUSER QUESTION:\n{message}\n\n(Note: Use the scraped data above as context when relevant, but feel free to use your full knowledge to provide a comprehensive answer.)"
+        # Add other scraped data as reference
+        if data.get('headings'):
+            context_parts.append("Page Headings:")
+            for level, headings in data['headings'].items():
+                if headings:
+                    context_parts.append(f"{level}: {', '.join(headings[:3])}")
+        
+        if data.get('structured_data'):
+            context_parts.append("Structured Data Found:")
+            if data['structured_data'].get('tables'):
+                context_parts.append(f"- {len(data['structured_data']['tables'])} tables")
+            if data['structured_data'].get('lists'):
+                context_parts.append(f"- {len(data['structured_data']['lists'])} lists")
+        
+        # Build the full prompt with data compression
+        scraped_context = "\n\n".join(context_parts)
+        
+        # Compress scraped data if too long
+        if len(scraped_context) > 15000:
+            # Keep only essential parts
+            essential_parts = []
+            if data.get('title'):
+                essential_parts.append(f"Title: {data['title']}")
+            if data.get('description'):
+                essential_parts.append(f"Description: {data['description']}")
+            
+            # Add first 10 paragraphs only
+            if data.get('paragraphs'):
+                essential_parts.append("Content (first 10 paragraphs):")
+                for para in data['paragraphs'][:10]:
+                    essential_parts.append(para)
+            
+            scraped_context = "\n\n".join(essential_parts)
+        
+        full_context = f"{scraped_context}\n\n---\n\nUSER QUESTION:\n{message}\n\n(Note: Use the scraped data above as context when relevant, but feel free to use your full knowledge to provide a comprehensive answer.)"
 
-    try:
-        messages_to_send = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": full_context[:20000]}  # Increased limit for comprehensive answers
-        ]
-        
-        response = grok_mode.chat_completions_create(
-            model=MODEL_DEEP,
-            messages=messages_to_send,
-            temperature=0.4,
-            max_tokens=2000
-        )
-        
-        answer = response.get("choices", [{}])[0].get("message", {}).get("content", None)
-        if not answer:
-            answer = "No response generated from Grok Mode."
-        
-        return {
-            "success": True, 
-            "response": answer.strip(),
-            "mode": "grok_mode",
-            "model": MODEL_DEEP,
-            "analysis_type": analysis_type
-        }
-        
+        try:
+            messages_to_send = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": full_context[:20000]}  # Increased limit for comprehensive answers
+            ]
+            
+            response = grok_mode.chat_completions_create(
+                model=MODEL_DEEP,
+                messages=messages_to_send,
+                temperature=0.4,
+                max_tokens=2000
+            )
+            
+            answer = response.get("choices", [{}])[0].get("message", {}).get("content", None)
+            if not answer:
+                answer = "No response generated from Grok Mode."
+            
+            return {
+                "success": True, 
+                "response": answer.strip(),
+                "mode": "grok_mode",
+                "model": MODEL_DEEP,
+                "analysis_type": analysis_type
+            }
+            
+        except Exception as e:
+            print("🔥 Grok Mode Exception:", e)
+            return {"success": False, "error": f"Grok Mode error: {str(e)}"}
+    
     except Exception as e:
-        print("🔥 Grok Mode Exception:", e)
-        return {"success": False, "error": f"Grok Mode error: {str(e)}"}
+        print("🔥 Grok Mode General Exception:", e)
+        return {"success": False, "error": f"Grok Mode failed: {str(e)}"}
 
 # ========== GROK MODE SUMMARY ==========
 @app.post("/grok-summary")
