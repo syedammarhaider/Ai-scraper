@@ -10,6 +10,7 @@ load_dotenv()
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
+scraper = UltraScraper()
 
 # GROQ - Using direct API calls for Python 3.14 compatibility
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
