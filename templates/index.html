@@ -620,23 +620,22 @@ body {
 
 /* ROYAL GOLDEN FOOTER – ultra professional responsive design */
 .footer {
-    margin-top: 60px;
-    padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
+    margin-top: 40px;
+    padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem);
     background: linear-gradient(145deg, #1a1033, #2b1b47, #0f0c29);
     color: #fffbee;
-    border-radius: clamp(40px, 8vw, 80px) clamp(40px, 8vw, 80px) 0 0;
+    border-radius: clamp(30px, 6vw, 60px) clamp(30px, 6vw, 60px) 0 0;
     box-shadow: 
-        0 -30px 60px rgba(180, 130, 220, 0.6),
-        0 0 0 3px rgba(212,175,55,0.4) inset,
-        0 0 120px rgba(212,175,55,0.15),
-        inset 0 0 60px rgba(255,215,0,0.05);
-    backdrop-filter: blur(20px);
+        0 -20px 40px rgba(180, 130, 220, 0.4),
+        0 0 0 2px rgba(212,175,55,0.3) inset,
+        0 0 80px rgba(212,175,55,0.1);
+    backdrop-filter: blur(15px);
     width: 100%;
     flex-shrink: 0;
     position: relative;
-    border-top: 4px solid rgba(212,175,55,0.6);
+    border-top: 3px solid rgba(212,175,55,0.5);
     overflow: hidden;
-    min-height: clamp(300px, 50vw, 600px);
+    min-height: clamp(200px, 35vw, 400px);
 }
 
 .footer::before {
@@ -690,40 +689,39 @@ body {
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: clamp(20px, 4vw, 40px);
-    margin-bottom: clamp(20px, 4vw, 40px);
+    gap: clamp(15px, 3vw, 30px);
+    margin-bottom: clamp(15px, 3vw, 30px);
     text-align: center;
 }
 
 .footer-logo {
-    font-size: clamp(32px, 6vw, 56px); 
-    font-weight: 900;
+    font-size: clamp(24px, 5vw, 40px); 
+    font-weight: 800;
     background: linear-gradient(145deg, #fff, #ffe68f, #e2c5ff);
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent;
     display: flex; 
     align-items: center; 
     justify-content: center;
-    gap: clamp(12px, 2vw, 20px);
-    text-shadow: 0 8px 16px rgba(0,0,0,0.5);
-    letter-spacing: -0.02em;
-    margin-bottom: clamp(10px, 2vw, 20px);
+    gap: clamp(10px, 2vw, 16px);
+    text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    letter-spacing: -0.01em;
+    margin-bottom: clamp(8px, 2vw, 12px);
     flex: 1;
-    min-width: 250px;
+    min-width: 200px;
 }
 .footer-logo i {
-    font-size: clamp(36px, 7vw, 72px);
+    font-size: clamp(28px, 5.5vw, 48px);
     background: linear-gradient(145deg, #fbbf24, #ff8c00, #ff6ec7);
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 20px gold) drop-shadow(0 6px 12px rgba(0,0,0,0.4));
-    animation: crownGlow 4s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 12px gold) drop-shadow(0 3px 6px rgba(0,0,0,0.3));
+    animation: crownGlow 3s ease-in-out infinite alternate;
 }
 
 @keyframes crownGlow {
-    0% { filter: drop-shadow(0 0 20px gold) drop-shadow(0 6px 12px rgba(0,0,0,0.4)); transform: scale(1); }
-    50% { filter: drop-shadow(0 0 35px #ffdb7c) drop-shadow(0 6px 12px rgba(0,0,0,0.4)); transform: scale(1.05); }
-    100% { filter: drop-shadow(0 0 50px #ffd700) drop-shadow(0 6px 12px rgba(0,0,0,0.4)); transform: scale(1.1); }
+    0% { filter: drop-shadow(0 0 12px gold) drop-shadow(0 3px 6px rgba(0,0,0,0.3)); transform: scale(1); }
+    100% { filter: drop-shadow(0 0 20px #ffdb7c) drop-shadow(0 3px 6px rgba(0,0,0,0.3)); transform: scale(1.05); }
 }
 .footer-tagline {
     display: flex;
@@ -734,38 +732,38 @@ body {
 }
 
 .footer-tagline span {
-    background: linear-gradient(145deg, rgba(255,255,255,0.18), rgba(212,175,55,0.25));
-    padding: clamp(8px, 2vw, 16px) clamp(20px, 4vw, 40px);
-    border-radius: clamp(30px, 6vw, 80px);
-    font-size: clamp(0.9rem, 2.5vw, 1.4rem);
-    font-weight: 700;
-    border: 2px solid rgba(212,175,55,0.6);
-    backdrop-filter: blur(20px);
-    text-shadow: 0 4px 8px rgba(0,0,0,0.4);
-    letter-spacing: 0.06em;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-    transition: all 0.4s ease;
+    background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(212,175,55,0.2));
+    padding: clamp(6px, 1.5vw, 12px) clamp(16px, 3vw, 28px);
+    border-radius: clamp(25px, 5vw, 50px);
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    font-weight: 600;
+    border: 1px solid rgba(212,175,55,0.5);
+    backdrop-filter: blur(15px);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    letter-spacing: 0.04em;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
 }
 
 .footer-badges {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: clamp(12px, 3vw, 24px);
-    margin: clamp(20px, 4vw, 40px) 0;
+    gap: clamp(10px, 2.5vw, 18px);
+    margin: clamp(15px, 3vw, 25px) 0;
 }
 .footer-badge {
-    background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(212,175,55,0.2));
-    padding: clamp(10px, 2.5vw, 20px) clamp(24px, 5vw, 48px);
-    border-radius: clamp(40px, 8vw, 80px);
-    font-size: clamp(0.9rem, 2.5vw, 1.4rem);
-    font-weight: 700;
-    border: 2px solid rgba(212,175,55,0.5);
-    text-shadow: 0 3px 6px rgba(0,0,0,0.4);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-    letter-spacing: 0.04em;
-    transition: all 0.4s ease;
-    backdrop-filter: blur(15px);
+    background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(212,175,55,0.18));
+    padding: clamp(8px, 2vw, 14px) clamp(18px, 4vw, 32px);
+    border-radius: clamp(30px, 6vw, 60px);
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    font-weight: 600;
+    border: 1px solid rgba(212,175,55,0.4);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    letter-spacing: 0.02em;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(12px);
 }
 .footer-badge:hover {
     background: linear-gradient(145deg, rgba(212,175,55,0.4), rgba(255,215,0,0.3));
@@ -778,20 +776,20 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
-    gap: clamp(30px, 6vw, 80px);
-    margin: clamp(30px, 6vw, 60px) 0;
+    gap: clamp(20px, 4vw, 50px);
+    margin: clamp(20px, 4vw, 40px) 0;
     text-align: center;
 }
 
 .footer-column h4 {
-    font-size: clamp(1.1rem, 3vw, 1.6rem);
-    margin-bottom: clamp(16px, 3vw, 32px);
+    font-size: clamp(0.95rem, 2.5vw, 1.3rem);
+    margin-bottom: clamp(12px, 2.5vw, 20px);
     background: linear-gradient(145deg, #fff8e7, #ffe49e, #ffd966);
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    text-shadow: 0 3px 6px rgba(0,0,0,0.4);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     text-align: center;
 }
 .footer-column h4::after {
@@ -812,15 +810,15 @@ body {
 .footer-column ul li a {
     color: rgba(255,255,240,0.9);
     text-decoration: none;
-    font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+    font-size: clamp(0.85rem, 2.2vw, 1rem);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: clamp(6px, 1.5vw, 12px);
-    font-weight: 500;
-    transition: all 0.4s ease;
-    padding: clamp(6px, 1.5vw, 12px) 0;
-    border-radius: 8px;
+    gap: clamp(5px, 1.2vw, 8px);
+    font-weight: 400;
+    transition: all 0.3s ease;
+    padding: clamp(4px, 1vw, 8px) 0;
+    border-radius: 6px;
 }
 .footer-column ul li a:hover {
     color: #fff;
@@ -833,62 +831,63 @@ body {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: clamp(16px, 3vw, 32px);
-    margin: clamp(25px, 5vw, 50px) 0;
+    gap: clamp(12px, 2.5vw, 24px);
+    margin: clamp(20px, 4vw, 35px) 0;
 }
 
 .footer-social a {
-    width: clamp(50px, 8vw, 90px); 
-    height: clamp(50px, 8vw, 90px); 
-    font-size: clamp(20px, 4vw, 36px); 
+    width: clamp(40px, 6vw, 70px); 
+    height: clamp(40px, 6vw, 70px); 
+    font-size: clamp(16px, 3vw, 28px); 
     border-radius: 50%;
-    background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(212,175,55,0.15));
-    border: 3px solid rgba(212,175,55,0.5);
+    background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(212,175,55,0.12));
+    border: 2px solid rgba(212,175,55,0.4);
     display: flex; 
     align-items: center; 
     justify-content: center; 
     text-decoration: none; 
     color: #fffbee;
-    transition: all 0.4s ease;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
-    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    backdrop-filter: blur(8px);
 }
 .footer-social a:hover {
     background: linear-gradient(145deg, #d4af37, #ffdb7c, #ffd700); 
     color: #1a1033; 
-    transform: translateY(-15px) scale(1.2) rotate(8deg); 
+    transform: translateY(-8px) scale(1.1) rotate(5deg); 
     box-shadow: 
-        0 25px 50px rgba(212,175,55,0.6), 
-        0 0 40px rgba(255,215,0,0.4),
-        inset 0 0 20px rgba(255,255,255,0.2);
+        0 15px 30px rgba(212,175,55,0.5), 
+        0 0 25px rgba(255,215,0,0.3);
     border-color: #ffd700;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 .footer-extra {
     display: flex; 
     flex-wrap: wrap; 
     justify-content: center;
-    gap: clamp(16px, 3vw, 32px); 
-    margin: clamp(20px, 4vw, 40px) 0; 
-    padding: clamp(16px, 3vw, 32px) 0;
-    border-top: 2px solid rgba(255,255,255,0.15); 
-    border-bottom: 2px solid rgba(255,255,255,0.15);
+    gap: clamp(12px, 2.5vw, 24px); 
+    margin: clamp(15px, 3vw, 30px) 0; 
+    padding: clamp(12px, 2.5vw, 24px) 0;
+    border-top: 1px solid rgba(255,255,255,0.12); 
+    border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 
-.footer-extra-link {
-    color: rgba(255, 255,255,0.8); 
-    text-decoration: none;  
-    font-size: 1rem; 
-    padding: 12px 28px; 
-    border-radius: 40px;
-    background: rgba(0,0,0,0.2); 
+.footer-extra-link { 
+    color: rgba(255,255,255,0.8); 
+    text-decoration: none; 
+    font-size: clamp(0.85rem, 2vw, 1rem);
+    padding: clamp(8px, 2vw, 14px) clamp(20px, 4vw, 36px); 
+    border-radius: clamp(30px, 6vw, 60px);
+    background: linear-gradient(145deg, rgba(0,0,0,0.25), rgba(212,175,55,0.12)); 
     display: flex; 
     align-items: center; 
-    gap: 8px;
-    font-weight: 600;
+    justify-content: center;
+    gap: clamp(6px, 1.5vw, 10px);
+    font-weight: 500;
     border: 1px solid rgba(212,175,55,0.3);
     transition: all 0.3s ease;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2)
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    backdrop-filter: blur(8px);
 }
 
 .footer-extra-link:hover { 
@@ -901,16 +900,16 @@ body {
 
 .footer-copyright { 
     text-align: center; 
-    font-size: clamp(0.9rem, 2.5vw, 1.2rem); 
+    font-size: clamp(0.8rem, 2vw, 1rem); 
     display: flex; 
     flex-wrap: wrap; 
     justify-content: center; 
-    gap: clamp(20px, 4vw, 50px);
-    padding-top: clamp(20px, 4vw, 40px); 
-    border-top: 2px solid rgba(255,255,255,0.18);
-    font-weight: 500;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    margin-top: clamp(10px, 2vw, 20px);
+    gap: clamp(15px, 3vw, 30px);
+    padding-top: clamp(15px, 3vw, 25px); 
+    border-top: 1px solid rgba(255,255,255,0.15);
+    font-weight: 400;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    margin-top: clamp(8px, 2vw, 15px);
 }
 /* Ultra Responsive Design */
 @media (max-width: 1200px) {
@@ -927,9 +926,9 @@ body {
 }
 
 @media (max-width: 700px) {
-    .footer-logo { font-size: clamp(24px, 5vw, 36px); }
-    .footer-social a { width: clamp(40px, 7vw, 60px); height: clamp(40px, 7vw, 60px); font-size: clamp(16px, 3vw, 24px); }
-    .footer-links { gap: 25px; flex-direction: column; }
+    .footer-logo { font-size: clamp(20px, 4vw, 28px); }
+    .footer-social a { width: clamp(32px, 6vw, 48px); height: clamp(32px, 6vw, 48px); font-size: clamp(14px, 2.5vw, 20px); }
+    .footer-links { gap: 20px; flex-direction: column; }
     .footer-column { min-width: 100%; text-align: center; }
     .footer-tagline { flex-direction: column; align-items: center; }
     .footer-badges { flex-direction: column; align-items: center; }
@@ -938,22 +937,22 @@ body {
 
 @media (max-width: 480px) {
     .footer { 
-        border-radius: 30px 30px 0 0;
-        padding: clamp(1rem, 3vw, 1.5rem) clamp(0.8rem, 2.5vw, 1.2rem);
-        margin-top: 30px;
+        border-radius: 20px 20px 0 0;
+        padding: clamp(0.8rem, 2.5vw, 1.2rem) clamp(0.6rem, 2vw, 1rem);
+        margin-top: 20px;
     }
-    .footer-logo { font-size: clamp(20px, 4vw, 28px); min-width: 200px; }
-    .footer-logo i { font-size: clamp(24px, 5vw, 36px); }
-    .footer-tagline span { font-size: clamp(0.8rem, 2vw, 1rem); padding: clamp(6px, 1.5vw, 12px) clamp(16px, 3vw, 24px); }
-    .footer-badge { font-size: clamp(0.8rem, 2vw, 1rem); padding: clamp(8px, 2vw, 16px) clamp(20px, 4vw, 32px); }
-    .footer-column h4 { font-size: clamp(0.9rem, 2.5vw, 1.2rem); }
-    .footer-column ul li a { font-size: clamp(0.85rem, 2.2vw, 1rem); }
-    .footer-social a { width: clamp(35px, 6vw, 50px); height: clamp(35px, 6vw, 50px); font-size: clamp(14px, 2.5vw, 20px); }
-    .footer-extra-link { font-size: clamp(0.8rem, 2vw, 1rem); padding: clamp(8px, 2vw, 16px) clamp(20px, 4vw, 32px); }
-    .footer-copyright { font-size: clamp(0.8rem, 2vw, 1rem); gap: 15px; flex-direction: column; }
-    .footer-links { gap: 20px; }
-    .footer-badges { gap: 12px; }
-    .footer-extra { gap: 12px; }
+    .footer-logo { font-size: clamp(18px, 3.5vw, 24px); min-width: 180px; }
+    .footer-logo i { font-size: clamp(20px, 4vw, 28px); }
+    .footer-tagline span { font-size: clamp(0.7rem, 1.8vw, 0.9rem); padding: clamp(5px, 1.2vw, 10px) clamp(12px, 2.5vw, 18px); }
+    .footer-badge { font-size: clamp(0.7rem, 1.8vw, 0.9rem); padding: clamp(6px, 1.5vw, 12px) clamp(16px, 3vw, 24px); }
+    .footer-column h4 { font-size: clamp(0.8rem, 2vw, 1rem); }
+    .footer-column ul li a { font-size: clamp(0.75rem, 1.8vw, 0.9rem); }
+    .footer-social a { width: clamp(28px, 5vw, 40px); height: clamp(28px, 5vw, 40px); font-size: clamp(12px, 2.2vw, 18px); }
+    .footer-extra-link { font-size: clamp(0.7rem, 1.8vw, 0.9rem); padding: clamp(6px, 1.5vw, 12px) clamp(16px, 3vw, 24px); }
+    .footer-copyright { font-size: clamp(0.7rem, 1.8vw, 0.9rem); gap: 12px; flex-direction: column; }
+    .footer-links { gap: 15px; }
+    .footer-badges { gap: 8px; }
+    .footer-extra { gap: 8px; }
 }
 
 ::-webkit-scrollbar {
