@@ -86,11 +86,13 @@ body {
     color: var(--text-primary);
     min-height: 100vh;
     padding: 12px 10px 0 10px;
-    line-height: 1.5;
+    line-height: 1.6;
     display: flex;
     flex-direction: column;
-    font-size: 15px;
+    font-size: 14px;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.01em;
 }
 
 .container {
@@ -115,16 +117,16 @@ body {
 }
 
 .header h1 {
-    font-size: clamp(24px, 4.2vw, 36px);
-    font-weight: 800;
+    font-size: clamp(20px, 3.8vw, 28px);
+    font-weight: 700;
     background: var(--accent-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: flex;
     align-items: center;
-    gap: 12px;
-    letter-spacing: -0.01em;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    gap: 10px;
+    letter-spacing: -0.005em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
 
 .header h1 i {
@@ -170,15 +172,15 @@ body {
 }
 
 .card h2 {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     color: var(--text-primary);
-    font-size: clamp(22px, 3.8vw, 32px);
-    font-weight: 700;
+    font-size: clamp(18px, 3.2vw, 24px);
+    font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex-wrap: wrap;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.005em;
 }
 
 .card h2 i {
@@ -198,16 +200,17 @@ body {
 .input-group input,
 .input-group select {
     flex: 1 1 180px;
-    padding: 16px 22px;
-    border-radius: 34px;
-    border: 1.5px solid var(--input-border);
+    padding: 14px 18px;
+    border-radius: 28px;
+    border: 1px solid var(--input-border);
     background: var(--input-bg);
     color: var(--text-primary);
-    font-size: 15px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 400;
     outline: none;
     transition: 0.2s;
     font-family: inherit;
+    letter-spacing: 0.005em;
 }
 
 .input-group input:focus,
@@ -218,23 +221,23 @@ body {
 }
 
 .primary-btn, .scrape-btn {
-    padding: 16px 26px;
+    padding: 14px 22px;
     border: none;
-    border-radius: 40px;
+    border-radius: 32px;
     background: var(--accent-gradient);
     color: white;
-    font-weight: 700;
-    font-size: 15px;
+    font-weight: 600;
+    font-size: 14px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     transition: 0.2s;
-    box-shadow: 0 10px 20px -5px rgba(74,42,107,0.4);
+    box-shadow: 0 6px 16px rgba(74,42,107,0.3);
     background-size: 200% auto;
     font-family: inherit;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
 }
 
 .primary-btn:hover {
@@ -244,19 +247,19 @@ body {
 
 .scrape-btn {
     width: 100%;
-    padding: 20px;
+    padding: 16px;
     border: none;
-    border-radius: 50px;
+    border-radius: 40px;
     background: var(--accent-gradient);
     color: white;
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
-    margin-top: 8px;
+    margin-top: 6px;
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
 }
 
@@ -375,14 +378,15 @@ body {
 
 .message-content {
     display: inline-block;
-    padding: 14px 20px;
-    border-radius: 24px;
+    padding: 12px 16px;
+    border-radius: 20px;
     max-width: 85%;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.5;
     word-wrap: break-word;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
     font-family: inherit;
+    letter-spacing: 0.005em;
 }
 
 .user .message-content {
@@ -620,22 +624,22 @@ body {
 
 /* ROYAL GOLDEN FOOTER – ultra professional responsive design */
 .footer {
-    margin-top: 40px;
-    padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 3vw, 2rem);
+    margin-top: 30px;
+    padding: clamp(1rem, 3vw, 2rem) clamp(0.8rem, 2.5vw, 1.5rem);
     background: linear-gradient(145deg, #1a1033, #2b1b47, #0f0c29);
     color: #fffbee;
-    border-radius: clamp(30px, 6vw, 60px) clamp(30px, 6vw, 60px) 0 0;
+    border-radius: clamp(20px, 4vw, 40px) clamp(20px, 4vw, 40px) 0 0;
     box-shadow: 
-        0 -20px 40px rgba(180, 130, 220, 0.4),
-        0 0 0 2px rgba(212,175,55,0.3) inset,
-        0 0 80px rgba(212,175,55,0.1);
-    backdrop-filter: blur(15px);
+        0 -15px 30px rgba(180, 130, 220, 0.3),
+        0 0 0 1px rgba(212,175,55,0.2) inset,
+        0 0 60px rgba(212,175,55,0.08);
+    backdrop-filter: blur(12px);
     width: 100%;
     flex-shrink: 0;
     position: relative;
-    border-top: 3px solid rgba(212,175,55,0.5);
+    border-top: 2px solid rgba(212,175,55,0.4);
     overflow: hidden;
-    min-height: clamp(200px, 35vw, 400px);
+    min-height: clamp(150px, 25vw, 300px);
 }
 
 .footer::before {
@@ -695,33 +699,33 @@ body {
 }
 
 .footer-logo {
-    font-size: clamp(24px, 5vw, 40px); 
-    font-weight: 800;
+    font-size: clamp(18px, 4vw, 28px); 
+    font-weight: 700;
     background: linear-gradient(145deg, #fff, #ffe68f, #e2c5ff);
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent;
     display: flex; 
     align-items: center; 
     justify-content: center;
-    gap: clamp(10px, 2vw, 16px);
-    text-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    letter-spacing: -0.01em;
-    margin-bottom: clamp(8px, 2vw, 12px);
+    gap: clamp(8px, 1.5vw, 12px);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    letter-spacing: -0.005em;
+    margin-bottom: clamp(6px, 1.5vw, 10px);
     flex: 1;
-    min-width: 200px;
+    min-width: 180px;
 }
 .footer-logo i {
-    font-size: clamp(28px, 5.5vw, 48px);
+    font-size: clamp(20px, 4.5vw, 36px);
     background: linear-gradient(145deg, #fbbf24, #ff8c00, #ff6ec7);
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 12px gold) drop-shadow(0 3px 6px rgba(0,0,0,0.3));
-    animation: crownGlow 3s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 8px gold) drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    animation: crownGlow 2.5s ease-in-out infinite alternate;
 }
 
 @keyframes crownGlow {
-    0% { filter: drop-shadow(0 0 12px gold) drop-shadow(0 3px 6px rgba(0,0,0,0.3)); transform: scale(1); }
-    100% { filter: drop-shadow(0 0 20px #ffdb7c) drop-shadow(0 3px 6px rgba(0,0,0,0.3)); transform: scale(1.05); }
+    0% { filter: drop-shadow(0 0 8px gold) drop-shadow(0 2px 4px rgba(0,0,0,0.2)); transform: scale(1); }
+    100% { filter: drop-shadow(0 0 15px #ffdb7c) drop-shadow(0 2px 4px rgba(0,0,0,0.2)); transform: scale(1.02); }
 }
 .footer-tagline {
     display: flex;
@@ -732,17 +736,17 @@ body {
 }
 
 .footer-tagline span {
-    background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(212,175,55,0.2));
-    padding: clamp(6px, 1.5vw, 12px) clamp(16px, 3vw, 28px);
-    border-radius: clamp(25px, 5vw, 50px);
-    font-size: clamp(0.8rem, 2vw, 1.1rem);
-    font-weight: 600;
-    border: 1px solid rgba(212,175,55,0.5);
-    backdrop-filter: blur(15px);
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    letter-spacing: 0.04em;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
+    background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(212,175,55,0.15));
+    padding: clamp(4px, 1.2vw, 8px) clamp(12px, 2.5vw, 20px);
+    border-radius: clamp(20px, 4vw, 35px);
+    font-size: clamp(0.7rem, 1.8vw, 0.9rem);
+    font-weight: 500;
+    border: 1px solid rgba(212,175,55,0.4);
+    backdrop-filter: blur(12px);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
 }
 
 .footer-badges {
@@ -753,17 +757,17 @@ body {
     margin: clamp(15px, 3vw, 25px) 0;
 }
 .footer-badge {
-    background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(212,175,55,0.18));
-    padding: clamp(8px, 2vw, 14px) clamp(18px, 4vw, 32px);
-    border-radius: clamp(30px, 6vw, 60px);
-    font-size: clamp(0.8rem, 2vw, 1.1rem);
-    font-weight: 600;
-    border: 1px solid rgba(212,175,55,0.4);
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    letter-spacing: 0.02em;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(12px);
+    background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(212,175,55,0.12));
+    padding: clamp(6px, 1.2vw, 10px) clamp(14px, 2.5vw, 24px);
+    border-radius: clamp(20px, 4vw, 40px);
+    font-size: clamp(0.7rem, 1.8vw, 0.9rem);
+    font-weight: 500;
+    border: 1px solid rgba(212,175,55,0.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    letter-spacing: 0.01em;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
 }
 .footer-badge:hover {
     background: linear-gradient(145deg, rgba(212,175,55,0.4), rgba(255,215,0,0.3));
@@ -782,14 +786,14 @@ body {
 }
 
 .footer-column h4 {
-    font-size: clamp(0.95rem, 2.5vw, 1.3rem);
-    margin-bottom: clamp(12px, 2.5vw, 20px);
+    font-size: clamp(0.8rem, 2vw, 1.1rem);
+    margin-bottom: clamp(10px, 2vw, 16px);
     background: linear-gradient(145deg, #fff8e7, #ffe49e, #ffd966);
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     text-align: center;
 }
 .footer-column h4::after {
@@ -810,15 +814,16 @@ body {
 .footer-column ul li a {
     color: rgba(255,255,240,0.9);
     text-decoration: none;
-    font-size: clamp(0.85rem, 2.2vw, 1rem);
+    font-size: clamp(0.75rem, 1.8vw, 0.9rem);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: clamp(5px, 1.2vw, 8px);
+    gap: clamp(4px, 1vw, 6px);
     font-weight: 400;
-    transition: all 0.3s ease;
-    padding: clamp(4px, 1vw, 8px) 0;
-    border-radius: 6px;
+    transition: all 0.2s ease;
+    padding: clamp(3px, 0.8vw, 6px) 0;
+    border-radius: 4px;
+    letter-spacing: 0.005em;
 }
 .footer-column ul li a:hover {
     color: #fff;
@@ -836,30 +841,28 @@ body {
 }
 
 .footer-social a {
-    width: clamp(40px, 6vw, 70px); 
-    height: clamp(40px, 6vw, 70px); 
-    font-size: clamp(16px, 3vw, 28px); 
+    width: clamp(32px, 5vw, 50px); 
+    height: clamp(32px, 5vw, 50px); 
+    font-size: clamp(14px, 2.5vw, 20px); 
     border-radius: 50%;
-    background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(212,175,55,0.12));
-    border: 2px solid rgba(212,175,55,0.4);
+    background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(212,175,55,0.1));
+    border: 1px solid rgba(212,175,55,0.3);
     display: flex; 
     align-items: center; 
     justify-content: center; 
     text-decoration: none; 
     color: #fffbee;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    backdrop-filter: blur(6px);
 }
 .footer-social a:hover {
     background: linear-gradient(145deg, #d4af37, #ffdb7c, #ffd700); 
     color: #1a1033; 
-    transform: translateY(-8px) scale(1.1) rotate(5deg); 
-    box-shadow: 
-        0 15px 30px rgba(212,175,55,0.5), 
-        0 0 25px rgba(255,215,0,0.3);
+    transform: translateY(-5px) scale(1.05) rotate(3deg); 
+    box-shadow: 0 10px 20px rgba(212,175,55,0.4);
     border-color: #ffd700;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 .footer-extra {
     display: flex; 
@@ -873,21 +876,22 @@ body {
 }
 
 .footer-extra-link { 
-    color: rgba(255,255,255,0.8); 
+    color: rgba(255,255,255,0.75); 
     text-decoration: none; 
-    font-size: clamp(0.85rem, 2vw, 1rem);
-    padding: clamp(8px, 2vw, 14px) clamp(20px, 4vw, 36px); 
-    border-radius: clamp(30px, 6vw, 60px);
-    background: linear-gradient(145deg, rgba(0,0,0,0.25), rgba(212,175,55,0.12)); 
+    font-size: clamp(0.75rem, 1.8vw, 0.9rem);
+    padding: clamp(6px, 1.2vw, 10px) clamp(16px, 2.5vw, 28px); 
+    border-radius: clamp(25px, 4vw, 45px);
+    background: linear-gradient(145deg, rgba(0,0,0,0.2), rgba(212,175,55,0.1)); 
     display: flex; 
     align-items: center; 
     justify-content: center;
-    gap: clamp(6px, 1.5vw, 10px);
-    font-weight: 500;
-    border: 1px solid rgba(212,175,55,0.3);
-    transition: all 0.3s ease;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    backdrop-filter: blur(8px);
+    gap: clamp(4px, 1vw, 8px);
+    font-weight: 400;
+    border: 1px solid rgba(212,175,55,0.25);
+    transition: all 0.2s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    backdrop-filter: blur(6px);
+    letter-spacing: 0.005em;
 }
 
 .footer-extra-link:hover { 
@@ -900,16 +904,17 @@ body {
 
 .footer-copyright { 
     text-align: center; 
-    font-size: clamp(0.8rem, 2vw, 1rem); 
+    font-size: clamp(0.7rem, 1.8vw, 0.85rem); 
     display: flex; 
     flex-wrap: wrap; 
     justify-content: center; 
-    gap: clamp(15px, 3vw, 30px);
-    padding-top: clamp(15px, 3vw, 25px); 
-    border-top: 1px solid rgba(255,255,255,0.15);
+    gap: clamp(12px, 2vw, 20px);
+    padding-top: clamp(12px, 2vw, 20px); 
+    border-top: 1px solid rgba(255,255,255,0.12);
     font-weight: 400;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    margin-top: clamp(8px, 2vw, 15px);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    margin-top: clamp(6px, 1.5vw, 12px);
+    letter-spacing: 0.005em;
 }
 /* Ultra Responsive Design */
 @media (max-width: 1200px) {
