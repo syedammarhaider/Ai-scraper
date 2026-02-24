@@ -6,15 +6,15 @@
 <title>AI SCRAPER · AMMAR EDITION</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- refined font stack: Inter as primary, fallbacks polished -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+<!-- Professional font stack: Inter tightened, plus system fallbacks -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    /* font-family is now globally Inter with system fallback – crisp & professional */
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 :root {
@@ -24,7 +24,7 @@
     --majestic-gold: #d4af37;
     --soft-gold: #ffdb7c;
     --royal-pink: #c85cb8;
-    --royal-blue: #4158d0;
+    --royal-blue: #4158d0;  /* kept only for structure */
     
     --bg-color: #ffffff;
     --card-bg: #ffffff;
@@ -32,8 +32,8 @@
     --card-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
     --text-primary: #1a1a2e;
     --text-muted: #4a5568;
-    --accent-primary: #d4af37;
-    --accent-secondary: #c85cb8;
+    --accent-primary: #d4af37;      
+    --accent-secondary: #c85cb8;     
     --accent-gradient: linear-gradient(135deg, #d4af37, #c85cb8, #4a2a6b);
     --border-color: #e2e8f0;
     --input-bg: #f8fafc;
@@ -62,7 +62,7 @@
     --card-shadow: 0 1px 3px rgba(0,0,0,0.5);
     --text-primary: #ffffff;
     --text-muted: #b0b0b0;
-    --accent-primary: #ffdb7c;
+    --accent-primary: #ffdb7c;       /* soft gold */
     --accent-secondary: #c85cb8;
     --accent-gradient: linear-gradient(135deg, #d4af37, #c85cb8, #4a2a6b);
     --border-color: #2d2d4a;
@@ -87,21 +87,14 @@ body {
     color: var(--text-primary);
     min-height: 100vh;
     padding: 12px 10px 0 10px;
-    line-height: 1.5;  /* slightly refined for readability */
+    line-height: 1.5;            /* refined leading */
     display: flex;
     flex-direction: column;
-    font-size: 15px;   /* base size polished — professional */
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;              /* base type slightly bumped, yet clean */
     font-weight: 400;
-    letter-spacing: -0.005em;  /* cleaner tracking */
+    letter-spacing: -0.011em;     /* professional negative tracking */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-}
-
-/* all text elements inherit refined font + subtle adjustments */
-h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-btn, .primary-btn, .scrape-btn, .export-btn, .model-badge, .message-content {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    letter-spacing: -0.01em;  /* consistent professional kerning */
 }
 
 .container {
@@ -119,7 +112,7 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     flex-wrap: wrap;
     gap: 6px;
     background: var(--header-bg);
-    padding: 8px 16px;      /* slightly more horizontal padding */
+    padding: 8px 18px;
     border-radius: 32px;
     border: 1px solid var(--card-border);
     box-shadow: var(--card-shadow);
@@ -127,15 +120,15 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 
 .header h1 {
     font-size: clamp(20px, 3.8vw, 28px);
-    font-weight: 700;
+    font-weight: 650;              /* semi‑bold but refined */
     background: var(--accent-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: flex;
     align-items: center;
     gap: 10px;
-    letter-spacing: -0.01em;   /* crisp */
-    text-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    letter-spacing: -0.02em;       /* tighter for display */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .header h1 i {
@@ -146,7 +139,7 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 }
 
 .theme-toggle {
-    padding: 8px 14px;       /* better proportion */
+    padding: 6px 14px;
     border: none;
     border-radius: 30px;
     background: linear-gradient(135deg, #d4af37, #c85cb8);
@@ -156,10 +149,10 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 13px;          /* professional size */
+    font-size: 13px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
-    letter-spacing: 0.01em;
+    transition: all 0.2s ease;
+    letter-spacing: -0.01em;
 }
 
 .theme-toggle:hover {
@@ -169,16 +162,16 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 
 .card {
     background: var(--card-bg);
-    padding: 20px 18px;        /* increased for breathing */
+    padding: 18px 18px;            /* slightly more breathing */
     border-radius: 24px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     border: 1px solid var(--card-border);
     box-shadow: var(--card-shadow);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
 }
 
 .card h2 {
@@ -190,7 +183,7 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
 }
 
 .card h2 i {
@@ -203,14 +196,14 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 .input-group {
     display: flex;
     gap: 8px;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     flex-wrap: wrap;
 }
 
 .input-group input,
 .input-group select {
     flex: 1 1 180px;
-    padding: 14px 20px;          /* more balanced */
+    padding: 14px 20px;
     border-radius: 34px;
     border: 1px solid var(--input-border);
     background: var(--input-bg);
@@ -219,14 +212,14 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     font-weight: 400;
     outline: none;
     transition: 0.2s;
-    font-family: 'Inter', sans-serif;
-    letter-spacing: -0.005em;
+    font-family: inherit;
+    letter-spacing: -0.01em;
 }
 
 .input-group input:focus,
 .input-group select:focus {
     border-color: var(--input-focus);
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
     transform: translateY(-1px);
 }
 
@@ -244,11 +237,12 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     justify-content: center;
     gap: 8px;
     transition: 0.2s;
-    box-shadow: 0 8px 18px rgba(74,42,107,0.3);
+    box-shadow: 0 8px 18px rgba(74,42,107,0.2);
     background-size: 200% auto;
-    font-family: 'Inter', sans-serif;
-    letter-spacing: 0.01em;
+    font-family: inherit;
+    letter-spacing: -0.01em;
     line-height: 1;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .primary-btn:hover {
@@ -258,8 +252,7 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 
 .scrape-btn {
     width: 100%;
-    padding: 18px;
-    border: none;
+    padding: 16px;
     border-radius: 48px;
     background: var(--accent-gradient);
     color: white;
@@ -268,26 +261,24 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     cursor: pointer;
     margin-top: 8px;
     transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    text-transform: none;           /* no all-caps, professional */
 }
 
 .loading {
     display: none;
     text-align: center;
-    margin-top: 12px;
+    margin-top: 8px;
 }
 
 .loading-spinner {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
     border: 2px solid var(--border-color);
     border-top: 2px solid #d4af37;
     border-radius: 50%;
     animation: spin 0.5s linear infinite;
-    margin: 8px auto;
+    margin: 6px auto;
 }
 
 @keyframes spin {
@@ -309,14 +300,14 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 
 .preview-content {
     background: var(--input-bg);
-    padding: 16px;
+    padding: 12px;
     border-radius: 18px;
-    max-height: 220px;
+    max-height: 200px;
     overflow: auto;
     font-size: 13px;
     border: 1px solid var(--border-color);
     white-space: pre-wrap;
-    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    font-family: 'SF Mono', 'Fira Code', monospace;
     line-height: 1.5;
 }
 
@@ -330,9 +321,9 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 .export-btn {
     flex: 1 0 auto;
     min-width: 60px;
-    padding: 10px 8px;
+    padding: 8px 8px;
     border: none;
-    border-radius: 26px;
+    border-radius: 28px;
     background: linear-gradient(135deg, #d4af37, #c85cb8);
     color: white;
     font-weight: 600;
@@ -341,19 +332,19 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     justify-content: center;
     gap: 4px;
     cursor: pointer;
-    font-size: 12px;
-    transition: all 0.2s ease;
-    letter-spacing: 0.02em;
+    font-size: 13px;
+    transition: all 0.15s ease;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .export-btn:hover {
     opacity: 0.9;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .chat-container {
     background: var(--input-bg);
-    padding: 16px;
+    padding: 14px;
     border-radius: 22px;
     max-height: 300px;
     overflow-y: auto;
@@ -361,7 +352,7 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     margin-bottom: 12px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     scroll-behavior: smooth;
 }
 
@@ -383,43 +374,43 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 
 .message-content {
     display: inline-block;
-    padding: 14px 18px;
+    padding: 12px 18px;
     border-radius: 22px;
     max-width: 85%;
-    font-size: 14px;
+    font-size: 14.5px;
     line-height: 1.5;
     word-wrap: break-word;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    font-family: 'Inter', sans-serif;
-    letter-spacing: -0.005em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    font-family: inherit;
+    letter-spacing: -0.01em;
 }
 
 .user .message-content {
     background: linear-gradient(135deg, #d4af37, #c85cb8);
     color: white;
-    border-bottom-right-radius: 6px;
+    border-bottom-right-radius: 5px;
 }
 
 .assistant .message-content {
     background: var(--chat-assistant);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    border-bottom-left-radius: 6px;
+    border-bottom-left-radius: 5px;
 }
 
-.message-content h1 { font-size: 1.2em; margin: 0.3em 0; }
-.message-content h2 { font-size: 1.1em; margin: 0.3em 0; }
-.message-content h3 { font-size: 1em; margin: 0.2em 0; }
+.message-content h1 { font-size: 1.3em; margin: 0.3em 0; }
+.message-content h2 { font-size: 1.2em; margin: 0.3em 0; }
+.message-content h3 { font-size: 1.1em; margin: 0.2em 0; }
 .message-content p { margin: 0.4em 0; }
 .message-content ul, .message-content ol { padding-left: 1.2em; margin: 0.3em 0; }
 .message-content li { margin: 0.1em 0; }
 .message-content code {
     background: var(--code-bg);
     color: var(--code-color);
-    padding: 3px 6px;
-    border-radius: 6px;
+    padding: 2px 6px;
+    border-radius: 8px;
     font-size: 0.9em;
-    font-family: 'Fira Code', monospace;
+    font-family: 'SF Mono', 'Fira Code', monospace;
 }
 .message-content pre {
     background: var(--code-bg);
@@ -436,8 +427,8 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 .typing {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 0;
+    gap: 5px;
+    padding: 6px 0;
 }
 .typing span {
     width: 7px;
@@ -459,20 +450,20 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     padding: 4px 12px;
     background: linear-gradient(135deg, #d4af37, #c85cb8);
     color: white;
-    border-radius: 30px;
-    font-size: 11px;
+    border-radius: 32px;
+    font-size: 12px;
     font-weight: 600;
     margin-left: 6px;
     border: 1px solid rgba(255, 255, 255, 0.3);
     white-space: nowrap;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    letter-spacing: 0.02em;
+    letter-spacing: -0.01em;
 }
 
 .card p {
     color: var(--text-muted);
     margin-bottom: 8px;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .card p i {
@@ -485,30 +476,28 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     gap: 10px;
     margin-bottom: 18px;
     background: var(--input-bg);
-    padding: 5px;
+    padding: 6px;
     border-radius: 48px;
     border: 1px solid var(--border-color);
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.03);
 }
 
 .toggle-btn {
     flex: 1;
-    padding: 12px 16px;
+    padding: 10px 14px;
     border: none;
     border-radius: 48px;
     background: transparent;
     color: var(--text-muted);
     font-weight: 600;
-    font-size: 13px;
+    font-size: 14px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    letter-spacing: 0.02em;
+    transition: all 0.25s ease;
+    letter-spacing: -0.01em;
 }
 
 .toggle-btn i {
@@ -520,37 +509,14 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     transform: scale(1.1);
 }
 
-.toggle-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition: width 0.5s, height 0.5s;
-}
-
-.toggle-btn:hover::before {
-    width: 200px;
-    height: 200px;
-}
-
 .toggle-btn.active {
     background: linear-gradient(135deg, #d4af37, #c85cb8);
     color: white;
-    box-shadow: 0 3px 10px rgba(212,175,55,0.2);
+    box-shadow: 0 4px 12px rgba(212,175,55,0.2);
 }
 
 .toggle-btn.active i {
     color: white;
-    transform: scale(1.1);
-}
-
-.toggle-btn.active::before {
-    display: none;
 }
 
 .chat-section {
@@ -575,14 +541,14 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 
 .mode-header {
     background: linear-gradient(135deg, var(--input-bg), var(--card-bg));
-    border-radius: 14px;
-    padding: 12px 16px;
-    margin-bottom: 18px;
+    border-radius: 18px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
     border-left: 4px solid #d4af37;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.02);
 }
 .mode-header h2 {
-    margin: 0 0 4px 0;
+    margin: 0 0 2px 0;
     font-size: 16px;
     font-weight: 600;
 }
@@ -594,9 +560,9 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 
 .format-badge {
     display: inline-block;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 14px;
+    font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
     margin-left: 4px;
@@ -609,13 +575,14 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     right: 15px;
     background: var(--success);
     color: white;
-    padding: 10px 20px;
-    border-radius: 30px;
-    font-size: 13px;
-    font-weight: 600;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    padding: 10px 18px;
+    border-radius: 32px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
     z-index: 1000;
     animation: slideInRight 0.2s ease-out;
+    letter-spacing: -0.01em;
 }
 
 @keyframes slideInRight {
@@ -629,13 +596,13 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     }
 }
 
-/* PROFESSIONAL ROYAL FOOTER – exactly same structure, refined typography */
+/* ROYAL GOLDEN FOOTER – fully preserved but refined typography & details */
 .footer {
     margin-top: 30px;
-    padding: clamp(1.2rem, 3.5vw, 2.2rem) clamp(1rem, 3vw, 2rem);
+    padding: clamp(1rem, 3vw, 2rem) clamp(0.8rem, 2.5vw, 1.5rem);
     background: linear-gradient(145deg, #1a1033, #2b1b47, #0f0c29);
     color: #fffbee;
-    border-radius: clamp(24px, 4vw, 44px) clamp(24px, 4vw, 44px) 0 0;
+    border-radius: clamp(20px, 4vw, 40px) clamp(20px, 4vw, 40px) 0 0;
     box-shadow: 
         0 -15px 30px rgba(180, 130, 220, 0.3),
         0 0 0 1px rgba(212,175,55,0.2) inset,
@@ -647,6 +614,8 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     border-top: 2px solid rgba(212,175,55,0.4);
     overflow: hidden;
     min-height: clamp(150px, 25vw, 300px);
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.01em;
 }
 
 .footer::before {
@@ -694,6 +663,7 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     z-index: 3; 
 }
 
+/* Footer main content - responsive layout */
 .footer-main {
     display: flex;
     flex-wrap: wrap;
@@ -705,8 +675,8 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 }
 
 .footer-logo {
-    font-size: clamp(22px, 4.5vw, 32px); 
-    font-weight: 700;
+    font-size: clamp(18px, 4vw, 28px); 
+    font-weight: 600;
     background: linear-gradient(145deg, #fff, #ffe68f, #e2c5ff);
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent;
@@ -715,13 +685,13 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     justify-content: center;
     gap: clamp(8px, 1.5vw, 12px);
     text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
     margin-bottom: clamp(6px, 1.5vw, 10px);
     flex: 1;
     min-width: 180px;
 }
 .footer-logo i {
-    font-size: clamp(24px, 5vw, 40px);
+    font-size: clamp(20px, 4.5vw, 36px);
     background: linear-gradient(145deg, #fbbf24, #ff8c00, #ff6ec7);
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent;
@@ -745,12 +715,12 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(212,175,55,0.15));
     padding: clamp(4px, 1.2vw, 8px) clamp(12px, 2.5vw, 20px);
     border-radius: clamp(20px, 4vw, 35px);
-    font-size: clamp(0.8rem, 1.8vw, 0.95rem);  /* slightly larger for professionalism */
+    font-size: clamp(0.8rem, 1.8vw, 0.9rem);
     font-weight: 500;
     border: 1px solid rgba(212,175,55,0.4);
     backdrop-filter: blur(12px);
     text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     transition: all 0.2s ease;
 }
@@ -764,21 +734,21 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 }
 .footer-badge {
     background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(212,175,55,0.12));
-    padding: clamp(6px, 1.2vw, 10px) clamp(16px, 2.8vw, 26px);
+    padding: clamp(6px, 1.2vw, 10px) clamp(14px, 2.5vw, 24px);
     border-radius: clamp(20px, 4vw, 40px);
-    font-size: clamp(0.8rem, 1.8vw, 0.95rem);
+    font-size: clamp(0.8rem, 1.8vw, 0.9rem);
     font-weight: 500;
     border: 1px solid rgba(212,175,55,0.3);
     text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
     transition: all 0.2s ease;
     backdrop-filter: blur(8px);
 }
 .footer-badge:hover {
     background: linear-gradient(145deg, rgba(212,175,55,0.4), rgba(255,215,0,0.3));
     border-color: #ffdb7c;
-    transform: translateY(-6px) scale(1.08) rotate(1deg);
+    transform: translateY(-6px) scale(1.12) rotate(2deg);
     box-shadow: 0 12px 28px rgba(212,175,55,0.5);
     text-shadow: 0 4px 8px rgba(0,0,0,0.5);
 }
@@ -792,13 +762,13 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 }
 
 .footer-column h4 {
-    font-size: clamp(0.9rem, 2.2vw, 1.2rem);   /* enhanced */
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
     margin-bottom: clamp(10px, 2vw, 16px);
     background: linear-gradient(145deg, #fff8e7, #ffe49e, #ffd966);
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent;
-    font-weight: 600;   /* bolder */
-    letter-spacing: 0.01em;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     text-shadow: 0 1px 2px rgba(0,0,0,0.2);
     text-align: center;
 }
@@ -820,7 +790,7 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 .footer-column ul li a {
     color: rgba(255,255,240,0.9);
     text-decoration: none;
-    font-size: clamp(0.85rem, 1.9vw, 1rem);    /* refined */
+    font-size: clamp(0.8rem, 1.8vw, 0.95rem);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -829,11 +799,11 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     transition: all 0.2s ease;
     padding: clamp(3px, 0.8vw, 6px) 0;
     border-radius: 4px;
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
 }
 .footer-column ul li a:hover {
     color: #fff;
-    transform: translateX(10px) scale(1.03);
+    transform: translateX(12px) scale(1.05);
     background: rgba(212,175,55,0.15);
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
@@ -847,9 +817,9 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 }
 
 .footer-social a {
-    width: clamp(36px, 5.5vw, 52px); 
-    height: clamp(36px, 5.5vw, 52px); 
-    font-size: clamp(16px, 2.5vw, 22px); 
+    width: clamp(32px, 5vw, 50px); 
+    height: clamp(32px, 5vw, 50px); 
+    font-size: clamp(14px, 2.5vw, 20px); 
     border-radius: 50%;
     background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(212,175,55,0.1));
     border: 1px solid rgba(212,175,55,0.3);
@@ -865,7 +835,7 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 .footer-social a:hover {
     background: linear-gradient(145deg, #d4af37, #ffdb7c, #ffd700); 
     color: #1a1033; 
-    transform: translateY(-5px) scale(1.05) rotate(2deg); 
+    transform: translateY(-5px) scale(1.05) rotate(3deg); 
     box-shadow: 0 10px 20px rgba(212,175,55,0.4);
     border-color: #ffd700;
     text-shadow: 0 1px 2px rgba(0,0,0,0.15);
@@ -882,11 +852,11 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 }
 
 .footer-extra-link { 
-    color: rgba(255,255,255,0.8); 
+    color: rgba(255,255,255,0.75); 
     text-decoration: none; 
-    font-size: clamp(0.8rem, 1.9vw, 0.95rem);
-    padding: clamp(6px, 1.2vw, 10px) clamp(18px, 2.8vw, 30px); 
-    border-radius: clamp(28px, 4.5vw, 48px);
+    font-size: clamp(0.8rem, 1.8vw, 0.95rem);
+    padding: clamp(6px, 1.2vw, 10px) clamp(16px, 2.5vw, 28px); 
+    border-radius: clamp(25px, 4vw, 45px);
     background: linear-gradient(145deg, rgba(0,0,0,0.2), rgba(212,175,55,0.1)); 
     display: flex; 
     align-items: center; 
@@ -897,20 +867,20 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     transition: all 0.2s ease;
     text-shadow: 0 1px 2px rgba(0,0,0,0.15);
     backdrop-filter: blur(6px);
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
 }
 
 .footer-extra-link:hover { 
     background: rgba(212,175,55,0.15); 
     color: #fff;
-    transform: translateY(-3px) scale(1.03);
+    transform: translateY(-3px) scale(1.05);
     border-color: #db7c;
     box-shadow: 0 8px 20px rgba(212,175,55,0.3);
 }
 
 .footer-copyright { 
     text-align: center; 
-    font-size: clamp(0.75rem, 1.8vw, 0.9rem); 
+    font-size: clamp(0.8rem, 1.8vw, 0.9rem); 
     display: flex; 
     flex-wrap: wrap; 
     justify-content: center; 
@@ -920,9 +890,10 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     font-weight: 400;
     text-shadow: 0 1px 2px rgba(0,0,0,0.15);
     margin-top: clamp(6px, 1.5vw, 12px);
-    letter-spacing: 0.01em;
+    letter-spacing: -0.01em;
 }
 
+/* Ultra Responsive Design */
 @media (max-width: 1200px) {
     .footer-main { flex-direction: column; text-align: center; }
     .footer-logo { margin-bottom: 20px; }
@@ -967,8 +938,8 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 }
 
 ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+    width: 5px;
+    height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -982,20 +953,20 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 }
 
 @media (max-width: 380px) {
-    body { padding: 5px 4px 0 4px; font-size: 14px; }
+    body { padding: 5px 4px 0 4px; }
     .header { padding: 6px 10px; }
-    .header h1 { font-size: 13px; }
-    .theme-toggle { padding: 5px 8px; font-size: 9px; }
+    .header h1 { font-size: 16px; }
+    .theme-toggle { padding: 5px 8px; font-size: 11px; }
     .card { padding: 10px 8px; }
-    .card h2 { font-size: 13px; }
-    .input-group input, .input-group select { padding: 8px 10px; font-size: 11px; }
-    .primary-btn { padding: 8px 12px; font-size: 11px; }
-    .scrape-btn { padding: 10px; font-size: 13px; }
-    .model-badge { font-size: 8px; padding: 2px 6px; }
-    .export-btn { min-width: 100%; font-size: 10px; padding: 8px; }
-    .toggle-btn { font-size: 10px; padding: 6px 8px; }
-    .toggle-btn i { font-size: 11px; }
-    .message-content { font-size: 11px; padding: 8px 12px; }
+    .card h2 { font-size: 16px; }
+    .input-group input, .input-group select { padding: 10px 12px; font-size: 13px; }
+    .primary-btn { padding: 10px 14px; font-size: 13px; }
+    .scrape-btn { padding: 12px; font-size: 14px; }
+    .model-badge { font-size: 10px; padding: 2px 8px; }
+    .export-btn { min-width: 100%; font-size: 12px; padding: 10px; }
+    .toggle-btn { font-size: 12px; padding: 8px 8px; }
+    .toggle-btn i { font-size: 12px; }
+    .message-content { font-size: 13px; padding: 8px 12px; }
     .footer-logo { font-size: 24px; }
     .footer-logo i { font-size: 28px; }
     .footer-badge { padding: 4px 10px; font-size: 10px; }
@@ -1090,10 +1061,10 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
         <div id="chatContainer" class="chat-container"></div>
         <div class="input-group" style="gap: 8px;">
             <input type="text" id="questionInput" placeholder="Ask about scraped data..." onkeypress="if(event.key==='Enter') askGroq()">
-            <button class="primary-btn" onclick="askGroq()" style="width: auto; padding: 12px 18px;">
+            <button class="primary-btn" onclick="askGroq()" style="width: auto; padding: 10px 16px;">
                 <i class="fas fa-paper-plane"></i>
             </button>
-            <button class="primary-btn" onclick="clearGroqChat()" style="width: auto; background: linear-gradient(135deg, #ef4444, #dc2626); padding: 12px 16px;">
+            <button class="primary-btn" onclick="clearGroqChat()" style="width: auto; background: linear-gradient(135deg, #ef4444, #dc2626); padding: 10px 12px;">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
@@ -1109,17 +1080,17 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
         <div id="grokChatContainer" class="chat-container"></div>
         <div class="input-group" style="gap: 8px;">
             <input type="text" id="grokQuestionInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') askGrokMode()">
-            <button class="primary-btn" onclick="askGrokMode()" style="width: auto; padding: 12px 18px;">
+            <button class="primary-btn" onclick="askGrokMode()" style="width: auto; padding: 10px 16px;">
                 <i class="fas fa-bolt"></i>
             </button>
-            <button class="primary-btn" onclick="clearGrokChat()" style="width: auto; background: linear-gradient(135deg, #ef4444, #dc2626); padding: 12px 16px;">
+            <button class="primary-btn" onclick="clearGrokChat()" style="width: auto; background: linear-gradient(135deg, #ef4444, #dc2626); padding: 10px 12px;">
                 <i class="fas fa-trash"></i>
             </button>
         </div>
     </div>
 </div>
 
-<!-- ROYAL GOLDEN FOOTER - exactly from example with AMMAR branding, only text sizing refined -->
+<!-- ROYAL GOLDEN FOOTER - exactly from example with AMMAR branding (professionalised) -->
 <footer class="footer">
     <div class="footer-main">
         <div class="footer-logo">
