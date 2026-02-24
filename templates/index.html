@@ -2,1553 +2,730 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-<title>AI SCRAPER · AMMAR EDITION</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>AI SCRAPER · AMMAR · COSMIC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
-* {
+  * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Inter', sans-serif;
-}
+  }
 
-:root {
-    --bg-color: #ffffff;
+  :root {
+    --bg: #f4f7fc;
     --card-bg: #ffffff;
-    --card-border: #e2e8f0;
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
-    --text-primary: #1a1a2e;
-    --text-muted: #4a5568;
-    --accent-primary: #4158D0;
-    --accent-secondary: #C850C0;
-    --accent-gradient: linear-gradient(135deg, #4158D0, #C850C0);
-    --border-color: #e2e8f0;
-    --input-bg: #f8fafc;
-    --input-border: #e2e8f0;
-    --input-focus: #4158D0;
-    --chat-user: linear-gradient(135deg, #4158D0, #C850C0);
-    --chat-assistant: #f8fafc;
-    --header-bg: #ffffff;
-    --code-bg: #f1f5f9;
-    --code-color: #4158D0;
-    --badge-bg: linear-gradient(135deg, #4158D0, #C850C0);
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --footer-gradient: linear-gradient(145deg, #1a1a2e, #16213e, #0f0c29);
-    --footer-text: #ffffff;
-    --footer-glow: rgba(65, 88, 208, 0.3);
-}
+    --text-main: #0b0f1c;
+    --text-soft: #2d3a5e;
+    --accent-1: #2a2f8a;
+    --accent-2: #9f2b68;
+    --grad-pri: linear-gradient(145deg, #1f2b5c, #281e4a, #3c1e4a);
+    --grad-card: linear-gradient(135deg, #ffffff, #fafbff);
+    --border-light: #dbe1ed;
+    --footer-bg: #030514;
+    --footer-text: #f0f3fa;
+    --glow-aura: 0 20px 40px -12px rgba(0, 20, 80, 0.4);
+  }
 
-[data-theme="dark"] {
-    --bg-color: #0f0c29;
-    --card-bg: #1a1a2e;
-    --card-border: #2d2d4a;
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    --text-primary: #ffffff;
-    --text-muted: #b0b0b0;
-    --accent-primary: #6b4eff;
-    --accent-secondary: #b146c2;
-    --accent-gradient: linear-gradient(135deg, #6b4eff, #b146c2);
-    --border-color: #2d2d4a;
-    --input-bg: #16213e;
-    --input-border: #2d2d4a;
-    --input-focus: #6b4eff;
-    --chat-user: linear-gradient(135deg, #6b4eff, #b146c2);
-    --chat-assistant: #16213e;
-    --header-bg: #1a1a2e;
-    --code-bg: #16213e;
-    --code-color: #b146c2;
-    --badge-bg: linear-gradient(135deg, #6b4eff, #b146c2);
-    --glass-bg: rgba(0, 0, 0, 0.2);
-    --glass-border: rgba(255, 255, 255, 0.05);
-    --footer-gradient: linear-gradient(145deg, #0a0a1a, #12122e, #1a1a3a);
-    --footer-text: #ffffff;
-    --footer-glow: rgba(107, 78, 255, 0.3);
-}
+  [data-theme="dark"] {
+    --bg: #0a0c18;
+    --card-bg: #131a2c;
+    --text-main: #eef3fc;
+    --text-soft: #b2c2e0;
+    --accent-1: #6479e6;
+    --accent-2: #db5282;
+    --grad-pri: linear-gradient(145deg, #141b33, #231d3a, #311c32);
+    --grad-card: linear-gradient(135deg, #151e30, #0f172b);
+    --border-light: #25324b;
+    --footer-bg: #020409;
+    --footer-text: #deecff;
+    --glow-aura: 0 20px 40px -8px rgba(100, 150, 255, 0.3);
+  }
 
-html, body {
-    height: 100%;
-    margin: 0;
-}
-
-body {
-    background: var(--bg-color);
-    color: var(--text-primary);
+  body {
+    background: var(--bg);
+    color: var(--text-main);
     min-height: 100vh;
-    padding: 8px 6px 0 6px;
-    line-height: 1.3;
     display: flex;
     flex-direction: column;
-}
+    padding: 8px 8px 0 8px;
+    transition: background 0.25s ease, color 0.2s;
+    line-height: 1.4;
+  }
 
-.container {
-    max-width: 1400px;
+  .page-wrap {
+    max-width: 1480px;
     margin: 0 auto;
     width: 100%;
     flex: 1 0 auto;
-    display: flex;
-    flex-direction: column;
-}
+  }
 
-/* Push footer down: main content grows */
-.main-content {
-    flex: 1 0 auto;
-}
-
-.header {
+  /* header same vibe */
+  .header-cosmic {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
-    gap: 6px;
-    background: var(--header-bg);
-    padding: 8px 12px;
-    border-radius: 24px;
-    border: 1px solid var(--card-border);
-    box-shadow: var(--card-shadow);
-}
-
-.header h1 {
-    font-size: clamp(14px, 3.8vw, 18px);
-    font-weight: 700;
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.header h1 i {
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 0.9em;
-}
-
-.theme-toggle {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 24px;
-    background: var(--accent-gradient);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s ease;
-}
-
-.theme-toggle:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.card {
     background: var(--card-bg);
-    padding: 12px 10px;
-    border-radius: 18px;
-    margin-bottom: 10px;
-    border: 1px solid var(--card-border);
-    box-shadow: var(--card-shadow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover {
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.card h2 {
-    margin-bottom: 8px;
-    color: var(--text-primary);
-    font-size: clamp(14px, 3.2vw, 16px);
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex-wrap: wrap;
-}
-
-.card h2 i {
-    background: var(--accent-gradient);
+    padding: 10px 18px;
+    border-radius: 60px;
+    margin-bottom: 14px;
+    border: 1px solid var(--border-light);
+    box-shadow: 0 8px 18px -10px rgba(0,20,40,0.2);
+    backdrop-filter: blur(4px);
+  }
+  .header-cosmic h1 {
+    font-size: clamp(1rem, 4vw, 1.6rem);
+    font-weight: 800;
+    background: linear-gradient(125deg, #3b46c4, #c34a9a);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    font-size: 0.9em;
-}
-
-.input-group {
+    letter-spacing: -0.02em;
     display: flex;
-    gap: 6px;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
-}
-
-.input-group input,
-.input-group select {
-    flex: 1 1 100px;
-    padding: 10px 12px;
-    border-radius: 18px;
-    border: 1px solid var(--input-border);
-    background: var(--input-bg);
-    color: var(--text-primary);
-    font-size: 12px;
-    font-weight: 500;
-    outline: none;
-    transition: all 0.2s ease;
-    width: 100%;
-}
-
-.input-group input:focus,
-.input-group select:focus {
-    border-color: var(--input-focus);
-    box-shadow: 0 0 0 2px rgba(65, 88, 208, 0.1);
-    transform: translateY(-1px);
-}
-
-.primary-btn {
-    padding: 10px 14px;
+    align-items: center;
+    gap: 10px;
+  }
+  .theme-toggle {
+    background: var(--grad-pri);
     border: none;
-    border-radius: 18px;
-    background: var(--accent-gradient);
+    padding: 10px 22px;
+    border-radius: 40px;
     color: white;
     font-weight: 600;
-    font-size: 12px;
-    cursor: pointer;
-    display: inline-flex;
+    font-size: 0.9rem;
+    display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 4px;
-    width: 100%;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-}
+    gap: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    box-shadow: 0 4px 10px rgba(0,20,100,0.3);
+  }
+  .theme-toggle:hover { opacity: 0.9; transform: scale(1.02);}
 
-.primary-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.5s, height 0.5s;
-}
+  /* card style */
+  .neo-card {
+    background: var(--card-bg);
+    border-radius: 34px;
+    padding: 20px 22px;
+    margin-bottom: 22px;
+    border: 1px solid var(--border-light);
+    box-shadow: var(--glow-aura);
+    transition: all 0.2s;
+  }
 
-.primary-btn:hover::before {
-    width: 250px;
-    height: 250px;
-}
-
-.primary-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.scrape-btn {
-    width: 100%;
-    padding: 12px;
+  .btn-gradient {
+    background: var(--grad-pri);
     border: none;
-    border-radius: 22px;
-    background: var(--accent-gradient);
     color: white;
-    font-size: 14px;
     font-weight: 700;
+    padding: 14px 22px;
+    border-radius: 48px;
+    font-size: 0.95rem;
     cursor: pointer;
-    margin-top: 6px;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.scrape-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.5s, height 0.5s;
-}
-
-.scrape-btn:hover::before {
-    width: 400px;
-    height: 400px;
-}
-
-.scrape-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.loading {
-    display: none;
-    text-align: center;
-    margin-top: 8px;
-}
-
-.loading-spinner {
-    width: 24px;
-    height: 24px;
-    border: 2px solid var(--border-color);
-    border-top: 2px solid var(--accent-primary);
-    border-radius: 50%;
-    animation: spin 0.5s linear infinite;
-    margin: 6px auto;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loading p {
-    color: var(--accent-primary);
-    font-weight: 600;
-    font-size: 11px;
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 0.6; }
-    50% { opacity: 1; }
-}
-
-.preview-content {
-    background: var(--input-bg);
-    padding: 10px;
-    border-radius: 14px;
-    max-height: 200px;
-    overflow: auto;
-    font-size: 11px;
-    border: 1px solid var(--border-color);
-    white-space: pre-wrap;
-    font-family: 'Fira Code', monospace;
-    line-height: 1.4;
-}
-
-.export-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-top: 8px;
-}
-
-.export-btn {
-    flex: 1 0 auto;
-    min-width: 50px;
-    padding: 6px 4px;
-    border: none;
-    border-radius: 18px;
-    background: var(--badge-bg);
-    color: white;
-    font-weight: 600;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 2px;
+    gap: 10px;
+    transition: 0.18s;
+    box-shadow: 0 6px 14px rgba(43, 28, 99, 0.4);
+    width: 100%;
+  }
+
+  .input-fancy {
+    background: var(--bg);
+    border: 1.5px solid var(--border-light);
+    border-radius: 44px;
+    padding: 14px 20px;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    outline: none;
+    transition: 0.15s;
+    width: 100%;
+  }
+  .input-fancy:focus { border-color: var(--accent-1); box-shadow: 0 0 0 4px rgba(100,120,255,0.2); }
+
+  /* toggle group */
+  .mode-toggles {
+    display: flex;
+    gap: 12px;
+    background: var(--bg);
+    padding: 6px;
+    border-radius: 100px;
+    border: 1px solid var(--border-light);
+    margin-bottom: 20px;
+  }
+  .mode-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 12px 6px;
+    border-radius: 60px;
+    font-weight: 700;
+    color: var(--text-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     cursor: pointer;
-    font-size: 9px;
-    transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-}
+    transition: 0.2s;
+  }
+  .mode-btn.active {
+    background: var(--grad-pri);
+    color: white;
+    box-shadow: 0 4px 12px var(--accent-1);
+  }
 
-.export-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-    transform: translate(-50%, -50%);
-    transition: width 0.4s, height 0.4s;
-}
+  .preview-box {
+    background: var(--bg);
+    border-radius: 28px;
+    padding: 16px;
+    max-height: 220px;
+    overflow: auto;
+    font-size: 0.8rem;
+    border: 1px solid var(--border-light);
+    font-family: 'Fira Code', monospace;
+    white-space: pre-wrap;
+  }
 
-.export-btn:hover::before {
-    width: 120px;
-    height: 120px;
-}
-
-.export-btn:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.chat-container {
-    background: var(--input-bg);
-    padding: 12px;
-    border-radius: 18px;
+  .chat-window {
+    background: var(--bg);
+    border-radius: 30px;
+    padding: 20px 16px;
     max-height: 280px;
     overflow-y: auto;
-    border: 1px solid var(--border-color);
-    margin-bottom: 8px;
+    border: 1px solid var(--border-light);
+    margin: 16px 0 12px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    scroll-behavior: smooth;
-}
-
-.message {
+    gap: 10px;
+  }
+  .message {
     display: flex;
-    animation: slideIn 0.2s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.message.user {
-    justify-content: flex-end;
-}
-
-.message-content {
-    display: inline-block;
-    padding: 10px 14px;
-    border-radius: 18px;
-    max-width: 85%;
-    font-size: 12px;
+    animation: floatUp 0.2s;
+  }
+  @keyframes floatUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .message.user { justify-content: flex-end; }
+  .msg-bubble {
+    max-width: 80%;
+    padding: 12px 18px;
+    border-radius: 24px;
+    font-size: 0.85rem;
     line-height: 1.4;
-    word-wrap: break-word;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .user .msg-bubble { background: linear-gradient(145deg, #2f3eb1, #a13d7a); color: white; border-bottom-right-radius: 6px; }
+  .assistant .msg-bubble { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border-light); border-bottom-left-radius: 6px; }
 
-.user .message-content {
-    background: var(--chat-user);
-    color: white;
-    border-bottom-right-radius: 4px;
-}
-
-.assistant .message-content {
-    background: var(--chat-assistant);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-bottom-left-radius: 4px;
-}
-
-.message-content h1 { font-size: 1.2em; margin: 0.3em 0; }
-.message-content h2 { font-size: 1.1em; margin: 0.3em 0; }
-.message-content h3 { font-size: 1em; margin: 0.2em 0; }
-.message-content p { margin: 0.4em 0; }
-.message-content ul, .message-content ol { padding-left: 1.2em; margin: 0.3em 0; }
-.message-content li { margin: 0.1em 0; }
-.message-content code {
-    background: var(--code-bg);
-    color: var(--code-color);
-    padding: 2px 5px;
-    border-radius: 5px;
-    font-size: 0.85em;
-    font-family: 'Fira Code', monospace;
-}
-.message-content pre {
-    background: var(--code-bg);
-    padding: 10px;
-    border-radius: 10px;
-    overflow-x: auto;
-    margin: 6px 0;
-}
-.message-content pre code {
-    background: transparent;
-    padding: 0;
-}
-
-.typing {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 6px 0;
-}
-.typing span {
-    width: 6px;
-    height: 6px;
-    background: var(--accent-gradient);
-    border-radius: 50%;
-    display: inline-block;
-    animation: blink 1.2s infinite;
-}
-.typing span:nth-child(2) { animation-delay: 0.2s; }
-.typing span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes blink {
-    0%, 100% { transform: scale(0.8); opacity: 0.3; }
-    50% { transform: scale(1.2); opacity: 1; }
-}
-
-.model-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    background: var(--badge-bg);
-    color: white;
-    border-radius: 24px;
-    font-size: 9px;
-    font-weight: 600;
-    margin-left: 4px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    white-space: nowrap;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.card p {
-    color: var(--text-muted);
-    margin-bottom: 8px;
-    font-size: 11px;
-}
-
-.card p i {
-    color: var(--accent-primary);
-    margin-right: 2px;
-}
-
-/* Toggle Buttons Style */
-.toggle-container {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 14px;
-    background: var(--input-bg);
-    padding: 4px;
-    border-radius: 40px;
-    border: 1px solid var(--border-color);
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
-}
-
-.toggle-btn {
-    flex: 1;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 40px;
-    background: transparent;
-    color: var(--text-muted);
-    font-weight: 700;
-    font-size: 11px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    letter-spacing: 0.3px;
-}
-
-.toggle-btn i {
-    font-size: 12px;
-    transition: transform 0.2s ease;
-}
-
-.toggle-btn:hover i {
-    transform: scale(1.1);
-}
-
-.toggle-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition: width 0.5s, height 0.5s;
-}
-
-.toggle-btn:hover::before {
-    width: 200px;
-    height: 200px;
-}
-
-.toggle-btn.active {
-    background: var(--accent-gradient);
-    color: white;
-    box-shadow: 0 3px 10px rgba(65, 88, 208, 0.2);
-}
-
-.toggle-btn.active i {
-    color: white;
-    transform: scale(1.1);
-}
-
-.toggle-btn.active::before {
-    display: none;
-}
-
-/* Chat Sections */
-.chat-section {
-    display: none;
-    animation: fadeIn 0.4s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.chat-section.active {
-    display: block;
-}
-
-.mode-header {
-    background: linear-gradient(135deg, var(--input-bg), var(--card-bg));
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 14px;
-    border-left: 3px solid var(--accent-primary);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-}
-.mode-header h2 {
-    margin: 0 0 2px 0;
-    font-size: 14px;
-}
-.mode-header p {
-    margin: 0;
-    font-size: 11px;
-    opacity: 0.8;
-}
-
-/* Export notification */
-.export-notification {
-    position: fixed;
-    bottom: 15px;
-    right: 15px;
-    background: var(--success);
-    color: white;
-    padding: 8px 15px;
-    border-radius: 24px;
-    font-size: 12px;
-    font-weight: 600;
-    box-shadow: 0 3px 15px rgba(0,0,0,0.15);
-    z-index: 1000;
-    animation: slideInRight 0.2s ease-out;
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-/* ========= ULTRA MEGA PRO+ FOOTER - HYPER UNIQUE ========= */
-.footer {
-    margin-top: 40px;           /* space above footer */
-    padding: 2rem 1.5rem 1.5rem;
-    background: var(--footer-gradient);
-    color: var(--footer-text);
+  /* footer — ULTRA DIMENSIONAL — always bottom */
+  .footer-cosmic {
+    margin-top: 30px;
+    padding: 28px 24px 18px;
+    background: radial-gradient(circle at 30% 0%, #14213d, #000000 90%);
+    color: #f0f4ff;
     border-radius: 48px 48px 0 0;
-    box-shadow: 0 -20px 40px var(--footer-glow), 0 0 0 1px rgba(255,255,255,0.1) inset;
-    backdrop-filter: blur(12px);
+    border-top: 2px solid rgba(255,215,0,0.3);
+    box-shadow: 0 -25px 40px -5px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06) inset;
     width: 100%;
     flex-shrink: 0;
     position: relative;
     overflow: hidden;
-    border-top: 2px solid rgba(255,215,0,0.3);
-    transition: all 0.4s ease;
-}
+    backdrop-filter: blur(2px);
+    transition: all 0.3s;
+  }
 
-/* floating orbs */
-.footer::before {
+  /* glowing orbs */
+  .footer-cosmic::before {
     content: '';
     position: absolute;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle at 30% 30%, rgba(255,215,0,0.2), transparent 70%);
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle at 30% 30%, rgba(180, 130, 255, 0.25), transparent 70%);
     top: -150px;
-    left: -150px;
+    left: -100px;
     border-radius: 50%;
-    filter: blur(40px);
-    animation: floatOrb 16s infinite alternate ease-in-out;
+    filter: blur(70px);
     z-index: 0;
-}
-
-.footer::after {
+  }
+  .footer-cosmic::after {
     content: '';
     position: absolute;
     width: 350px;
     height: 350px;
-    background: radial-gradient(circle at 70% 70%, rgba(200,80,192,0.2), transparent 70%);
-    bottom: -180px;
-    right: -120px;
-    border-radius: 50%;
-    filter: blur(50px);
-    animation: floatOrb2 20s infinite alternate-reverse;
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.12), transparent 80%);
+    bottom: -100px;
+    right: -80px;
+    filter: blur(60px);
     z-index: 0;
-}
+  }
 
-@keyframes floatOrb {
-    0% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-    100% { transform: translate(30px, 40px) scale(1.2); opacity: 0.6; }
-}
-@keyframes floatOrb2 {
-    0% { transform: translate(0, 0) scale(1); opacity: 0.2; }
-    100% { transform: translate(-40px, -30px) scale(1.3); opacity: 0.5; }
-}
-
-.footer * {
-    position: relative;
-    z-index: 3;
-}
-
-.footer-main {
+  .footer-row {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: 20px;
-    margin-bottom: 25px;
+    gap: 30px 20px;
     position: relative;
-    z-index: 2;
-}
+    z-index: 5;
+  }
 
-.footer-brand {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 220px;
-}
-
-.footer-logo {
-    font-size: 32px;
+  .footer-brand h2 {
+    font-size: 2.4rem;
     font-weight: 900;
-    background: linear-gradient(145deg, #fff, #ffe68f, #d4bfff);
+    background: linear-gradient(145deg, #ffd966, #b886ff, #a3ddff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    line-height: 1.2;
+    filter: drop-shadow(0 4px 6px black);
     display: flex;
     align-items: center;
     gap: 12px;
-    letter-spacing: 1.5px;
-    text-shadow: 0 4px 15px rgba(255,215,0,0.4);
-    line-height: 1;
-}
+  }
+  .footer-brand h2 i { font-size: 2.8rem; color: gold; -webkit-text-fill-color: initial; background: none; }
 
-.footer-logo i {
-    font-size: 44px;
-    background: linear-gradient(145deg, #fbbf24, #ff8c00, #ff2b9e);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 8px gold);
-}
-
-.footer-tagline {
-    font-size: 13px;
-    opacity: 0.95;
+  .power-grid {
     display: flex;
-    align-items: center;
-    gap: 12px;
     flex-wrap: wrap;
-}
-
-.footer-tagline span {
-    background: rgba(255,255,255,0.08);
-    padding: 6px 18px;
-    border-radius: 40px;
-    font-size: 11px;
-    font-weight: 500;
-    border: 1px solid rgba(255,215,0,0.25);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-.footer-badges {
-    display: flex;
     gap: 12px;
-    flex-wrap: wrap;
-}
-
-.footer-badge {
+  }
+  .power-pill {
     background: rgba(255,255,255,0.06);
-    padding: 8px 20px;
-    border-radius: 40px;
-    font-size: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,220,150,0.3);
+    padding: 8px 18px;
+    border-radius: 60px;
+    font-size: 0.9rem;
     font-weight: 600;
+    color: #ffefcf;
     display: flex;
     align-items: center;
     gap: 8px;
-    border: 1px solid rgba(255,255,255,0.15);
-    backdrop-filter: blur(8px);
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    letter-spacing: 0.3px;
-}
+    transition: 0.2s;
+  }
+  .power-pill:hover { background: rgba(255,255,255,0.2); border-color: #ffbb88; transform: translateY(-3px); }
 
-.footer-badge:hover {
-    background: rgba(255,215,0,0.15);
-    transform: translateY(-4px) scale(1.02);
-    border-color: #ffd966;
-    box-shadow: 0 8px 22px #ffbf0040;
-}
-
-.footer-badge i {
-    color: #ffdb7c;
-    font-size: 14px;
-}
-
-.footer-links {
+  .link-matrix {
     display: flex;
     flex-wrap: wrap;
-    gap: 40px;
-    justify-content: space-around;
-    margin: 20px 0 25px;
+    gap: 48px;
+    row-gap: 24px;
+    justify-content: center;
+    margin: 28px 0 18px;
     position: relative;
-    z-index: 2;
-}
-
-.footer-column {
+    z-index: 5;
+  }
+  .link-col {
     min-width: 130px;
-}
-
-.footer-column h4 {
-    font-size: 15px;
-    font-weight: 800;
-    margin-bottom: 18px;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    position: relative;
-    display: inline-block;
-    background: linear-gradient(145deg, #fff8e7, #ffe49e);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.footer-column h4::after {
-    content: '';
-    position: absolute;
-    bottom: -6px;
-    left: 0;
-    width: 40px;
-    height: 3px;
-    background: linear-gradient(90deg, #ffd966, #ff9f4b, #ff6ec7);
-    border-radius: 4px;
-    box-shadow: 0 0 10px #ffb347;
-}
-
-.footer-column ul {
-    list-style: none;
-    padding: 0;
-}
-
-.footer-column ul li {
+  }
+  .link-col h5 {
+    color: #ffcd94;
+    font-size: 1rem;
     margin-bottom: 12px;
-}
-
-.footer-column ul li a {
-    color: rgba(255,255,255,0.85);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-left: 3px solid #ffa54b;
+    padding-left: 10px;
+  }
+  .link-col ul {
+    list-style: none;
+  }
+  .link-col li {
+    margin-bottom: 10px;
+  }
+  .link-col a {
+    color: #bdd3ff;
     text-decoration: none;
-    font-size: 13px;
-    transition: all 0.25s ease;
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-weight: 400;
-}
+    gap: 6px;
+    transition: 0.2s;
+  }
+  .link-col a:hover { color: white; transform: translateX(6px); }
 
-.footer-column ul li a:hover {
-    color: #fff;
-    transform: translateX(8px);
-    text-shadow: 0 0 6px #fff3b0;
-}
-
-.footer-column ul li a i {
-    font-size: 10px;
-    color: #ffbc6e;
-    transition: transform 0.2s;
-}
-
-.footer-column ul li a:hover i {
-    transform: rotate(360deg);
-    color: #ffd966;
-}
-
-.footer-social {
+  .social-reactor {
     display: flex;
     gap: 18px;
     flex-wrap: wrap;
     justify-content: center;
-    margin: 25px 0 20px;
+    margin: 20px 0;
+    z-index: 5;
     position: relative;
-    z-index: 2;
-}
-
-.footer-social a {
-    color: var(--footer-text);
-    font-size: 20px;
+  }
+  .social-reactor a {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,215,0,0.3);
     width: 52px;
     height: 52px;
+    border-radius: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,0.05);
-    border-radius: 30px;
-    border: 1px solid rgba(255,215,0,0.3);
-    text-decoration: none;
-    backdrop-filter: blur(8px);
-    position: relative;
-    overflow: hidden;
-    transition: 0.3s;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
+    color: #ffe8b6;
+    font-size: 1.6rem;
+    transition: 0.25s;
+    backdrop-filter: blur(10px);
+  }
+  .social-reactor a:hover {
+    background: gold;
+    color: black;
+    transform: scale(1.15) rotate(8deg);
+    border-color: white;
+    box-shadow: 0 0 30px gold;
+  }
 
-.footer-social a::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle, #fff3b0, #ffb989);
-    transform: translate(-50%, -50%);
-    transition: width 0.5s, height 0.5s;
-    z-index: -1;
-}
-
-.footer-social a:hover::before {
-    width: 120px;
-    height: 120px;
-}
-
-.footer-social a:hover {
-    color: #0f0c29;
-    transform: translateY(-6px) scale(1.08);
-    background: #ffdf99;
-    border-color: gold;
-    box-shadow: 0 8px 25px #ffb700;
-}
-
-.footer-extra {
+  .footer-extra-c {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
-    margin: 15px 0;
-    padding: 12px 0;
+    padding: 10px 0;
     border-top: 1px solid rgba(255,255,255,0.1);
     border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin: 12px 0;
+    z-index: 5;
     position: relative;
-    z-index: 2;
-}
-
-.footer-extra-link {
-    color: rgba(255,255,255,0.8);
+  }
+  .footer-extra-c a {
+    color: #b0d5ff;
     text-decoration: none;
-    font-size: 12px;
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 20px;
+    padding: 6px 16px;
+    background: rgba(0,0,0,0.25);
     border-radius: 40px;
-    background: rgba(0,0,0,0.2);
-    transition: all 0.2s ease;
-    border: 1px solid rgba(255,215,0,0.2);
-}
+    border: 1px solid rgba(255,255,200,0.15);
+  }
 
-.footer-extra-link:hover {
-    color: #fff;
-    background: rgba(255,215,0,0.15);
-    transform: translateY(-3px);
-    border-color: gold;
-    box-shadow: 0 6px 12px #00000050;
-}
-
-.footer-extra-link i {
-    font-size: 11px;
-    color: #ffbc6e;
-}
-
-.footer-copyright {
-    text-align: center;
-    font-size: 12px;
-    opacity: 0.9;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255,255,255,0.1);
-    position: relative;
-    z-index: 2;
+  .copyright-bar {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 25px;
-    font-weight: 300;
-}
+    gap: 24px;
+    font-size: 0.85rem;
+    color: #cbd5ff;
+    z-index: 5;
+    position: relative;
+    padding-top: 15px;
+    border-top: 1px dashed rgba(255,255,255,0.2);
+  }
+  .copyright-bar i { color: #ff9770; }
 
-.footer-copyright span {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
+  /* guaranteed bottom: footer always after content, but page flex above */
+  body { display: flex; flex-direction: column; }
+  .page-wrap { flex: 1 0 auto; }
+  .footer-cosmic { flex-shrink: 0; }
 
-.footer-copyright i {
-    color: #ffa07a;
-    animation: heartbeat 1.5s infinite;
-}
-
-@keyframes heartbeat {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-}
-
-.footer-copyright a {
-    color: #fff3b0;
-    text-decoration: none;
-    border-bottom: 1px dotted #ffb347;
-}
-
-.footer-copyright a:hover {
-    color: #fff;
-    border-bottom-color: #fff;
-}
-
-::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--input-bg);
-    border-radius: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--accent-primary);
-    border-radius: 8px;
-}
-
-/* Ultra Responsive */
-@media (max-width: 480px) {
-    .footer {
-        padding: 1.5rem 1rem 1rem;
-        border-radius: 32px 32px 0 0;
-    }
-    .footer-logo {
-        font-size: 26px;
-    }
-    .footer-logo i {
-        font-size: 34px;
-    }
-    .footer-social a {
-        width: 44px;
-        height: 44px;
-        font-size: 18px;
-    }
-    .footer-column h4 {
-        font-size: 14px;
-    }
-}
+  /* responsive fine-tune */
+  @media (max-width: 500px) {
+    .footer-brand h2 { font-size: 1.8rem; }
+    .link-matrix { gap: 24px; }
+  }
+  /* hide/show chat sections */
+  .chat-section { display: none; }
+  .chat-section.active { display: block; }
 </style>
 </head>
-
 <body data-theme="light">
+<div class="page-wrap">
 
-<div class="container">
+  <div class="header-cosmic">
+    <h1><i class="fas fa-bolt"></i> AI SCRAPER · AMMAR</h1>
+    <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i> <span id="themeText">Dark</span></button>
+  </div>
 
-<div class="header">
-<h1><i class="fas fa-bolt"></i> AI SCRAPER · AMMAR</h1>
-<button class="theme-toggle" onclick="toggleTheme()">
-<i class="fas fa-moon"></i> <span id="themeText">Dark</span>
-</button>
-</div>
+  <!-- SCRAPER CARD -->
+  <div class="neo-card">
+    <h2 style="display: flex; gap: 8px; margin-bottom: 16px;"><i class="fas fa-compass"></i> Website Scraper</h2>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
+      <input type="url" id="urlInput" class="input-fancy" placeholder="https://example.com" value="">
+      <button class="btn-gradient" onclick="previewUrl()" style="width: auto; padding: 12px 28px;"><i class="fas fa-eye"></i> Preview</button>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px;">
+      <select id="scrapeMode" class="input-fancy" style="flex:2;">
+        <option value="comprehensive">🔍 Comprehensive</option>
+        <option value="smart">⚡ Smart</option>
+        <option value="basic">📄 Basic</option>
+      </select>
+      <select id="jsMode" class="input-fancy" style="flex:1;">
+        <option value="false">🚫 JS Off</option>
+        <option value="true">⚡ JS On</option>
+      </select>
+    </div>
+    <button class="btn-gradient" onclick="scrapeWebsite()"><i class="fas fa-search"></i> SCRAPE NOW</button>
+    <div id="loading" class="loading" style="display: none; margin-top: 16px;">
+      <div style="display:flex; justify-content:center;"><div class="loading-spinner" style="width:30px;height:30px;border:3px solid var(--border-light);border-top-color:var(--accent-1);border-radius:50%;animation:spin 0.7s linear infinite;"></div></div>
+      <p style="text-align:center;">processing...</p>
+    </div>
+  </div>
 
-<!-- SCRAPER SECTION -->
-<div class="card">
-<h2><i class="fas fa-globe"></i> Website Scraper</h2>
+  <!-- SCRAPED DATA CARD -->
+  <div class="neo-card" id="dataCard" style="display:none;">
+    <h2 style="display: flex; gap: 8px;"><i class="fas fa-database"></i> Scraped data <span class="model-badge" style="background:var(--grad-pri); padding:4px 10px; border-radius:30px; font-size:0.6rem;">preview</span></h2>
+    <div id="previewContent" class="preview-box"></div>
+    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 18px;">
+      <button class="power-pill" onclick="exportData('json')" style="background:var(--grad-pri); color:white; border:none;"><i class="fas fa-code"></i> JSON</button>
+      <button class="power-pill" onclick="exportData('csv')" style="background:var(--grad-pri); color:white; border:none;"><i class="fas fa-table"></i> CSV</button>
+      <button class="power-pill" onclick="exportData('txt')" style="background:var(--grad-pri); color:white; border:none;"><i class="fas fa-file-alt"></i> TXT</button>
+      <button class="power-pill" onclick="exportData('markdown')" style="background:var(--grad-pri); color:white; border:none;"><i class="fas fa-markdown"></i> MD</button>
+    </div>
+  </div>
 
-<div class="input-group">
-<input type="url" id="urlInput" placeholder="URL (e.g., example.com)" value="">
-<button class="primary-btn" onclick="previewUrl()"><i class="fas fa-eye"></i> Preview</button>
-</div>
-
-<div class="input-group">
-<select id="scrapeMode">
-<option value="comprehensive">🔍 Comprehensive</option>
-<option value="smart">⚡ Smart</option>
-<option value="basic">📄 Basic</option>
-</select>
-
-<select id="jsMode">
-<option value="false">🚫 JS Off</option>
-<option value="true">⚡ JS On</option>
-</select>
-</div>
-
-<button class="scrape-btn" onclick="scrapeWebsite()">
-<i class="fas fa-search"></i> SCRAPE NOW
-</button>
-<div id="loading" class="loading">
-<div class="loading-spinner"></div>
-<p>Processing...</p>
-</div>
-</div>
-
-<!-- SCRAPED DATA CARD -->
-<div class="card" id="dataCard" style="display:none">
-<h2><i class="fas fa-database"></i> Scraped Data <span class="model-badge">Preview</span></h2>
-<div id="previewContent" class="preview-content"></div>
-
-<!-- EXPORT BUTTONS -->
-<div class="export-grid">
-<button class="export-btn" onclick="exportData('json')"><i class="fas fa-code"></i> JSON</button>
-<button class="export-btn" onclick="exportData('csv')"><i class="fas fa-table"></i> CSV</button>
-<button class="export-btn" onclick="exportData('excel')"><i class="fas fa-file-excel"></i> Excel</button>
-<button class="export-btn" onclick="exportData('txt')"><i class="fas fa-file-alt"></i> Text</button>
-<button class="export-btn" onclick="exportData('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
-<button class="export-btn" onclick="exportData('markdown')"><i class="fas fa-markdown"></i> MD</button>
-</div>
-</div>
-
-<!-- COMBINED AI CHAT CARD -->
-<div class="card" id="combinedChatCard" style="display:none">
-    <h2><i class="fas fa-robot"></i> AI Assistants <span class="model-badge">Dual Mode</span></h2>
-    
-    <div class="toggle-container">
-        <button class="toggle-btn active" id="groqToggle" onclick="switchMode('groq')">
-            <i class="fas fa-brain"></i> 
-            <span>Grok AI · Scraped</span>
-        </button>
-        <button class="toggle-btn" id="grokToggle" onclick="switchMode('grok')">
-            <i class="fas fa-bolt"></i> 
-            <span>Grok Mode · Universal</span>
-        </button>
+  <!-- DUAL AI CHAT CARD -->
+  <div class="neo-card" id="combinedChatCard" style="display:none;">
+    <h2 style="display: flex; gap: 8px;"><i class="fas fa-robot"></i> AI Assistants <span style="font-size:0.7rem; background:var(--grad-pri); padding:4px 12px; border-radius:30px;">dual core</span></h2>
+    <div class="mode-toggles">
+      <button class="mode-btn active" id="groqToggle" onclick="switchMode('groq')"><i class="fas fa-brain"></i> Grok AI · scraped</button>
+      <button class="mode-btn" id="grokToggle" onclick="switchMode('grok')"><i class="fas fa-bolt"></i> Grok mode · universal</button>
     </div>
 
-    <!-- Groq AI Chat Section -->
+    <!-- groq (scraped) section -->
     <div id="groqSection" class="chat-section active">
-        <div class="mode-header">
-            <h2><i class="fas fa-microchip"></i> Grok AI · Scraped Data Analysis</h2>
-         </div>
-        <div id="chatContainer" class="chat-container"></div>
-        <div class="input-group" style="gap: 8px;">
-            <input type="text" id="questionInput" placeholder="Ask about scraped data..." onkeypress="if(event.key==='Enter') askGroq()">
-            <button class="primary-btn" onclick="askGroq()" style="width: auto; padding: 10px 16px;">
-                <i class="fas fa-paper-plane"></i>
-            </button>
-            <button class="primary-btn" onclick="clearGroqChat()" style="width: auto; background: linear-gradient(135deg, #ef4444, #dc2626); padding: 10px 12px;">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
-        
+      <div style="margin-bottom: 10px; opacity:0.9;"><i class="fas fa-microchip"></i> Ask about scraped data</div>
+      <div id="chatContainer" class="chat-window"></div>
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="questionInput" class="input-fancy" placeholder="question about page..." onkeypress="if(event.key==='Enter') askGroq()">
+        <button class="btn-gradient" onclick="askGroq()" style="width: auto; padding: 12px 20px;"><i class="fas fa-paper-plane"></i></button>
+        <button class="btn-gradient" onclick="clearGroqChat()" style="width: auto; background:linear-gradient(145deg,#a13d7a,#4b2e5a); padding:12px 16px;"><i class="fas fa-trash"></i></button>
+      </div>
     </div>
 
-    <!-- Grok Mode Section -->
+    <!-- grok universal section -->
     <div id="grokSection" class="chat-section">
-        <div class="mode-header">
-            <h2><i class="fas fa-brain"></i> Grok Mode · Universal</h2>
-            <p>Ask any question (not limited to scraped data)</p>
-         </div>
-        <div id="grokChatContainer" class="chat-container"></div>
-        <div class="input-group" style="gap: 8px;">
-            <input type="text" id="grokQuestionInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') askGrokMode()">
-            <button class="primary-btn" onclick="askGrokMode()" style="width: auto; padding: 10px 16px;">
-                <i class="fas fa-bolt"></i>
-            </button>
-            <button class="primary-btn" onclick="clearGrokChat()" style="width: auto; background: linear-gradient(135deg, #ef4444, #dc2626); padding: 10px 12px;">
-                <i class="fas fa-trash"></i>
-            </button>
-        </div>
+      <div style="margin-bottom: 10px;"><i class="fas fa-globe"></i> Ask anything (universal)</div>
+      <div id="grokChatContainer" class="chat-window"></div>
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="grokQuestionInput" class="input-fancy" placeholder="any question..." onkeypress="if(event.key==='Enter') askGrokMode()">
+        <button class="btn-gradient" onclick="askGrokMode()" style="width: auto; padding: 12px 20px;"><i class="fas fa-bolt"></i></button>
+        <button class="btn-gradient" onclick="clearGrokChat()" style="width: auto; background:linear-gradient(145deg,#a13d7a,#4b2e5a); padding:12px 16px;"><i class="fas fa-trash"></i></button>
+      </div>
     </div>
-</div>
+  </div>
+</div> <!-- page-wrap ends -->
 
-<!-- ULTRA MEGA PRO+ FOOTER - ROYAL EDITION with AMMAR -->
-<footer class="footer">
-    <div class="footer-main">
-        <div class="footer-brand">
-            <div class="footer-logo">
-                <i class="fas fa-crown"></i> AMMAR·AI
-            </div>
-            <div class="footer-tagline">
-                <span>SCRAPER SUPREME</span>
-                <span>v3.14 · infinite</span>
-            </div>
-        </div>
-        <div class="footer-badges">
-            <span class="footer-badge"><i class="fas fa-shield-halved"></i>  zero‑copy</span>
-            <span class="footer-badge"><i class="fas fa-bolt"></i>  edge‑ai</span>
-            <span class="footer-badge"><i class="fas fa-gem"></i>  dual‑mind</span>
-        </div>
+<!-- ULTRA PRO FOOTER - ABSOLUTELY BOTTOM - ROYAL COSMIC -->
+<footer class="footer-cosmic">
+  <div class="footer-row">
+    <div class="footer-brand">
+      <h2><i class="fas fa-crown"></i> AMMAR · AI</h2>
+      <div class="power-grid" style="margin-top: 8px;">
+        <span class="power-pill"><i class="fas fa-bolt"></i> 0.3ms scrape</span>
+        <span class="power-pill"><i class="fas fa-feather"></i> 200+ formats</span>
+        <span class="power-pill"><i class="fas fa-shield"></i> quantum proxy</span>
+      </div>
     </div>
+    <div style="color: #e3d6ff; text-align: right;">
+      <div style="font-size: 1rem; font-weight: 200;"><i class="fas fa-infinity"></i> always bottom · ultra tier</div>
+      <div style="font-size: 0.8rem; opacity: 0.7;">version 17.24 · build 2026</div>
+    </div>
+  </div>
 
-    <div class="footer-links">
-        <div class="footer-column">
-            <h4>Platform</h4>
-            <ul>
-                <li><a href="#"><i class="fas fa-chevron-right"></i> Features</a></li>                
-                <li><a href="#"><i class="fas fa-chevron-right"></i> API</a></li>
-                <li><a href="#"><i class="fas fa-chevron-right"></i> Changelog</a></li>
-            </ul>
-        </div>
-        <div class="footer-column">
-            <h4>Resources</h4>
-            <ul>
-                <li><a href="#"><i class="fas fa-chevron-right"></i> Documentation</a></li>
-                <li><a href="#"><i class="fas fa-chevron-right"></i> Blog</a></li>
-                <li><a href="#"><i class="fas fa-chevron-right"></i> Community</a></li>
-            </ul>
-        </div>
-        <div class="footer-column">
-            <h4>Company</h4>
-            <ul>
-                <li><a href="#"><i class="fas fa-chevron-right"></i> About</a></li>
-                <li><a href="#"><i class="fas fa-chevron-right"></i> Careers</a></li>
-                <li><a href="#"><i class="fas fa-chevron-right"></i> Contact</a></li>
-            </ul>
-        </div>
-        <div class="footer-column">
-            <h4>Legal</h4>
-            <ul>
-                <li><a href="#"><i class="fas fa-chevron-right"></i> Impressum</a></li>
-                <li><a href="#"><i class="fas fa-chevron-right"></i> GDPR</a></li>
-            </ul>
-        </div>
-    </div>
+  <!-- link columns -->
+  <div class="link-matrix">
+    <div class="link-col"><h5>stack</h5><ul><li><a href="#"><i class="fas fa-angle-right"></i> scrapers</a></li><li><a href="#"><i class="fas fa-angle-right"></i> dual AI</a></li><li><a href="#"><i class="fas fa-angle-right"></i> export 360</a></li></ul></div>
+    <div class="link-col"><h5>resources</h5><ul><li><a href="#"><i class="fas fa-angle-right"></i> docs</a></li><li><a href="#"><i class="fas fa-angle-right"></i> API</a></li><li><a href="#"><i class="fas fa-angle-right"></i> blog</a></li></ul></div>
+    <div class="link-col"><h5>social</h5><ul><li><a href="#"><i class="fab fa-linkedin"></i> linkedin/ammar</a></li><li><a href="#"><i class="fab fa-github"></i> syedammar</a></li><li><a href="#"><i class="fab fa-facebook"></i> fb/ammar</a></li></ul></div>
+  </div>
 
-    <div class="footer-social">
-        <a href="https://www.linkedin.com/in/ammar-haider-61136b27b/" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
-        <a href="https://github.com/Syedammarhaider" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
-        <a href="https://www.facebook.com/profile.php?id=100091524961370" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
-        <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="#" title="X"><i class="fab fa-x-twitter"></i></a>
-    </div>
+  <!-- social reactor -->
+  <div class="social-reactor">
+    <a href="https://www.linkedin.com/in/ammar-haider-61136b27b/" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+    <a href="https://github.com/Syedammarhaider" target="_blank"><i class="fab fa-github"></i></a>
+    <a href="https://www.facebook.com/profile.php?id=100091524961370" target="_blank"><i class="fab fa-facebook-f"></i></a>
+    <a href="#"><i class="fab fa-instagram"></i></a>
+    <a href="#"><i class="fab fa-x-twitter"></i></a>
+  </div>
 
-    <div class="footer-extra">
-        <a href="#" class="footer-extra-link"><i class="fas fa-shield-alt"></i> Privacy Policy</a>
-        <a href="#" class="footer-extra-link"><i class="fas fa-file-contract"></i> Terms of Service</a>
-        <a href="#" class="footer-extra-link"><i class="fas fa-cookie-bite"></i> Cookie Policy</a>
-        <a href="#" class="footer-extra-link"><i class="fas fa-map-pin"></i> Sitemap</a>
-    </div>
+  <div class="footer-extra-c">
+    <a href="#"><i class="fas fa-lock"></i> privacy nexus</a>
+    <a href="#"><i class="fas fa-file-signature"></i> terms · ultra</a>
+    <a href="#"><i class="fas fa-cookie"></i> cookie realm</a>
+    <a href="#"><i class="fas fa-shield-halved"></i> GDPR ready</a>
+  </div>
 
-    <div class="footer-copyright">
-        <span><i class="far fa-copyright"></i> 2026 AMMAR · AI SCRAPER · patent pending</span>
-        <span><i class="fas fa-globe"></i> All terrestrial & extraterrestrial rights reserved</span>
-        <span><i class="fas fa-heart" style="color:#ff6b6b;"></i> made with <i class="fas fa-bolt"></i> in the cloud</span>
-    </div>
+  <div class="copyright-bar">
+    <span><i class="far fa-copyright"></i> 2026 AMMAR · AI SCRAPER – universal edition</span>
+    <span><i class="fas fa-globe"></i> all hemispheres protected</span>
+    <span><i class="fas fa-star"></i> designed to stay at bottom forever</span>
+  </div>
 </footer>
-
-</div> <!-- container -->
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
-let scrapedData = null;
-let sessionId = null;
-let groqChatHistory = [];
-let grokChatHistory = [];
+  let scrapedData = null, sessionId = null;
+  let groqChatHistory = [], grokChatHistory = [];
 
-function toggleTheme() {
+  function toggleTheme() {
     const body = document.body;
     const themeText = document.getElementById('themeText');
     const icon = document.querySelector('.theme-toggle i');
-    if(body.getAttribute('data-theme') === 'light') {
-        body.setAttribute('data-theme', 'dark');
-        themeText.textContent = 'Light';
-        icon.className = 'fas fa-sun';
+    if (body.getAttribute('data-theme') === 'light') {
+      body.setAttribute('data-theme', 'dark');
+      themeText.textContent = 'Light';
+      icon.className = 'fas fa-sun';
     } else {
-        body.setAttribute('data-theme', 'light');
-        themeText.textContent = 'Dark';
-        icon.className = 'fas fa-moon';
+      body.setAttribute('data-theme', 'light');
+      themeText.textContent = 'Dark';
+      icon.className = 'fas fa-moon';
     }
-}
+  }
 
-function previewUrl() {
+  function previewUrl() {
     const url = document.getElementById('urlInput').value;
-    if(!url) { showNotification("Enter URL first", "warning"); return; }
-    let fullUrl = url;
-    if(!url.startsWith('http')) { fullUrl = 'https://' + url; }
-    window.open(fullUrl, '_blank');
-}
+    if (!url) { showNotification("enter URL", "warning"); return; }
+    let full = url.startsWith('http') ? url : 'https://' + url;
+    window.open(full, '_blank');
+  }
 
-function showNotification(message, type = "success") {
-    const notification = document.createElement('div');
-    notification.className = 'export-notification';
-    notification.style.background = type === 'success' ? 'var(--success)' : type === 'warning' ? 'var(--warning)' : 'var(--danger)';
-    notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-circle' : 'times-circle'}"></i> ${message}`;
-    document.body.appendChild(notification);
-    setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease-out';
-        setTimeout(() => notification.remove(), 300);
-    }, 2500);
-}
+  function showNotification(msg, type = "success") {
+    const n = document.createElement('div');
+    n.className = 'export-notification';
+    n.style.position = 'fixed'; n.style.bottom = '20px'; n.style.right = '20px'; n.style.background = type === 'success' ? '#10b981' : '#f59e0b'; n.style.color = 'white'; n.style.padding = '12px 22px'; n.style.borderRadius = '60px'; n.style.zIndex = '9999'; n.style.fontWeight = 'bold';
+    n.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':'exclamation-triangle'}"></i> ${msg}`;
+    document.body.appendChild(n);
+    setTimeout(() => { n.style.opacity = '0'; setTimeout(() => n.remove(), 400); }, 2500);
+  }
 
-async function scrapeWebsite() {
+  async function scrapeWebsite() {
     const url = document.getElementById('urlInput').value;
-    if(!url) { showNotification("Enter URL first", "warning"); return; }
-    let fullUrl = url;
-    if(!url.startsWith('http')) { fullUrl = 'https://' + url; }
+    if (!url) { showNotification("enter url", "warning"); return; }
+    let full = url.startsWith('http') ? url : 'https://' + url;
     document.getElementById('loading').style.display = 'block';
     document.querySelector('.scrape-btn').disabled = true;
     try {
-        const formData = new FormData();
-        formData.append('url', fullUrl);
-        formData.append('mode', document.getElementById('scrapeMode').value);
-        formData.append('js', document.getElementById('jsMode').value);
-        const response = await fetch('/scrape', { method: 'POST', body: formData });
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Server error:', errorText);
-            throw new Error(`Server error: ${response.status}`);
-        }
-        const result = await response.json();
-        if(result.success) {
-            scrapedData = result.data;
-            sessionId = result.session_id;
-            document.getElementById('previewContent').innerHTML = '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
-            document.getElementById('dataCard').style.display = 'block';
-            document.getElementById('combinedChatCard').style.display = 'block';
-            addMessage('assistant', '✅ Scraped! Ask about the content.');
-            showNotification('Scraped successfully!', 'success');
-        } else {
-            showNotification('Error: ' + (result.error || 'Unknown'), 'error');
-        }
-    } catch(error) {
-        showNotification('Error: ' + error.message, 'error');
-    } finally {
-        document.getElementById('loading').style.display = 'none';
-        document.querySelector('.scrape-btn').disabled = false;
+      const fd = new FormData();
+      fd.append('url', full);
+      fd.append('mode', document.getElementById('scrapeMode').value);
+      fd.append('js', document.getElementById('jsMode').value);
+      const resp = await fetch('/scrape', { method: 'POST', body: fd });
+      if (!resp.ok) throw new Error('server error');
+      const result = await resp.json();
+      if (result.success) {
+        scrapedData = result.data;
+        sessionId = result.session_id;
+        document.getElementById('previewContent').innerHTML = '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
+        document.getElementById('dataCard').style.display = 'block';
+        document.getElementById('combinedChatCard').style.display = 'block';
+        addMessage('assistant', '✅ scraped. ask about data.');
+        showNotification('scrape ok');
+      } else { showNotification('error: '+ (result.error||''), 'warning'); }
+    } catch (e) { showNotification('error: '+e.message, 'error'); } finally {
+      document.getElementById('loading').style.display = 'none';
+      document.querySelector('.scrape-btn').disabled = false;
     }
-}
+  }
 
-async function askGroq() {
-    const question = document.getElementById('questionInput').value;
-    if(!question) { showNotification("Enter question", "warning"); return; }
-    if(!scrapedData) { addMessage('assistant', '⚠️ Scrape a website first!'); return; }
-    
-    addMessage('user', question);
+  async function askGroq() {
+    const q = document.getElementById('questionInput').value;
+    if (!q) return;
+    if (!scrapedData) { addMessage('assistant','⚠️ scrape first'); return; }
+    addMessage('user', q);
     document.getElementById('questionInput').value = '';
-    
-    const typingId = 'typing-' + Date.now();
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'message assistant';
-    typingDiv.id = typingId;
-    typingDiv.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Analyzing...</div>';
+    const typingId = 't'+Date.now();
+    const typingDiv = document.createElement('div'); typingDiv.className = 'message assistant'; typingDiv.id = typingId;
+    typingDiv.innerHTML = '<div class="msg-bubble typing"><span></span><span></span><span></span> grok thinking...</div>';
     document.getElementById('chatContainer').appendChild(typingDiv);
-    
+
     try {
-        const formData = new FormData();
-        formData.append('message', question);
-        formData.append('scraped_data', JSON.stringify(scrapedData));
-        formData.append('history', JSON.stringify(groqChatHistory));
-        
-        const response = await fetch('/groq-chat', { method: 'POST', body: formData });
-        const result = await response.json();
-        
-        document.getElementById(typingId)?.remove();
-        
-        if(result.success) {
-            addMessage('assistant', marked.parse(result.response));
-            groqChatHistory.push({ role: 'user', content: question });
-            groqChatHistory.push({ role: 'assistant', content: result.response });
-        } else {
-            addMessage('assistant', '❌ Error: ' + (result.error || 'Unknown'));
-        }
-    } catch(error) {
-        document.getElementById(typingId)?.remove();
-        addMessage('assistant', '❌ Error: ' + error.message);
-    }
-}
+      const fd = new FormData();
+      fd.append('message', q);
+      fd.append('scraped_data', JSON.stringify(scrapedData));
+      fd.append('history', JSON.stringify(groqChatHistory));
+      const resp = await fetch('/groq-chat', { method: 'POST', body: fd });
+      const res = await resp.json();
+      document.getElementById(typingId)?.remove();
+      if (res.success) {
+        addMessage('assistant', marked.parse(res.response));
+        groqChatHistory.push({role:'user',content:q},{role:'assistant',content:res.response});
+      } else { addMessage('assistant','❌ '+res.error); }
+    } catch(e){ document.getElementById(typingId)?.remove(); addMessage('assistant','error'); }
+  }
 
-function addMessage(role, content) {
-    const chatContainer = document.getElementById('chatContainer');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message ' + role;
-    messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
-    chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-}
+  function addMessage(role, content) {
+    const cont = document.getElementById('chatContainer');
+    const d = document.createElement('div'); d.className = 'message '+role;
+    d.innerHTML = '<div class="msg-bubble">'+content+'</div>';
+    cont.appendChild(d); cont.scrollTop = cont.scrollHeight;
+  }
+  function addGrokMessage(role, content) {
+    const c = document.getElementById('grokChatContainer');
+    const d = document.createElement('div'); d.className = 'message '+role;
+    d.innerHTML = '<div class="msg-bubble">'+content+'</div>';
+    c.appendChild(d); c.scrollTop = c.scrollHeight;
+  }
 
-function addGrokMessage(role, content) {
-    const chatContainer = document.getElementById('grokChatContainer');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message ' + role;
-    messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
-    chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-}
-
-async function askGrokMode() {
+  async function askGrokMode() {
     const q = document.getElementById('grokQuestionInput').value;
-    if(!q) { showNotification("Enter question", "warning"); return; }
-    
+    if (!q) return;
     addGrokMessage('user', q);
     document.getElementById('grokQuestionInput').value = '';
-    
-    const tid = 'gt' + Date.now();
-    const td = document.createElement('div');
-    td.className = 'message assistant';
-    td.id = tid;
-    td.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Reasoning...</div>';
+    const tid = 'gt'+Date.now();
+    const td = document.createElement('div'); td.className = 'message assistant'; td.id = tid;
+    td.innerHTML = '<div class="msg-bubble typing"><span></span><span></span><span></span> universal reasoning...</div>';
     document.getElementById('grokChatContainer').appendChild(td);
-    
     try {
-        const fd = new FormData();
-        fd.append('message', q);
-        fd.append('scraped_data', JSON.stringify(scrapedData || {}));
-        fd.append('analysis_type', 'comprehensive');
-        fd.append('history', JSON.stringify(grokChatHistory));
-        
-        const r = await fetch('/grok-mode', { method: 'POST', body: fd });
-        const res = await r.json();
-        
-        document.getElementById(tid)?.remove();
-        
-        if(res.success) {
-            addGrokMessage('assistant', marked.parse(res.response));
-            grokChatHistory.push({ role: 'user', content: q });
-            grokChatHistory.push({ role: 'assistant', content: res.response });
-        } else {
-            addGrokMessage('assistant', '❌ Error: ' + (res.error || 'Unknown'));
-        }
-    } catch(e) {
-        document.getElementById(tid)?.remove();
-        addGrokMessage('assistant', '❌ Error: ' + e.message);
-    }
-}
+      const fd = new FormData();
+      fd.append('message', q);
+      fd.append('scraped_data', JSON.stringify(scrapedData || {}));
+      fd.append('analysis_type','comprehensive');
+      fd.append('history', JSON.stringify(grokChatHistory));
+      const r = await fetch('/grok-mode', { method:'POST', body:fd });
+      const res = await r.json();
+      document.getElementById(tid)?.remove();
+      if(res.success) {
+        addGrokMessage('assistant', marked.parse(res.response));
+        grokChatHistory.push({role:'user',content:q},{role:'assistant',content:res.response});
+      } else { addGrokMessage('assistant','❌ '+res.error); }
+    } catch(e){ document.getElementById(tid)?.remove(); addGrokMessage('assistant','error'); }
+  }
 
-function clearGroqChat() {
-    document.getElementById('chatContainer').innerHTML = '';
-    groqChatHistory = [];
-    addMessage('assistant', '🧹 Chat cleared.');
-    showNotification('Groq chat cleared', 'success');
-}
+  function clearGroqChat() { document.getElementById('chatContainer').innerHTML = ''; groqChatHistory = []; addMessage('assistant','🧹 cleared'); }
+  function clearGrokChat() { document.getElementById('grokChatContainer').innerHTML = ''; grokChatHistory = []; addGrokMessage('assistant','🧹 cleared'); }
 
-function clearGrokChat() {
-    document.getElementById('grokChatContainer').innerHTML = '';
-    grokChatHistory = [];
-    addGrokMessage('assistant', '🧹 Chat cleared.');
-    showNotification('Grok chat cleared', 'success');
-}
+  async function exportData(format) {
+    if (!scrapedData) { showNotification('no data', 'warning'); return; }
+    let content = '', type = '', ext = 'txt', filename = 'ammar_'+Date.now();
+    if (format === 'json') { content = JSON.stringify(scrapedData,null,2); type='application/json'; ext='json'; }
+    else if (format === 'csv') {
+      let rows = []; let headers = ['key','value'];
+      rows.push(['title', scrapedData.title||'']); rows.push(['url', scrapedData.url||'']);
+      if (scrapedData.paragraphs) scrapedData.paragraphs.forEach((p,i)=> rows.push([`para_${i+1}`, p]));
+      content = headers.join(',')+'\n' + rows.map(r=> r.map(c=>`"${c}"`).join(',')).join('\n');
+      type='text/csv'; ext='csv';
+    } else if (format==='txt') {
+      content = `TITLE: ${scrapedData.title}\nURL: ${scrapedData.url}\nPARAGRAPHS:\n`+(scrapedData.paragraphs? scrapedData.paragraphs.join('\n---\n'):'');
+      type='text/plain'; ext='txt';
+    } else { content = JSON.stringify(scrapedData,null,2); type='application/json'; ext='json'; }
+    const blob = new Blob([content], {type});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `scrape.${ext}`; a.click();
+    showNotification(`exported .${ext}`);
+  }
 
-async function exportData(format) {
-    if(!scrapedData) { showNotification("Scrape a website first", "warning"); return; }
-    
-    try {
-        let content = '';
-        let mimeType = '';
-        let fileExtension = '';
-        let fileName = `scraped_${new Date().toISOString().slice(0,10)}`;
-        
-        if(format === 'json') {
-            content = JSON.stringify(scrapedData, null, 2);
-            mimeType = 'application/json';
-            fileExtension = 'json';
-            fileName += '.json';
-        } else if(format === 'csv') {
-            const headers = ['Field', 'Value', 'Type', 'Length'];
-            const rows = [];
-            rows.push(['Title', scrapedData.title || 'N/A', 'metadata', String(scrapedData.title?.length || 0)]);
-            rows.push(['URL', scrapedData.url || 'N/A', 'metadata', String(scrapedData.url?.length || 0)]);
-            rows.push(['Total Paragraphs', String(scrapedData.paragraphs?.length || 0), 'count', '']);
-            if(scrapedData.paragraphs) {
-                scrapedData.paragraphs.forEach((para, index) => {
-                    rows.push([`Paragraph ${index + 1}`, para.replace(/"/g, '""'), 'content', String(para.length)]);
-                });
-            }
-            content = headers.join(',') + '\n';
-            rows.forEach(row => {
-                content += row.map(cell => `"${cell}"`).join(',') + '\n';
-            });
-            mimeType = 'text/csv';
-            fileExtension = 'csv';
-            fileName += '.csv';
-        } else if(format === 'txt') {
-            content = `📌 METADATA\n`;
-            content += `• Title: ${scrapedData.title || 'N/A'}\n`;
-            content += `• URL: ${scrapedData.url || 'N/A'}\n`;
-            content += `• Total Paragraphs: ${scrapedData.paragraphs?.length || 0}\n\n`;
-            content += `📄 CONTENT\n`;
-            if(scrapedData.paragraphs) {
-                scrapedData.paragraphs.forEach((para, index) => {
-                    content += `[${index + 1}] ${para}\n\n`;
-                });
-            }
-            content += `\nGenerated by AI SCRAPER · AMMAR\n`;
-            mimeType = 'text/plain';
-            fileExtension = 'txt';
-            fileName += '.txt';
-        } else {
-            content = JSON.stringify(scrapedData, null, 2);
-            mimeType = 'application/json';
-            fileExtension = 'json';
-            fileName += '.json';
-        }
-        
-        const blob = new Blob([content], { type: mimeType });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        
-        showNotification(`Exported as ${format.toUpperCase()}!`, 'success');
-        
-    } catch(error) {
-        showNotification('Error: ' + error.message, 'error');
-    }
-}
-
-function switchMode(mode) {
-    const groqSection = document.getElementById('groqSection');
-    const grokSection = document.getElementById('grokSection');
-    const groqToggle = document.getElementById('groqToggle');
-    const grokToggle = document.getElementById('grokToggle');
-    
-    if(mode === 'groq') {
-        groqSection.classList.add('active');
-        grokSection.classList.remove('active');
-        groqToggle.classList.add('active');
-        grokToggle.classList.remove('active');
+  function switchMode(mode) {
+    const groqSec = document.getElementById('groqSection'), grokSec = document.getElementById('grokSection');
+    const tog1 = document.getElementById('groqToggle'), tog2 = document.getElementById('grokToggle');
+    if (mode === 'groq') {
+      groqSec.classList.add('active'); grokSec.classList.remove('active');
+      tog1.classList.add('active'); tog2.classList.remove('active');
     } else {
-        grokSection.classList.add('active');
-        groqSection.classList.remove('active');
-        grokToggle.classList.add('active');
-        groqToggle.classList.remove('active');
+      grokSec.classList.add('active'); groqSec.classList.remove('active');
+      tog2.classList.add('active'); tog1.classList.remove('active');
     }
-}
+  }
 
-window.onload = function() {
-    document.body.setAttribute('data-theme', 'light');
-    setTimeout(() => {
-        if(document.getElementById('combinedChatCard').style.display !== 'block') {
-            addMessage('assistant', '👋 Enter URL and click SCRAPE NOW.');
-            addGrokMessage('assistant', '🚀 Grok Mode ready! Ask anything.');
-        }
-    }, 300);
-}
+  window.onload = function() {
+    document.body.setAttribute('data-theme','light');
+    setTimeout(()=>{
+      if (!document.getElementById('combinedChatCard').style.display) {
+        addMessage('assistant','👋 paste url & scrape');
+        addGrokMessage('assistant','🚀 universal mode always ready');
+      }
+    },200);
+  };
 </script>
-
 </body>
 </html>
