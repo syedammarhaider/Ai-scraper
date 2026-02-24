@@ -134,10 +134,10 @@ async def grok_mode(request: Request):
             model=MODEL_DEEP,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": full_context[:25000]}
+                {"role": "user", "content": full_context}  # Removed character limit for unlimited answers
             ],
             temperature=0.2,
-            max_tokens=2000
+            max_tokens=8000  # Increased from 2000 to 8000 for much longer answers
         )
 
         answer = getattr(response.choices[0].message, 'content', None)

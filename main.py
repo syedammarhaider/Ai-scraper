@@ -222,14 +222,14 @@ Provide expert answers on any topic using your knowledge base. The scraped data 
         try:
             messages_to_send = [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": full_context[:20000]}  # Increased limit for comprehensive answers
+                {"role": "user", "content": full_context}  # Removed character limit completely for unlimited answers
             ]
             
             response = grok_mode.chat_completions_create(
                 model=MODEL_DEEP,
                 messages=messages_to_send,
                 temperature=0.4,
-                max_tokens=2000
+                max_tokens=8000  # Increased from 2000 to 8000 for much longer answers
             )
             
             answer = response.get("choices", [{}])[0].get("message", {}).get("content", None)
