@@ -23,15 +23,17 @@
     --majestic-gold: #d4af37;
     --soft-gold: #ffdb7c;
     --royal-pink: #c85cb8;
+    --royal-blue: #4158d0;  /* kept only for structure, but replaced in gradients */
+    
     --bg-color: #ffffff;
     --card-bg: #ffffff;
     --card-border: #e2e8f0;
     --card-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
     --text-primary: #1a1a2e;
     --text-muted: #4a5568;
-    --accent-primary: #d4af37;
-    --accent-secondary: #c85cb8;
-    --accent-gradient: linear-gradient(135deg, #d4af37, #c85cb8, #9b4d96);
+    --accent-primary: #d4af37;      /* majestic gold */
+    --accent-secondary: #c85cb8;     /* royal pink */
+    --accent-gradient: linear-gradient(135deg, #d4af37, #c85cb8, #4a2a6b);
     --border-color: #e2e8f0;
     --input-bg: #f8fafc;
     --input-border: #e2e8f0;
@@ -40,39 +42,42 @@
     --chat-assistant: #f8fafc;
     --header-bg: #ffffff;
     --code-bg: #f1f5f9;
-    --code-color: #c85cb8;
+    --code-color: #4a2a6b;
     --badge-bg: linear-gradient(135deg, #d4af37, #c85cb8);
     --success: #10b981;
     --warning: #f59e0b;
     --danger: #ef4444;
     --glass-bg: rgba(255, 255, 255, 0.1);
     --glass-border: rgba(255, 255, 255, 0.2);
+    --footer-gradient: linear-gradient(145deg, #1a1033, #2b1b47, #0f0c29);
     --footer-text: #fffbee;
     --footer-glow: rgba(212, 175, 55, 0.4);
 }
 
 [data-theme="dark"] {
-    --bg-color: #0c0a1a;
-    --card-bg: #1a1033;
-    --card-border: #2d1b4e;
+    --bg-color: #0f0c29;
+    --card-bg: #1a1a2e;
+    --card-border: #2d2d4a;
     --card-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    --text-primary: #fffbee;
-    --text-muted: #e0d6c0;
-    --accent-primary: #ffdb7c;
-    --accent-secondary: #ff9f4b;
-    --accent-gradient: linear-gradient(135deg, #d4af37, #c85cb8, #9b4d96);
-    --border-color: #4a2a6b;
-    --input-bg: #2d1b4e;
-    --input-border: #4a2a6b;
-    --input-focus: #d4af37;
+    --text-primary: #ffffff;
+    --text-muted: #b0b0b0;
+    --accent-primary: #ffdb7c;       /* soft gold */
+    --accent-secondary: #c85cb8;
+    --accent-gradient: linear-gradient(135deg, #d4af37, #c85cb8, #4a2a6b);
+    --border-color: #2d2d4a;
+    --input-bg: #16213e;
+    --input-border: #2d2d4a;
+    --input-focus: #ffdb7c;
     --chat-user: linear-gradient(135deg, #d4af37, #c85cb8);
-    --chat-assistant: #2d1b4e;
-    --header-bg: #1a1033;
-    --code-bg: #2d1b4e;
+    --chat-assistant: #16213e;
+    --header-bg: #1a1a2e;
+    --code-bg: #16213e;
     --code-color: #ffdb7c;
     --badge-bg: linear-gradient(135deg, #d4af37, #c85cb8);
     --glass-bg: rgba(0, 0, 0, 0.2);
-    --glass-border: rgba(212, 175, 55, 0.2);
+    --glass-border: rgba(255, 255, 255, 0.05);
+    --footer-gradient: linear-gradient(145deg, #1a1033, #2b1b47, #0f0c29);
+    --footer-text: #fffbee;
     --footer-glow: rgba(212, 175, 55, 0.4);
 }
 
@@ -110,7 +115,7 @@ body {
 .header h1 {
     font-size: clamp(14px, 3.8vw, 18px);
     font-weight: 700;
-    background: var(--accent-gradient);
+    background: linear-gradient(145deg, #d4af37, #c85cb8, #4a2a6b);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     display: flex;
@@ -119,7 +124,7 @@ body {
 }
 
 .header h1 i {
-    background: var(--accent-gradient);
+    background: linear-gradient(145deg, #d4af37, #c85cb8);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-size: 0.9em;
@@ -129,7 +134,7 @@ body {
     padding: 6px 10px;
     border: none;
     border-radius: 24px;
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #d4af37, #c85cb8);
     color: white;
     font-weight: 600;
     cursor: pointer;
@@ -137,14 +142,13 @@ body {
     align-items: center;
     gap: 4px;
     font-size: 10px;
-    border: 1px solid rgba(212, 175, 55, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
 }
 
 .theme-toggle:hover {
     opacity: 0.9;
     transform: translateY(-1px);
-    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
 }
 
 .card {
@@ -158,7 +162,7 @@ body {
 }
 
 .card:hover {
-    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.15);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .card h2 {
@@ -173,7 +177,7 @@ body {
 }
 
 .card h2 i {
-    background: var(--accent-gradient);
+    background: linear-gradient(145deg, #d4af37, #c85cb8);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-size: 0.9em;
@@ -203,7 +207,7 @@ body {
 
 .input-group input:focus,
 .input-group select:focus {
-    border-color: var(--majestic-gold);
+    border-color: var(--input-focus);
     box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
     transform: translateY(-1px);
 }
@@ -212,7 +216,7 @@ body {
     padding: 10px 14px;
     border: none;
     border-radius: 18px;
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #d4af37, #c85cb8);
     color: white;
     font-weight: 600;
     font-size: 12px;
@@ -248,7 +252,6 @@ body {
 .primary-btn:hover {
     opacity: 0.9;
     transform: translateY(-1px);
-    box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
 }
 
 .scrape-btn {
@@ -256,7 +259,7 @@ body {
     padding: 12px;
     border: none;
     border-radius: 22px;
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #d4af37, #c85cb8, #4a2a6b);
     color: white;
     font-size: 14px;
     font-weight: 700;
@@ -288,7 +291,6 @@ body {
 .scrape-btn:hover {
     opacity: 0.9;
     transform: translateY(-1px);
-    box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
 }
 
 .loading {
@@ -301,7 +303,7 @@ body {
     width: 24px;
     height: 24px;
     border: 2px solid var(--border-color);
-    border-top: 2px solid var(--majestic-gold);
+    border-top: 2px solid #d4af37;
     border-radius: 50%;
     animation: spin 0.5s linear infinite;
     margin: 6px auto;
@@ -313,7 +315,7 @@ body {
 }
 
 .loading p {
-    color: var(--majestic-gold);
+    color: #d4af37;
     font-weight: 600;
     font-size: 11px;
     animation: pulse 1.5s ease-in-out infinite;
@@ -350,7 +352,7 @@ body {
     padding: 6px 4px;
     border: none;
     border-radius: 18px;
-    background: var(--badge-bg);
+    background: linear-gradient(135deg, #d4af37, #c85cb8);
     color: white;
     font-weight: 600;
     display: inline-flex;
@@ -385,7 +387,6 @@ body {
 .export-btn:hover {
     opacity: 0.9;
     transform: translateY(-1px);
-    box-shadow: 0 5px 10px rgba(212, 175, 55, 0.3);
 }
 
 .chat-container {
@@ -434,7 +435,7 @@ body {
 }
 
 .user .message-content {
-    background: var(--chat-user);
+    background: linear-gradient(135deg, #d4af37, #c85cb8);
     color: white;
     border-bottom-right-radius: 4px;
 }
@@ -481,7 +482,7 @@ body {
 .typing span {
     width: 6px;
     height: 6px;
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #d4af37, #c85cb8);
     border-radius: 50%;
     display: inline-block;
     animation: blink 1.2s infinite;
@@ -496,13 +497,13 @@ body {
 .model-badge {
     display: inline-block;
     padding: 3px 10px;
-    background: var(--badge-bg);
+    background: linear-gradient(135deg, #d4af37, #c85cb8);
     color: white;
     border-radius: 24px;
     font-size: 9px;
     font-weight: 600;
     margin-left: 4px;
-    border: 1px solid rgba(212, 175, 55, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     white-space: nowrap;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
@@ -514,11 +515,10 @@ body {
 }
 
 .card p i {
-    color: var(--majestic-gold);
+    color: #d4af37;
     margin-right: 2px;
 }
 
-/* Toggle Buttons Style */
 .toggle-container {
     display: flex;
     gap: 8px;
@@ -567,7 +567,7 @@ body {
     width: 0;
     height: 0;
     border-radius: 50%;
-    background: rgba(212, 175, 55, 0.2);
+    background: rgba(255, 255, 255, 0.2);
     transform: translate(-50%, -50%);
     transition: width 0.5s, height 0.5s;
 }
@@ -578,9 +578,9 @@ body {
 }
 
 .toggle-btn.active {
-    background: var(--accent-gradient);
+    background: linear-gradient(135deg, #d4af37, #c85cb8);
     color: white;
-    box-shadow: 0 3px 10px rgba(212, 175, 55, 0.3);
+    box-shadow: 0 3px 10px rgba(212,175,55,0.2);
 }
 
 .toggle-btn.active i {
@@ -592,7 +592,6 @@ body {
     display: none;
 }
 
-/* Chat Sections */
 .chat-section {
     display: none;
     animation: fadeIn 0.4s ease-out;
@@ -618,7 +617,7 @@ body {
     border-radius: 10px;
     padding: 10px;
     margin-bottom: 14px;
-    border-left: 3px solid var(--majestic-gold);
+    border-left: 3px solid #d4af37;
     box-shadow: 0 1px 3px rgba(0,0,0,0.03);
 }
 .mode-header h2 {
@@ -631,7 +630,6 @@ body {
     opacity: 0.8;
 }
 
-/* File format badges */
 .format-badge {
     display: inline-block;
     padding: 2px 6px;
@@ -640,10 +638,9 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     margin-left: 3px;
-    background: rgba(212, 175, 55, 0.2);
+    background: rgba(255,255,255,0.2);
 }
 
-/* Export notification */
 .export-notification {
     position: fixed;
     bottom: 15px;
@@ -670,14 +667,14 @@ body {
     }
 }
 
-/* ROYAL GOLDEN FOOTER - AMMAR EDITION */
+/* ROYAL GOLDEN FOOTER – exactly from example, with AMMAR colors */
 .footer {
     margin-top: 50px;
     padding: 2.5rem 2rem 1.8rem;
     background: linear-gradient(145deg, #1a1033, #2b1b47, #0f0c29);
     color: #fffbee;
     border-radius: 60px 60px 0 0;
-    box-shadow: 0 -20px 40px rgba(212, 175, 55, 0.4), 0 0 0 1px rgba(212,175,55,0.2) inset;
+    box-shadow: 0 -20px 40px rgba(180, 130, 220, 0.4), 0 0 0 1px rgba(212,175,55,0.2) inset;
     backdrop-filter: blur(12px);
     width: 100%;
     flex-shrink: 0;
@@ -771,7 +768,7 @@ body {
     padding: 12px 28px;
     border-radius: 60px;
     font-size: 1.1rem;
-    border: 1px solid rgba(212,175,55,0.2);
+    border: 1px solid rgba(255,215,0,0.2);
 }
 
 .footer-badge:hover {
@@ -892,18 +889,11 @@ body {
 }
 
 @media (max-width:700px) {
-    .footer { padding: 2rem 1.5rem 1.5rem; }
-    .footer-logo { font-size:32px; }
-    .footer-logo i { font-size: 42px; }
-    .footer-social a { width:50px; height:50px; font-size:20px; }
-    .footer-links { gap: 40px; }
+    .footer-logo { font-size:28px; }
+    .footer-social a { width:48px; height:48px; }
 }
 @media (max-width:480px) {
-    .footer { padding: 1.5rem 1rem 1.2rem; }
-    .footer-logo { font-size:28px; }
-    .footer-logo i { font-size: 36px; }
-    .footer-links { gap:25px; }
-    .footer-extra-link { padding: 8px 16px; font-size: 0.9rem; }
+    .footer-links { gap:30px; }
 }
 
 ::-webkit-scrollbar {
@@ -917,11 +907,10 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--majestic-gold);
+    background: #d4af37;
     border-radius: 8px;
 }
 
-/* Ultra Responsive */
 @media (max-width: 380px) {
     body { padding: 5px 4px 0 4px; }
     .header { padding: 6px 10px; }
@@ -955,7 +944,7 @@ body {
 <div class="container">
 
 <div class="header">
-<h1><i class="fas fa-crown"></i> AI SCRAPER · AMMAR</h1>
+<h1><i class="fas fa-bolt"></i> AI SCRAPER · AMMAR</h1>
 <button class="theme-toggle" onclick="toggleTheme()">
 <i class="fas fa-moon"></i> <span id="themeText">Dark</span>
 </button>
@@ -1060,7 +1049,7 @@ body {
     </div>
 </div>
 
-<!-- ROYAL GOLDEN FOOTER - AMMAR EDITION -->
+<!-- ROYAL GOLDEN FOOTER - exactly from example with AMMAR branding -->
 <footer class="footer">
     <div class="footer-main">
         <div class="footer-logo">
@@ -1157,7 +1146,7 @@ function previewUrl() {
 function showNotification(message, type = "success") {
     const notification = document.createElement('div');
     notification.className = 'export-notification';
-    notification.style.background = type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : '#ef4444';
+    notification.style.background = type === 'success' ? 'var(--success)' : type === 'warning' ? 'var(--warning)' : 'var(--danger)';
     notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-circle' : 'times-circle'}"></i> ${message}`;
     document.body.appendChild(notification);
     setTimeout(() => {
@@ -1174,24 +1163,28 @@ async function scrapeWebsite() {
     document.getElementById('loading').style.display = 'block';
     document.querySelector('.scrape-btn').disabled = true;
     try {
-        // Simulate API call since backend not available
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        const mockData = {
-            title: "Example Domain",
-            url: fullUrl,
-            paragraphs: [
-                "This is a sample paragraph from the scraped website.",
-                "AI SCRAPER by AMMAR extracts all the content from any webpage.",
-                "You can ask questions about this content in Grok AI mode."
-            ]
-        };
-        scrapedData = mockData;
-        sessionId = "mock-session-" + Date.now();
-        document.getElementById('previewContent').innerHTML = '<pre>' + JSON.stringify(mockData, null, 2) + '</pre>';
-        document.getElementById('dataCard').style.display = 'block';
-        document.getElementById('combinedChatCard').style.display = 'block';
-        addMessage('assistant', '✅ Scraped! Ask about the content.');
-        showNotification('Scraped successfully!', 'success');
+        const formData = new FormData();
+        formData.append('url', fullUrl);
+        formData.append('mode', document.getElementById('scrapeMode').value);
+        formData.append('js', document.getElementById('jsMode').value);
+        const response = await fetch('/scrape', { method: 'POST', body: formData });
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server error:', errorText);
+            throw new Error(`Server error: ${response.status}`);
+        }
+        const result = await response.json();
+        if(result.success) {
+            scrapedData = result.data;
+            sessionId = result.session_id;
+            document.getElementById('previewContent').innerHTML = '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
+            document.getElementById('dataCard').style.display = 'block';
+            document.getElementById('combinedChatCard').style.display = 'block';
+            addMessage('assistant', '✅ Scraped! Ask about the content.');
+            showNotification('Scraped successfully!', 'success');
+        } else {
+            showNotification('Error: ' + (result.error || 'Unknown'), 'error');
+        }
     } catch(error) {
         showNotification('Error: ' + error.message, 'error');
     } finally {
@@ -1216,13 +1209,23 @@ async function askGroq() {
     document.getElementById('chatContainer').appendChild(typingDiv);
     
     try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const mockResponse = `Based on the scraped content: "${scrapedData.paragraphs[0]}"`;
+        const formData = new FormData();
+        formData.append('message', question);
+        formData.append('scraped_data', JSON.stringify(scrapedData));
+        formData.append('history', JSON.stringify(groqChatHistory));
+        
+        const response = await fetch('/groq-chat', { method: 'POST', body: formData });
+        const result = await response.json();
         
         document.getElementById(typingId)?.remove();
-        addMessage('assistant', marked.parse(mockResponse));
-        groqChatHistory.push({ role: 'user', content: question });
-        groqChatHistory.push({ role: 'assistant', content: mockResponse });
+        
+        if(result.success) {
+            addMessage('assistant', marked.parse(result.response));
+            groqChatHistory.push({ role: 'user', content: question });
+            groqChatHistory.push({ role: 'assistant', content: result.response });
+        } else {
+            addMessage('assistant', '❌ Error: ' + (result.error || 'Unknown'));
+        }
     } catch(error) {
         document.getElementById(typingId)?.remove();
         addMessage('assistant', '❌ Error: ' + error.message);
@@ -1262,13 +1265,24 @@ async function askGrokMode() {
     document.getElementById('grokChatContainer').appendChild(td);
     
     try {
-        await new Promise(resolve => setTimeout(resolve, 1200));
-        const mockResponse = `I understand you're asking: "${q}". This is a simulated response from Grok Mode.`;
+        const fd = new FormData();
+        fd.append('message', q);
+        fd.append('scraped_data', JSON.stringify(scrapedData || {}));
+        fd.append('analysis_type', 'comprehensive');
+        fd.append('history', JSON.stringify(grokChatHistory));
+        
+        const r = await fetch('/grok-mode', { method: 'POST', body: fd });
+        const res = await r.json();
         
         document.getElementById(tid)?.remove();
-        addGrokMessage('assistant', marked.parse(mockResponse));
-        grokChatHistory.push({ role: 'user', content: q });
-        grokChatHistory.push({ role: 'assistant', content: mockResponse });
+        
+        if(res.success) {
+            addGrokMessage('assistant', marked.parse(res.response));
+            grokChatHistory.push({ role: 'user', content: q });
+            grokChatHistory.push({ role: 'assistant', content: res.response });
+        } else {
+            addGrokMessage('assistant', '❌ Error: ' + (res.error || 'Unknown'));
+        }
     } catch(e) {
         document.getElementById(tid)?.remove();
         addGrokMessage('assistant', '❌ Error: ' + e.message);
