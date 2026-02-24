@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
-/* ===== EXACT GOLDEN CSS (from first file) applied to second HTML structure ===== */
+/* ===== ROYAL GOLD / DEEP VIOLET THEME (exact from golden footer spec, integrated fully) ===== */
 * {
     margin: 0;
     padding: 0;
@@ -438,7 +438,7 @@ body {
     to { transform: translateX(0); opacity: 1; }
 }
 
-/* ===== ROYAL GOLD FOOTER (exact from first file, adapted to second HTML) ===== */
+/* ===== ROYAL GOLD FOOTER (exact golden style, ultra premium) ===== */
 .footer {
     margin-top: 50px;
     padding: 2.5rem 2rem 1.8rem;
@@ -585,15 +585,13 @@ body {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--input-bg); border-radius: 10px; }
 ::-webkit-scrollbar-thumb { background: var(--accent-primary); border-radius: 10px; }
-
-/* ensure everything fits original second HTML exactly */
 </style>
 </head>
 <body data-theme="light">
 
 <div class="container">
 
-<!-- HEADER same as second HTML but golden styled -->
+<!-- HEADER royal gold style -->
 <div class="header">
 <h1><i class="fas fa-crown"></i> AI SCRAPER · AMMAR</h1>
 <button class="theme-toggle" onclick="toggleTheme()">
@@ -666,7 +664,7 @@ body {
     </div>
 </div>
 
-<!-- ROYAL GOLD FOOTER (exact golden style, with second HTML links) -->
+<!-- ROYAL GOLD FOOTER (exact from golden spec, with second HTML links) -->
 <footer class="footer">
     <div class="footer-main">
         <div class="footer-brand">
@@ -727,7 +725,7 @@ body {
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
-// ----------------------------------- EXACT SCRIPT FROM SECOND HTML (preserved) ---------------------------------
+// ---------- EXACT FUNCTIONS FROM SECOND HTML (preserved 100%) ----------
 let scrapedData = null;
 let sessionId = null;
 let groqChatHistory = [];
@@ -776,7 +774,6 @@ async function scrapeWebsite() {
     document.getElementById('loading').style.display = 'block';
     document.querySelector('.scrape-btn').disabled = true;
     // simulate (mock) because backend not present – but keep original fetch logic for completeness
-    // using mock to show UI exactly as second HTML would behave
     setTimeout(() => {
         const mockData = {
             title: `Scraped: ${fullUrl.substring(0,30)}...`,
@@ -917,13 +914,8 @@ async function exportData(format) {
             mimeType = 'text/plain';
             fileExtension = 'txt';
             fileName += '.txt';
-        } else if(format === 'excel' || format === 'pdf' || format === 'markdown') {
-            // fallback to json for unsupported
-            content = JSON.stringify(scrapedData, null, 2);
-            mimeType = 'application/json';
-            fileExtension = 'json';
-            fileName += '.json';
         } else {
+            // fallback to json for excel/pdf/markdown
             content = JSON.stringify(scrapedData, null, 2);
             mimeType = 'application/json';
             fileExtension = 'json';
