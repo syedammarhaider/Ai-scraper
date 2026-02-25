@@ -631,22 +631,21 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 
 /* PROFESSIONAL ROYAL FOOTER – exactly same structure, refined typography */
 .footer {
-    margin-top: 30px;
-    padding: clamp(1.2rem, 3.5vw, 2.2rem) clamp(1rem, 3vw, 2rem);
+    margin-top: 20px;
+    padding: clamp(0.8rem, 2.5vw, 1.5rem) clamp(0.6rem, 2vw, 1.2rem);
     background: linear-gradient(145deg, #1a1033, #2b1b47, #0f0c29);
     color: #fffbee;
-    border-radius: clamp(24px, 4vw, 44px) clamp(24px, 4vw, 44px) 0 0;
+    border-radius: clamp(16px, 3vw, 32px) clamp(16px, 3vw, 32px) 0 0;
     box-shadow: 
-        0 -15px 30px rgba(180, 130, 220, 0.3),
-        0 0 0 1px rgba(212,175,55,0.2) inset,
-        0 0 60px rgba(212,175,55,0.08);
-    backdrop-filter: blur(12px);
+        0 -10px 20px rgba(180, 130, 220, 0.2),
+        0 0 0 1px rgba(212,175,55,0.15) inset;
+    backdrop-filter: blur(8px);
     width: 100%;
     flex-shrink: 0;
     position: relative;
-    border-top: 2px solid rgba(212,175,55,0.4);
+    border-top: 1px solid rgba(212,175,55,0.3);
     overflow: hidden;
-    min-height: clamp(150px, 25vw, 300px);
+    min-height: clamp(100px, 20vw, 200px);
 }
 
 .footer::before {
@@ -699,39 +698,39 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    gap: clamp(15px, 3vw, 30px);
-    margin-bottom: clamp(15px, 3vw, 30px);
+    gap: clamp(8px, 2vw, 15px);
+    margin-bottom: clamp(8px, 2vw, 15px);
     text-align: center;
 }
 
 .footer-logo {
-    font-size: clamp(22px, 4.5vw, 32px); 
-    font-weight: 700;
+    font-size: clamp(16px, 3.5vw, 24px); 
+    font-weight: 600;
     background: linear-gradient(145deg, #fff, #ffe68f, #e2c5ff);
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent;
     display: flex; 
     align-items: center; 
     justify-content: center;
-    gap: clamp(8px, 1.5vw, 12px);
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    letter-spacing: -0.01em;
-    margin-bottom: clamp(6px, 1.5vw, 10px);
+    gap: clamp(6px, 1.2vw, 10px);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    letter-spacing: -0.005em;
+    margin-bottom: clamp(4px, 1vw, 8px);
     flex: 1;
-    min-width: 180px;
+    min-width: 150px;
 }
 .footer-logo i {
-    font-size: clamp(24px, 5vw, 40px);
+    font-size: clamp(18px, 4vw, 28px);
     background: linear-gradient(145deg, #fbbf24, #ff8c00, #ff6ec7);
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 8px gold) drop-shadow(0 2px 4px rgba(0,0,0,0.2));
-    animation: crownGlow 2.5s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 5px gold) drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+    animation: crownGlow 2s ease-in-out infinite alternate;
 }
 
 @keyframes crownGlow {
-    0% { filter: drop-shadow(0 0 8px gold) drop-shadow(0 2px 4px rgba(0,0,0,0.2)); transform: scale(1); }
-    100% { filter: drop-shadow(0 0 15px #ffdb7c) drop-shadow(0 2px 4px rgba(0,0,0,0.2)); transform: scale(1.02); }
+    0% { filter: drop-shadow(0 0 5px gold) drop-shadow(0 1px 2px rgba(0,0,0,0.15)); transform: scale(1); }
+    100% { filter: drop-shadow(0 0 10px #ffdb7c) drop-shadow(0 1px 2px rgba(0,0,0,0.15)); transform: scale(1.01); }
 }
 .footer-tagline {
     display: flex;
@@ -742,16 +741,16 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 }
 
 .footer-tagline span {
-    background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(212,175,55,0.15));
-    padding: clamp(4px, 1.2vw, 8px) clamp(12px, 2.5vw, 20px);
-    border-radius: clamp(20px, 4vw, 35px);
-    font-size: clamp(0.8rem, 1.8vw, 0.95rem);  /* slightly larger for professionalism */
-    font-weight: 500;
-    border: 1px solid rgba(212,175,55,0.4);
-    backdrop-filter: blur(12px);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(212,175,55,0.12));
+    padding: clamp(3px, 0.8vw, 6px) clamp(8px, 1.5vw, 14px);
+    border-radius: clamp(12px, 2.5vw, 20px);
+    font-size: clamp(0.65rem, 1.5vw, 0.8rem);
+    font-weight: 400;
+    border: 1px solid rgba(212,175,55,0.3);
+    backdrop-filter: blur(8px);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
     letter-spacing: 0.01em;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: all 0.2s ease;
 }
 
@@ -759,21 +758,21 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: clamp(10px, 2.5vw, 18px);
-    margin: clamp(15px, 3vw, 25px) 0;
+    gap: clamp(6px, 1.5vw, 12px);
+    margin: clamp(8px, 1.5vw, 15px) 0;
 }
 .footer-badge {
-    background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(212,175,55,0.12));
-    padding: clamp(6px, 1.2vw, 10px) clamp(16px, 2.8vw, 26px);
-    border-radius: clamp(20px, 4vw, 40px);
-    font-size: clamp(0.8rem, 1.8vw, 0.95rem);
-    font-weight: 500;
-    border: 1px solid rgba(212,175,55,0.3);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(212,175,55,0.08));
+    padding: clamp(4px, 0.8vw, 8px) clamp(10px, 1.8vw, 18px);
+    border-radius: clamp(14px, 2.5vw, 25px);
+    font-size: clamp(0.65rem, 1.5vw, 0.8rem);
+    font-weight: 400;
+    border: 1px solid rgba(212,175,55,0.25);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     letter-spacing: 0.01em;
     transition: all 0.2s ease;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(6px);
 }
 .footer-badge:hover {
     background: linear-gradient(145deg, rgba(212,175,55,0.4), rgba(255,215,0,0.3));
@@ -786,20 +785,20 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
-    gap: clamp(20px, 4vw, 50px);
-    margin: clamp(20px, 4vw, 40px) 0;
+    gap: clamp(12px, 2.5vw, 25px);
+    margin: clamp(10px, 2vw, 20px) 0;
     text-align: center;
 }
 
 .footer-column h4 {
-    font-size: clamp(0.9rem, 2.2vw, 1.2rem);   /* enhanced */
-    margin-bottom: clamp(10px, 2vw, 16px);
+    font-size: clamp(0.7rem, 1.8vw, 0.95rem);
+    margin-bottom: clamp(6px, 1.5vw, 12px);
     background: linear-gradient(145deg, #fff8e7, #ffe49e, #ffd966);
     -webkit-background-clip: text; 
     -webkit-text-fill-color: transparent;
-    font-weight: 600;   /* bolder */
-    letter-spacing: 0.01em;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    font-weight: 500;
+    letter-spacing: 0.005em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
     text-align: center;
 }
 .footer-column h4::after {
@@ -818,18 +817,18 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 }
 
 .footer-column ul li a {
-    color: rgba(255,255,240,0.9);
+    color: rgba(255,255,240,0.85);
     text-decoration: none;
-    font-size: clamp(0.85rem, 1.9vw, 1rem);    /* refined */
+    font-size: clamp(0.7rem, 1.6vw, 0.85rem);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: clamp(4px, 1vw, 6px);
+    gap: clamp(3px, 0.8vw, 5px);
     font-weight: 400;
     transition: all 0.2s ease;
-    padding: clamp(3px, 0.8vw, 6px) 0;
-    border-radius: 4px;
-    letter-spacing: 0.01em;
+    padding: clamp(2px, 0.5vw, 4px) 0;
+    border-radius: 3px;
+    letter-spacing: 0.005em;
 }
 .footer-column ul li a:hover {
     color: #fff;
@@ -842,25 +841,25 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: clamp(12px, 2.5vw, 24px);
-    margin: clamp(20px, 4vw, 35px) 0;
+    gap: clamp(8px, 1.5vw, 15px);
+    margin: clamp(10px, 2vw, 20px) 0;
 }
 
 .footer-social a {
-    width: clamp(36px, 5.5vw, 52px); 
-    height: clamp(36px, 5.5vw, 52px); 
-    font-size: clamp(16px, 2.5vw, 22px); 
+    width: clamp(28px, 4.5vw, 40px); 
+    height: clamp(28px, 4.5vw, 40px); 
+    font-size: clamp(12px, 2vw, 16px); 
     border-radius: 50%;
-    background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(212,175,55,0.1));
-    border: 1px solid rgba(212,175,55,0.3);
+    background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(212,175,55,0.08));
+    border: 1px solid rgba(212,175,55,0.25);
     display: flex; 
     align-items: center; 
     justify-content: center; 
     text-decoration: none; 
     color: #fffbee;
     transition: all 0.2s ease;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-    backdrop-filter: blur(6px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    backdrop-filter: blur(4px);
 }
 .footer-social a:hover {
     background: linear-gradient(145deg, #d4af37, #ffdb7c, #ffd700); 
@@ -874,30 +873,30 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
     display: flex; 
     flex-wrap: wrap; 
     justify-content: center;
-    gap: clamp(12px, 2.5vw, 24px); 
-    margin: clamp(15px, 3vw, 30px) 0; 
-    padding: clamp(12px, 2.5vw, 24px) 0;
-    border-top: 1px solid rgba(255,255,255,0.12); 
-    border-bottom: 1px solid rgba(255,255,255,0.12);
+    gap: clamp(8px, 1.5vw, 15px); 
+    margin: clamp(8px, 1.5vw, 15px) 0; 
+    padding: clamp(8px, 1.5vw, 15px) 0;
+    border-top: 1px solid rgba(255,255,255,0.08); 
+    border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
 .footer-extra-link { 
-    color: rgba(255,255,255,0.8); 
+    color: rgba(255,255,255,0.7); 
     text-decoration: none; 
-    font-size: clamp(0.8rem, 1.9vw, 0.95rem);
-    padding: clamp(6px, 1.2vw, 10px) clamp(18px, 2.8vw, 30px); 
-    border-radius: clamp(28px, 4.5vw, 48px);
-    background: linear-gradient(145deg, rgba(0,0,0,0.2), rgba(212,175,55,0.1)); 
+    font-size: clamp(0.7rem, 1.6vw, 0.85rem);
+    padding: clamp(4px, 0.8vw, 8px) clamp(12px, 1.8vw, 20px); 
+    border-radius: clamp(20px, 3vw, 30px);
+    background: linear-gradient(145deg, rgba(0,0,0,0.15), rgba(212,175,55,0.08)); 
     display: flex; 
     align-items: center; 
     justify-content: center;
-    gap: clamp(4px, 1vw, 8px);
+    gap: clamp(3px, 0.8vw, 6px);
     font-weight: 400;
-    border: 1px solid rgba(212,175,55,0.25);
+    border: 1px solid rgba(212,175,55,0.2);
     transition: all 0.2s ease;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
-    backdrop-filter: blur(6px);
-    letter-spacing: 0.01em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    backdrop-filter: blur(4px);
+    letter-spacing: 0.005em;
 }
 
 .footer-extra-link:hover { 
@@ -910,17 +909,17 @@ h1, h2, h3, h4, .header h1, .card h2, .footer-logo, .footer-column h4, .toggle-b
 
 .footer-copyright { 
     text-align: center; 
-    font-size: clamp(0.75rem, 1.8vw, 0.9rem); 
+    font-size: clamp(0.65rem, 1.5vw, 0.8rem); 
     display: flex; 
     flex-wrap: wrap; 
     justify-content: center; 
-    gap: clamp(12px, 2vw, 20px);
-    padding-top: clamp(12px, 2vw, 20px); 
-    border-top: 1px solid rgba(255,255,255,0.12);
+    gap: clamp(8px, 1.5vw, 15px);
+    padding-top: clamp(8px, 1.5vw, 15px); 
+    border-top: 1px solid rgba(255,255,255,0.1);
     font-weight: 400;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
-    margin-top: clamp(6px, 1.5vw, 12px);
-    letter-spacing: 0.01em;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    margin-top: clamp(4px, 1vw, 8px);
+    letter-spacing: 0.005em;
 }
 
 @media (max-width: 1200px) {
