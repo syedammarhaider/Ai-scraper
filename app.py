@@ -1,7 +1,8 @@
+# app.py
+
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from groq import Groq
 from scraper import UltraScraper
@@ -14,9 +15,6 @@ load_dotenv()
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 scraper = UltraScraper()
-
-# Mount static files if needed
-os.makedirs("downloads", exist_ok=True)
 
 # ---------- GROQ ----------
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -49,7 +47,6 @@ async def scrape(request: Request):
     if not url.startswith("http"):
         url = "https://" + url
 
-    print(f"🚀 Starting scrape: {url} with mode: {mode}")
     data = scraper.scrape_website(url, mode)
 
     if "error" in data:
@@ -137,10 +134,10 @@ async def grok_mode(request: Request):
             model=MODEL_DEEP,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": full_context}
+                {"role": "user", "content": full_context}  # Removed character limit for unlimited answers
             ],
             temperature=0.2,
-            max_tokens=8000
+            max_tokens=8000  # Increased from 2000 to 8000 for much longer answers
         )
 
         answer = getattr(response.choices[0].message, 'content', None)
@@ -212,8 +209,7 @@ async def export(request: Request):
         "csv": scraper.save_as_csv,
         "excel": scraper.save_as_excel,
         "txt": scraper.save_as_text,
-        "pdf": scraper.save_as_pdf,
-        "markdown": scraper.save_as_text  # Use text handler for markdown
+        "pdf": scraper.save_as_pdf
     }
 
     if fmt not in handlers:
@@ -221,7 +217,3 @@ async def export(request: Request):
 
     path = handlers[fmt](data, filename)
     return FileResponse(path, filename=os.path.basename(path))
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
