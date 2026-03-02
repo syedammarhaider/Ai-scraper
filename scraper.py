@@ -638,7 +638,7 @@ class UltraScraper:
             description = self.clean(meta_desc.get("content"))
 
         # Headings
-        headings = {f"h{i}": [self.clean(h.get_text()) for h in soup.find_all(f"h{i")] if h.get_text()
+        headings = {f"h{i}": [self.clean(h.get_text()) for h in soup.find_all(f"h{i}") if h.get_text()]
                     for i in range(1, 7)}
 
         # Paragraphs
