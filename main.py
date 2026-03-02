@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 # from groq import Groq  # Temporarily disabled for Python 3.14 compatibility
 from scraper import UltraScraper
 import os, json, time, uuid
-import pandas as pd
 
 load_dotenv()
 
@@ -297,18 +296,6 @@ Only use data from the page. If info missing, say "Not found"."""
             temperature=0.1,
             max_tokens=500
         )
-        
-        answer = response.get("choices", [{}])[0].get("message", {}).get("content", "No summary generated.")
-        
-        return {
-            "success": True,
-            "summary": answer.strip(),
-            "mode": "grok_summary"
-        }
-        
-    except Exception as e:
-        return {"success": False, "error": f"Summary error: {str(e)}"}
-
         
         answer = response.get("choices", [{}])[0].get("message", {}).get("content", "No summary generated.")
         
