@@ -3,7 +3,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from groq import Groq
 from scraper import UltraScraper
@@ -16,9 +15,6 @@ load_dotenv()
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 scraper = UltraScraper()
-
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ---------- GROQ ----------
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
