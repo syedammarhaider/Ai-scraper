@@ -23,6 +23,9 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")  # Ye templates set karti hai
 scraper = UltraScraper()  # Ye scraper object create karti hai
 
+# Mount static files - Ye line static files serve karti hai
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # GROQ - Using direct API calls for Python 3.14 compatibility - Ye comment Groq ke bare mein hai
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")  # Ye API key get karti hai
 MODEL = "llama-3.3-70b-versatile"  # Ye model set karti hai
