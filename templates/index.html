@@ -1138,33 +1138,77 @@ function showNotification(message, type = "success") {
     }, 2500);
 }
 
+// Updated scrape function for full site
 async function scrapeWebsite() {
     const url = document.getElementById('urlInput').value;
-    if(!url) { showNotification("Enter URL first", "warning"); return; }
-    let fullUrl = url;
-    if(!url.startsWith('http')) { fullUrl = 'https://' + url; }
+    const mode = document.getElementById('scrapeMode').value;
+    const maxPages = document.getElementById('maxPages')?.value || 500;
+    const maxProducts = document.getElementById('maxProducts')?.value || 5000;
+    
+    if(!url) { 
+        showNotification("Enter URL first", "warning"); 
+        return; 
+    }
+    
+    // Show loading
     document.getElementById('loading').style.display = 'block';
     document.querySelector('.scrape-btn').disabled = true;
+    
     try {
         const formData = new FormData();
-        formData.append('url', fullUrl);
-        formData.append('mode', document.getElementById('scrapeMode').value);
-        formData.append('js', document.getElementById('jsMode').value);
-        const response = await fetch('/scrape', { method: 'POST', body: formData });
+        formData.append('url', url);
+        formData.append('mode', mode);
+        formData.append('max_pages', maxPages);
+        formData.append('max_products', maxProducts);
+        
+        const response = await fetch('/scrape', { 
+            method: 'POST', 
+            body: formData 
+        });
+        
         if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Server error:', errorText);
             throw new Error(`Server error: ${response.status}`);
         }
+        
         const result = await response.json();
+        
         if(result.success) {
             scrapedData = result.data;
-            sessionId = result.session_id;
-            document.getElementById('previewContent').innerHTML = '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
+            
+            // Show preview
+            let previewHTML = '';
+            previewHTML += `<h3>📊 Scraping Complete!</h3>`;
+            previewHTML += `<p>📍 URL: ${result.data.url}</p>`;
+            previewHTML += `<p>📦 Total Products: <strong>${result.data.total_products || 0}</strong></p>`;
+            previewHTML += `<p>📄 Pages Scraped: ${result.data.stats?.pages_scraped || 0}</p>`;
+            previewHTML += `<p>⏱️ Time: ${result.data.stats?.scrape_time || 0} seconds</p>`;
+            
+            if(result.data.products && result.data.products.length > 0) {
+                previewHTML += `<h4>📋 Sample Products (first 5):</h4>`;
+                previewHTML += `<ul style="list-style: none; padding: 0;">`;
+                
+                result.data.products.slice(0, 5).forEach((p, i) => {
+                    previewHTML += `<li style="margin: 10px 0; padding: 10px; background: var(--input-bg); border-radius: 10px;">`;
+                    previewHTML += `<strong>${i+1}. ${p.name || 'Unknown'}</strong>`;
+                    if(p.price) previewHTML += ` - $${p.price}`;
+                    previewHTML += `</li>`;
+                });
+                
+                if(result.data.products.length > 5) {
+                    previewHTML += `<li>... and ${result.data.products.length - 5} more products</li>`;
+                }
+                
+                previewHTML += `</ul>`;
+            }
+            
+            document.getElementById('previewContent').innerHTML = previewHTML;
             document.getElementById('dataCard').style.display = 'block';
             document.getElementById('combinedChatCard').style.display = 'block';
-            addMessage('assistant', '✅ Scraped! Ask about the content.');
-            showNotification('Scraped successfully!', 'success');
+            
+            // Add to chat
+            addMessage('assistant', `✅ Successfully scraped **${result.data.total_products || 0}** products from the entire website! Ask me anything about them.`);
+            
+            showNotification(`Scraped ${result.data.total_products || 0} products!`, 'success');
         } else {
             showNotification('Error: ' + (result.error || 'Unknown'), 'error');
         }
