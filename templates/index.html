@@ -1,3 +1,17 @@
+<!-- 
+git add .; git commit -m "Auto update"; git push origin main 
+
+
+
+ssh -i ai-key.pem ec2-user@3.95.32.144
+$ cd ~/Ai-scraper
+$ python app.py
+http://3.95.32.144
+http://3.95.32.144/
+
+-->
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -177,13 +191,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
-// Ye variables global hain jo scraped data aur chat history store karte hain
 let scrapedData = null;
 let sessionId = null;
 let groqChatHistory = [];
 let grokChatHistory = [];
 
-// Theme toggle function - light/dark mode switch karta hai
 function toggleTheme() {
     const body = document.body;
     const themeText = document.getElementById('themeText');
@@ -199,25 +211,19 @@ function toggleTheme() {
     }
 }
 
-// URL preview - new tab mein website kholta hai
 function previewUrl() {
     const url = document.getElementById('urlInput').value;
     if(!url) { showNotification("Enter URL first", "warning"); return; }
-    let fullUrl = url.startsWith('http') ? url : 'https://' + url;
+    let fullUrl = url;
+    if(!url.startsWith('http')) { fullUrl = 'https://' + url; }
     window.open(fullUrl, '_blank');
 }
 
-// Notification dikhane ka function
 function showNotification(message, type = "success") {
     const notification = document.createElement('div');
     notification.className = 'export-notification';
-    notification.style.background = type === 'success' ? 'var(--success)' : 
-                                   type === 'warning' ? 'var(--warning)' : 
-                                   'var(--danger)';
-    notification.innerHTML = `<i class="fas fa-${
-        type === 'success' ? 'check-circle' : 
-        type === 'warning' ? 'exclamation-circle' : 'times-circle'
-    }"></i> ${message}`;
+    notification.style.background = type === 'success' ? 'var(--success)' : type === 'warning' ? 'var(--warning)' : 'var(--danger)';
+    notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-circle' : 'times-circle'}"></i> ${message}`;
     document.body.appendChild(notification);
     setTimeout(() => {
         notification.style.animation = 'slideOutRight 0.3s ease-out';
@@ -225,201 +231,154 @@ function showNotification(message, type = "success") {
     }, 2500);
 }
 
-// Website scrape karne ka main function - ye data full scrape karta hai
 async function scrapeWebsite() {
-    const url = document.getElementById('urlInput').value.trim();
-    if (!url) return showNotification("Enter URL first", "warning");
-
-    let fullUrl = url.startsWith('http') ? url : 'https://' + url;
-
+    const url = document.getElementById('urlInput').value;
+    if(!url) { showNotification("Enter URL first", "warning"); return; }
+    let fullUrl = url;
+    if(!url.startsWith('http')) { fullUrl = 'https://' + url; }
     document.getElementById('loading').style.display = 'block';
     document.querySelector('.scrape-btn').disabled = true;
-
     try {
         const formData = new FormData();
         formData.append('url', fullUrl);
         formData.append('mode', document.getElementById('scrapeMode').value);
         formData.append('js', document.getElementById('jsMode').value);
-
-        const response = await fetch('/scrape', { 
-            method: 'POST', 
-            body: formData 
-        });
-
+        const response = await fetch('/scrape', { method: 'POST', body: formData });
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Scrape failed:', errorText);
+            console.error('Server error:', errorText);
             throw new Error(`Server error: ${response.status}`);
         }
-
         const result = await response.json();
-
-        if (result.success) {
+        if(result.success) {
             scrapedData = result.data;
             sessionId = result.session_id;
-
-            // Full data preview dikhata hai (performance ke liye limit nahi lagaya)
-            document.getElementById('previewContent').innerHTML = 
-                '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
-
+            document.getElementById('previewContent').innerHTML = '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
             document.getElementById('dataCard').style.display = 'block';
             document.getElementById('combinedChatCard').style.display = 'block';
-
-            addMessage('assistant', '✅ Scraped successfully! Ab is data ke bare mein pooch sakte ho.');
-            showNotification('Scraping complete!', 'success');
+            addMessage('assistant', '✅ Scraped! Ask about the content.');
+            showNotification('Scraped successfully!', 'success');
         } else {
             showNotification('Error: ' + (result.error || 'Unknown'), 'error');
         }
-    } catch (error) {
-        console.error('Scrape error:', error);
-        showNotification('Scraping failed: ' + error.message, 'error');
+    } catch(error) {
+        showNotification('Error: ' + error.message, 'error');
     } finally {
         document.getElementById('loading').style.display = 'none';
         document.querySelector('.scrape-btn').disabled = false;
     }
 }
 
-// Groq (scraped data) mode mein question poochna
 async function askGroq() {
-    const question = document.getElementById('questionInput').value.trim();
-    if (!question) return showNotification("Enter question first", "warning");
-    if (!scrapedData) return addMessage('assistant', '⚠️ Pehle website scrape karo!');
-
+    const question = document.getElementById('questionInput').value;
+    if(!question) { showNotification("Enter question", "warning"); return; }
+    if(!scrapedData) { addMessage('assistant', '⚠️ Scrape a website first!'); return; }
+    
     addMessage('user', question);
     document.getElementById('questionInput').value = '';
-
+    
     const typingId = 'typing-' + Date.now();
     const typingDiv = document.createElement('div');
     typingDiv.className = 'message assistant';
     typingDiv.id = typingId;
-    typingDiv.innerHTML = '<div class="message-content typing">Analyzing...</div>';
+    typingDiv.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Analyzing...</div>';
     document.getElementById('chatContainer').appendChild(typingDiv);
-
+    
     try {
         const formData = new FormData();
         formData.append('message', question);
-
-        // Purana tarika - full data bhej rahe hain (jaise pehle tha)
-        // lekin backend mein hum limit kar denge taake crash na ho
         formData.append('scraped_data', JSON.stringify(scrapedData));
         formData.append('history', JSON.stringify(groqChatHistory));
-
-        const response = await fetch('/groq-chat', { 
-            method: 'POST', 
-            body: formData 
-        });
-
-        if (!response.ok) {
-            const err = await response.text();
-            throw new Error(`Server returned ${response.status}: ${err.slice(0,100)}`);
-        }
-
+        
+        const response = await fetch('/groq-chat', { method: 'POST', body: formData });
         const result = await response.json();
-
+        
         document.getElementById(typingId)?.remove();
-
-        if (result.success) {
+        
+        if(result.success) {
             addMessage('assistant', marked.parse(result.response));
             groqChatHistory.push({ role: 'user', content: question });
             groqChatHistory.push({ role: 'assistant', content: result.response });
         } else {
-            addMessage('assistant', '❌ ' + (result.error || 'Unknown error'));
+            addMessage('assistant', '❌ Error: ' + (result.error || 'Unknown'));
         }
-    } catch (error) {
+    } catch(error) {
         document.getElementById(typingId)?.remove();
         addMessage('assistant', '❌ Error: ' + error.message);
-        console.error('Groq error:', error);
     }
 }
 
-// Message add karne ka function (Scraped mode ke liye)
 function addMessage(role, content) {
-    const container = document.getElementById('chatContainer');
-    const div = document.createElement('div');
-    div.className = `message ${role}`;
-    div.innerHTML = `<div class="message-content">${content}</div>`;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
+    const chatContainer = document.getElementById('chatContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message ' + role;
+    messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// Message add karne ka function (Grok mode ke liye)
 function addGrokMessage(role, content) {
-    const container = document.getElementById('grokChatContainer');
-    const div = document.createElement('div');
-    div.className = `message ${role}`;
-    div.innerHTML = `<div class="message-content">${content}</div>`;
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
+    const chatContainer = document.getElementById('grokChatContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message ' + role;
+    messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
-// Grok Mode (universal) mein question poochna
 async function askGrokMode() {
-    const q = document.getElementById('grokQuestionInput').value.trim();
-    if (!q) return showNotification("Enter question first", "warning");
-
+    const q = document.getElementById('grokQuestionInput').value;
+    if(!q) { showNotification("Enter question", "warning"); return; }
+    
     addGrokMessage('user', q);
     document.getElementById('grokQuestionInput').value = '';
-
+    
     const tid = 'gt' + Date.now();
     const td = document.createElement('div');
     td.className = 'message assistant';
     td.id = tid;
-    td.innerHTML = '<div class="message-content typing">Thinking...</div>';
+    td.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Reasoning...</div>';
     document.getElementById('grokChatContainer').appendChild(td);
-
+    
     try {
         const fd = new FormData();
         fd.append('message', q);
-
-        // Grok Mode mein scraped data ki zarurat nahi, dummy bhej rahe hain
-        fd.append('scraped_data', JSON.stringify({ title: "ignored", url: "ignored" }));
+        fd.append('scraped_data', JSON.stringify(scrapedData || {}));
         fd.append('analysis_type', 'comprehensive');
         fd.append('history', JSON.stringify(grokChatHistory));
-
-        const r = await fetch('/grok-mode', { 
-            method: 'POST', 
-            body: fd 
-        });
-
-        if (!r.ok) {
-            const err = await r.text();
-            throw new Error(`Server error ${r.status}: ${err.slice(0,100)}`);
-        }
-
+        
+        const r = await fetch('/grok-mode', { method: 'POST', body: fd });
         const res = await r.json();
-
+        
         document.getElementById(tid)?.remove();
-
-        if (res.success) {
+        
+        if(res.success) {
             addGrokMessage('assistant', marked.parse(res.response));
             grokChatHistory.push({ role: 'user', content: q });
             grokChatHistory.push({ role: 'assistant', content: res.response });
         } else {
-            addGrokMessage('assistant', '❌ ' + (res.error || 'Unknown'));
+            addGrokMessage('assistant', '❌ Error: ' + (res.error || 'Unknown'));
         }
-    } catch (e) {
+    } catch(e) {
         document.getElementById(tid)?.remove();
         addGrokMessage('assistant', '❌ Error: ' + e.message);
-        console.error('Grok Mode error:', e);
     }
 }
 
-// Chat clear functions
 function clearGroqChat() {
     document.getElementById('chatContainer').innerHTML = '';
     groqChatHistory = [];
-    addMessage('assistant', '🧹 Groq chat cleared.');
+    addMessage('assistant', '🧹 Chat cleared.');
     showNotification('Groq chat cleared', 'success');
 }
 
 function clearGrokChat() {
     document.getElementById('grokChatContainer').innerHTML = '';
     grokChatHistory = [];
-    addGrokMessage('assistant', '🧹 Grok Mode chat cleared.');
+    addGrokMessage('assistant', '🧹 Chat cleared.');
     showNotification('Grok chat cleared', 'success');
 }
 
-// Export function - ye bilkul same rakha gaya hai
 async function exportData(format) {
     if(!scrapedData) { showNotification("Scrape a website first", "warning"); return; }
     
@@ -463,6 +422,8 @@ async function exportData(format) {
                     rows.push([`Paragraph ${index + 1}`, para.replace(/"/g, '""'), 'content', String(para.length)]);
                 });
             }
+            
+            // Create Excel-compatible CSV content
             content = headers.join(',') + '\n';
             rows.forEach(row => {
                 content += row.map(cell => `"${cell}"`).join(',') + '\n';
@@ -536,7 +497,7 @@ async function exportData(format) {
         showNotification(`Exported as ${format.toUpperCase()}!`, 'success');
         
     } catch(error) {
-        showNotification('Export failed: ' + error.message, 'error');
+        showNotification('Error: ' + error.message, 'error');
     }
 }
 
@@ -569,5 +530,6 @@ window.onload = function() {
     }, 300);
 }
 </script>
+
 </body>
 </html>
