@@ -25,6 +25,9 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")  # Ye templates set karti hai
 scraper = UltraScraper()  # Ye scraper object create karti hai
 
+# Mount static files - Ye line static files serve karta hai
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # In-memory storage for scraped data (per session)
 # In production → use redis / file / database
 scraped_sessions = defaultdict(dict)   # session_id → data
@@ -202,7 +205,26 @@ Rules:
 4. Be precise and factual.
 5. For greetings, respond naturally but briefly.
 """
-    context = f"SCRAPED DATA:\n{json.dumps(data, indent=2)[:8000]}\n\nQUESTION:\n{message}"  # Ye context banati hai
+    
+    # Handle both single page and aggregated crawl data
+    if "pages" in data:  # Aggregated crawl data
+        context_parts = [f"CRAWLED WEBSITE: {data.get('start_url', '')}"]
+        context_parts.append(f"Total Pages Scraped: {data.get('total_stats', {}).get('pages_scraped', 0)}")
+        context_parts.append(f"Total Paragraphs: {data.get('total_stats', {}).get('total_paragraphs', 0)}")
+        context_parts.append("\nSCRAPED CONTENT FROM ALL PAGES:")
+        
+        for i, page in enumerate(data.get("pages", [])[:10]):  # Limit to first 10 pages for context
+            context_parts.append(f"\n--- PAGE {i+1}: {page.get('url', '')} ---")
+            if page.get('title'):
+                context_parts.append(f"Title: {page['title']}")
+            if page.get('description'):
+                context_parts.append(f"Description: {page['description']}")
+            if page.get('paragraphs'):
+                context_parts.append("Content:\n" + "\n".join(page['paragraphs'][:20]))  # Limit paragraphs per page
+        
+        context = "\n".join(context_parts) + f"\n\nQUESTION:\n{message}"
+    else:  # Single page data
+        context = f"SCRAPED DATA:\n{json.dumps(data, indent=2)[:8000]}\n\nQUESTION:\n{message}"  # Ye context banati hai
 
     try:  # Ye try
         response = groq_ai.chat_completions_create(  # Ye call
@@ -334,20 +356,40 @@ async def grok_summary(request: Request):
     system_prompt = """You are GROK MODE SUMMARY - Extract key facts instantly and accurately.
 
 Provide a structured summary with:
-1. MAIN TOPIC - What the page is about
+1. MAIN TOPIC - What the page/site is about
 2. KEY POINTS - 3-5 most important facts
 3. STATISTICS - Any numbers/data found
 4. CONCLUSION - Main takeaway
 
-Only use data from the page. If info missing, say "Not found"."""  # Ye prompt
+Only use data from the scraped content. If info missing, say "Not found"."""  # Ye prompt
     
-    context_parts = [f"URL: {data.get('url', '')}"]  # Ye parts list
-    if data.get('title'):  # Ye check
-        context_parts.append(f"Title: {data['title']}")  # Ye append
-    if data.get('description'):  # Ye check
-        context_parts.append(f"Description: {data['description']}")  # Ye append
-    if data.get('paragraphs'):  # Ye check
-        context_parts.append("\nContent:\n" + "\n".join(data['paragraphs'][:15]))  # Ye content append
+    # Handle both single page and aggregated crawl data
+    if "pages" in data:  # Aggregated crawl data
+        context_parts = [f"CRAWLED WEBSITE: {data.get('start_url', '')}"]
+        context_parts.append(f"Total Pages: {data.get('total_stats', {}).get('pages_scraped', 0)}")
+        context_parts.append(f"Total Paragraphs: {data.get('total_stats', {}).get('total_paragraphs', 0)}")
+        
+        # Collect content from first few pages for summary
+        all_titles = []
+        all_paragraphs = []
+        for page in data.get("pages", [])[:5]:  # First 5 pages
+            if page.get('title'):
+                all_titles.append(page['title'])
+            if page.get('paragraphs'):
+                all_paragraphs.extend(page['paragraphs'][:10])  # First 10 paragraphs per page
+        
+        if all_titles:
+            context_parts.append(f"\nPage Titles:\n" + "\n".join([f"- {title}" for title in all_titles]))
+        if all_paragraphs:
+            context_parts.append(f"\nContent Sample:\n" + "\n".join(all_paragraphs[:30]))  # Limit total paragraphs
+    else:  # Single page data
+        context_parts = [f"URL: {data.get('url', '')}"]
+        if data.get('title'):
+            context_parts.append(f"Title: {data['title']}")
+        if data.get('description'):
+            context_parts.append(f"Description: {data['description']}")
+        if data.get('paragraphs'):
+            context_parts.append("\nContent:\n" + "\n".join(data['paragraphs'][:15]))
     
     try:  # Ye try
         response = groq_ai.chat_completions_create(  # Ye call

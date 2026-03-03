@@ -253,7 +253,38 @@ async function scrapeWebsite() {
         if(result.success) {
             scrapedData = result.data;
             sessionId = result.session_id;
-            document.getElementById('previewContent').innerHTML = '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
+            
+            // Better preview for aggregated data
+            let previewHtml = '';
+            if (result.data.pages && Array.isArray(result.data.pages)) {
+                // Aggregated crawl data
+                previewHtml = `<div style="font-family: monospace; font-size: 12px; line-height: 1.4;">
+                    <h3>📊 Crawled Website Data</h3>
+                    <p><strong>Start URL:</strong> ${result.data.start_url || 'N/A'}</p>
+                    <p><strong>Total Pages:</strong> ${result.data.total_stats?.pages_scraped || 0}</p>
+                    <p><strong>Total Paragraphs:</strong> ${result.data.total_stats?.total_paragraphs || 0}</p>
+                    <p><strong>Scraped At:</strong> ${result.data.scraped_at || 'N/A'}</p>
+                    
+                    <h4>📄 Pages Summary:</h4>
+                    <ul>`;
+                
+                result.data.pages.slice(0, 10).forEach((page, index) => {
+                    previewHtml += `<li><strong>Page ${index + 1}:</strong> ${page.title || 'No title'}<br>
+                        <small>URL: ${page.url || 'N/A'}</small><br>
+                        <small>Paragraphs: ${page.paragraphs?.length || 0}</small></li>`;
+                });
+                
+                if (result.data.pages.length > 10) {
+                    previewHtml += `<li><em>... and ${result.data.pages.length - 10} more pages</em></li>`;
+                }
+                
+                previewHtml += `</ul></div>`;
+            } else {
+                // Single page data
+                previewHtml = '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
+            }
+            
+            document.getElementById('previewContent').innerHTML = previewHtml;
             document.getElementById('dataCard').style.display = 'block';
             document.getElementById('combinedChatCard').style.display = 'block';
             addMessage('assistant', '✅ Scraped! Ask about the content.');
