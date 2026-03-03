@@ -198,6 +198,95 @@ async def get_scrape_progress(session_id: str):
     return response
 
 
+# ---------- SCRAPE WEBSITE (Single Page) ----------
+def scrape_website(url: str, mode: str = "comprehensive") -> dict:
+    """
+    Scrape a single page from a website
+    Uses requests and BeautifulSoup for basic scraping
+    """
+    import requests
+    from bs4 import BeautifulSoup
+    import re
+    
+    try:
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.5",
+        }
+        
+        response = requests.get(url, headers=headers, timeout=15, verify=False)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Extract basic data
+        data = {
+            "url": url,
+            "title": soup.title.string if soup.title else "",
+            "meta_description": "",
+            "headings": {},
+            "paragraphs": [],
+            "links": [],
+            "images": [],
+            "raw_html": response.text[:50000] if mode == "comprehensive" else ""
+        }
+        
+        # Meta description
+        meta_desc = soup.find('meta', attrs={'name': 'description'})
+        if meta_desc and meta_desc.get('content'):
+            data["meta_description"] = meta_desc['content']
+        
+        # Headings
+        for level in ['h1', 'h2', 'h3']:
+            headings = []
+            for tag in soup.find_all(level):
+                text = tag.get_text(strip=True)
+                if text:
+                    headings.append(text)
+            data["headings"][level] = headings
+        
+        # Paragraphs
+        for p in soup.find_all('p'):
+            text = p.get_text(strip=True)
+            if text and len(text) > 20:
+                data["paragraphs"].append(text)
+        
+        # Links
+        for a in soup.find_all('a', href=True):
+            href = a['href']
+            if href.startswith('http'):
+                data["links"].append(href)
+        
+        # Images
+        for img in soup.find_all('img', src=True):
+            src = img['src']
+            if src:
+                data["images"].append(src)
+        
+        # Limit data based on mode
+        if mode == "basic":
+            data = {
+                "url": url,
+                "title": data["title"],
+                "meta_description": data["meta_description"],
+                "paragraphs": data["paragraphs"][:5]
+            }
+        elif mode == "smart":
+            data = {
+                "url": url,
+                "title": data["title"],
+                "headings": data["headings"],
+                "paragraphs": data["paragraphs"][:10]
+            }
+        # comprehensive keeps all data
+        
+        return data
+        
+    except Exception as e:
+        return {"error": str(e)}
+
+
 # ---------- LEGACY SINGLE PAGE SCRAPE ----------
 @app.post("/scrape")
 async def scrape_single(request: Request):
@@ -217,8 +306,8 @@ async def scrape_single(request: Request):
     if mode == "full_website":
         return await scrape_full_website(request)
 
-    # Single page scrape
-    data = scraper.scrape_website(url, mode)
+    # Single page scrape using our custom function
+    data = scrape_website(url, mode)
 
     if "error" in data:
         return {"success": False, "error": data["error"]}
