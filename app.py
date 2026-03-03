@@ -1,7 +1,8 @@
-# Final app.py - March 2026 version - Saeed's AI Scraper
-# Fixed: large payload issue, HTML error responses, CORS, consistent routes
+# Final working app.py - March 2025 version
+# All routes consistent, CORS enabled, JSON error responses only
+# Groq endpoints fixed, function names match frontend calls
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -12,15 +13,17 @@ import requests
 
 from scraper import UltraScraper
 
-# Load environment
+# Load environment variables
 load_dotenv()
 
 app = FastAPI()
+templates = Jinja2Templates(directory="templates")
+scraper = UltraScraper()
 
-# Enable CORS - Prevents browser blocking
+# Enable CORS - this fixes most "<!DOCTYPE html>" issues from browser
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],                # Change to your domain in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,10 +32,7 @@ app.add_middleware(
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-templates = Jinja2Templates(directory="templates")
-scraper = UltraScraper()
-
-# Always return JSON on error - no more HTML tracebacks or 404 pages
+# Force JSON response even on crashes (no more HTML error pages)
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
@@ -40,24 +40,12 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"success": False, "error": f"Server error: {str(exc)}"},
     )
 
-# Increase max body size to 10MB (for safety)
-@app.middleware("http")
-async def limit_body_size(request: Request, call_next):
-    if request.method in ("POST", "PUT", "PATCH"):
-        content_length = request.headers.get("content-length")
-        if content_length and int(content_length) > 10 * 1024 * 1024:
-            raise HTTPException(status_code=413, detail="Payload too large - reduce data size")
-    response = await call_next(request)
-    return response
-
-# ──────────────────────────────────────────────
-# Groq Setup - Direct client (more reliable)
-# ──────────────────────────────────────────────
-
+# GROQ API Key & Models
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 MODEL = "llama-3.3-70b-versatile"
 MODEL_DEEP = "llama-3.3-70b-versatile"
 
+# Direct Groq client (more reliable than old groq package)
 class GroqDirectClient:
     def __init__(self, api_key):
         self.api_key = api_key
@@ -80,29 +68,32 @@ class GroqDirectClient:
                 f"{self.base_url}/chat/completions",
                 headers=self.headers,
                 json=payload,
-                timeout=60
+                timeout=45
             )
             resp.raise_for_status()
             return resp.json()
         except Exception as e:
             raise Exception(f"Groq API failed: {str(e)}")
 
+# Global Groq clients
 groq_ai = None
 grok_mode_client = None
 
-def init_groq():
+def init_groq_clients():
     global groq_ai, grok_mode_client
     if not GROQ_API_KEY:
         print("❌ GROQ_API_KEY missing in .env")
-        return
+        return False
     try:
         groq_ai = GroqDirectClient(GROQ_API_KEY)
         grok_mode_client = GroqDirectClient(GROQ_API_KEY)
-        print("✅ Groq clients initialized")
+        print("✅ Groq clients initialized successfully")
+        return True
     except Exception as e:
         print(f"❌ Groq init failed: {e}")
+        return False
 
-init_groq()
+init_groq_clients()
 
 # ──────────────────────────────────────────────
 # Routes
@@ -148,23 +139,15 @@ async def groq_chat(request: Request):
 
     form = await request.form()
     message = form.get("message")
-    scraped_str = form.get("scraped_data")
+    scraped = form.get("scraped_data")
 
-    if not message or not scraped_str:
+    if not message or not scraped:
         return {"success": False, "error": "Missing message or scraped_data"}
 
     try:
-        data = json.loads(scraped_str)
+        data = json.loads(scraped)
     except:
         return {"success": False, "error": "Invalid scraped_data JSON"}
-
-    # Limit data size - very important!
-    limited_data = {
-        "title": data.get("title", ""),
-        "url": data.get("url", ""),
-        "description": data.get("description", ""),
-        "main_content": "\n".join(data.get("paragraphs", [])[:30])  # only first 30 paragraphs
-    }
 
     system_prompt = """
 You are an EXACT factual AI assistant.
@@ -173,7 +156,7 @@ Rules:
 2. If answer not found, say: "This information is not available in the scraped website data."
 3. Never guess or use outside knowledge.
 """
-    context = f"SCRAPED DATA:\n{json.dumps(limited_data, indent=2)}\n\nQUESTION:\n{message}"
+    context = f"SCRAPED DATA:\n{json.dumps(data, indent=2)[:12000]}\n\nQUESTION:\n{message}"
 
     try:
         resp = groq_ai.chat_completions_create(
@@ -197,15 +180,14 @@ async def grok_mode(request: Request):
 
     form = await request.form()
     message = form.get("message")
-    scraped_str = form.get("scraped_data")
+    scraped = form.get("scraped_data")
     analysis_type = form.get("analysis_type", "comprehensive")
 
-    if not message or not scraped_str:
+    if not message or not scraped:
         return {"success": False, "error": "Missing message or scraped_data"}
 
-    # Validate but don't use full data
     try:
-        json.loads(scraped_str)
+        json.loads(scraped)  # just validate
     except:
         return {"success": False, "error": "Invalid scraped_data"}
 
