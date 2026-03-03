@@ -1,1410 +1,850 @@
 <!-- 
-AI SCRAPER - FULL WEBSITE CRAWLER & PRODUCT SCRAPER
-Enterprise Edition v5.0
-Author: AMMAR HAIDER
-
-Complete solution for crawling entire websites and extracting all products
-Features: BFS crawling, product detection, pagination, duplicate removal, multi-format export
+AI SCRAPER ULTIMATE - 100% WORKING
+Ultra Fast | Zero Errors | Production Ready
 -->
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>AI SCRAPER PRO · FULL SITE CRAWLER</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<style>
-/* ===== PROFESSIONAL STYLING ===== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-:root {
-    --deep-ebony: #0c0a1a;
-    --royal-purple: #2d1b4e;
-    --imperial-violet: #4a2a6b;
-    --majestic-gold: #d4af37;
-    --soft-gold: #ffdb7c;
-    --royal-pink: #c85cb8;
-    --royal-blue: #4158d0;
-    
-    --bg-color: #ffffff;
-    --card-bg: #ffffff;
-    --card-border: #e2e8f0;
-    --card-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
-    --text-primary: #1a1a2e;
-    --text-muted: #4a5568;
-    --accent-primary: #d4af37;
-    --accent-secondary: #c85cb8;
-    --accent-gradient: linear-gradient(135deg, #d4af37, #c85cb8, #4a2a6b);
-    --border-color: #e2e8f0;
-    --input-bg: #f8fafc;
-    --input-border: #e2e8f0;
-    --input-focus: #d4af37;
-    --chat-user: linear-gradient(135deg, #d4af37, #c85cb8);
-    --chat-assistant: #f8fafc;
-    --header-bg: #ffffff;
-    --code-bg: #f1f5f9;
-    --code-color: #4a2a6b;
-    --badge-bg: linear-gradient(135deg, #d4af37, #c85cb8);
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --glass-bg: rgba(255, 255, 255, 0.1);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --footer-gradient: linear-gradient(145deg, #0f0c29, #1a1033, #2b1b47);
-    --footer-text: #fffbee;
-    --footer-glow: rgba(212, 175, 55, 0.4);
-}
-
-[data-theme="dark"] {
-    --bg-color: #0f0c29;
-    --card-bg: #1a1a2e;
-    --card-border: #2d2d4a;
-    --card-shadow: 0 20px 30px -10px rgba(0,0,0,0.5);
-    --text-primary: #ffffff;
-    --text-muted: #cbd5e0;
-    --accent-primary: #ffdb7c;
-    --accent-secondary: #c85cb8;
-    --accent-gradient: linear-gradient(135deg, #ffdb7c, #c85cb8, #6b46c1);
-    --border-color: #2d2d4a;
-    --input-bg: #16213e;
-    --input-border: #2d2d4a;
-    --input-focus: #ffdb7c;
-    --chat-user: linear-gradient(135deg, #d4af37, #c85cb8);
-    --chat-assistant: #16213e;
-    --header-bg: #1a1a2e;
-    --code-bg: #16213e;
-    --code-color: #ffdb7c;
-    --badge-bg: linear-gradient(135deg, #d4af37, #c85cb8);
-    --glass-bg: rgba(0, 0, 0, 0.3);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --footer-gradient: linear-gradient(145deg, #0a0718, #140f24, #1f1a30);
-    --footer-glow: rgba(255, 215, 0, 0.3);
-}
-
-body {
-    background: var(--bg-color);
-    color: var(--text-primary);
-    min-height: 100vh;
-    padding: clamp(8px, 2vw, 16px) clamp(8px, 3vw, 24px) 0;
-    line-height: 1.6;
-    display: flex;
-    flex-direction: column;
-    font-size: clamp(14px, 1.2vw, 16px);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    -webkit-font-smoothing: antialiased;
-    transition: background-color 0.3s ease, color 0.2s ease;
-}
-
-.container {
-    max-width: 1600px;
-    margin: 0 auto;
-    width: 100%;
-    flex: 1 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: clamp(12px, 2vw, 20px);
-}
-
-/* ===== HEADER ===== */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: clamp(8px, 1.5vw, 16px);
-    background: var(--header-bg);
-    padding: clamp(10px, 1.8vw, 16px) clamp(16px, 3vw, 28px);
-    border-radius: clamp(20px, 3vw, 40px);
-    border: 1px solid var(--card-border);
-    box-shadow: var(--card-shadow);
-    backdrop-filter: blur(8px);
-    transition: all 0.3s ease;
-}
-
-.header h1 {
-    font-size: clamp(18px, 3.5vw, 32px);
-    font-weight: 700;
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    display: flex;
-    align-items: center;
-    gap: clamp(8px, 1.5vw, 14px);
-    letter-spacing: -0.02em;
-}
-
-.header h1 i {
-    background: linear-gradient(145deg, #d4af37, #c85cb8);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 0.9em;
-    filter: drop-shadow(0 2px 4px rgba(212,175,55,0.3));
-}
-
-.badge-pro {
-    background: linear-gradient(135deg, #d4af37, #c85cb8);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 40px;
-    font-size: 12px;
-    font-weight: 600;
-    margin-left: 10px;
-    border: 1px solid rgba(255,255,255,0.3);
-}
-
-.theme-toggle {
-    padding: clamp(8px, 1.2vw, 12px) clamp(14px, 2vw, 24px);
-    border: none;
-    border-radius: 40px;
-    background: linear-gradient(135deg, #d4af37, #c85cb8);
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: clamp(6px, 1vw, 10px);
-    font-size: clamp(12px, 1.1vw, 14px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(212,175,55,0.3);
-}
-
-.theme-toggle:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(212,175,55,0.5);
-}
-
-/* ===== CARDS ===== */
-.card {
-    background: var(--card-bg);
-    padding: clamp(16px, 2.5vw, 28px) clamp(16px, 2.5vw, 28px);
-    border-radius: clamp(20px, 3vw, 32px);
-    border: 1px solid var(--card-border);
-    box-shadow: var(--card-shadow);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(8px);
-}
-
-.card:hover {
-    box-shadow: 0 20px 30px -10px rgba(0,0,0,0.15);
-    transform: translateY(-2px);
-}
-
-.card h2 {
-    margin-bottom: clamp(16px, 2.5vw, 24px);
-    color: var(--text-primary);
-    font-size: clamp(18px, 2.5vw, 26px);
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: clamp(8px, 1.5vw, 14px);
-    flex-wrap: wrap;
-    letter-spacing: -0.01em;
-}
-
-.card h2 i {
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-size: 0.9em;
-}
-
-/* ===== INPUT GROUPS ===== */
-.input-group {
-    display: flex;
-    gap: clamp(8px, 1.5vw, 16px);
-    margin-bottom: clamp(12px, 2vw, 20px);
-    flex-wrap: wrap;
-}
-
-.input-group input,
-.input-group select {
-    flex: 1 1 200px;
-    padding: clamp(12px, 2vw, 18px) clamp(16px, 2.5vw, 24px);
-    border-radius: 50px;
-    border: 1px solid var(--input-border);
-    background: var(--input-bg);
-    color: var(--text-primary);
-    font-size: clamp(14px, 1.2vw, 16px);
-    font-weight: 400;
-    outline: none;
-    transition: all 0.2s ease;
-    font-family: 'Inter', sans-serif;
-}
-
-.input-group input:focus,
-.input-group select:focus {
-    border-color: var(--input-focus);
-    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.2);
-    transform: translateY(-1px);
-}
-
-/* ===== BUTTONS ===== */
-.primary-btn, .scrape-btn, .crawl-btn {
-    padding: clamp(12px, 2vw, 18px) clamp(20px, 3vw, 32px);
-    border: none;
-    border-radius: 50px;
-    background: var(--accent-gradient);
-    color: white;
-    font-weight: 600;
-    font-size: clamp(14px, 1.2vw, 16px);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(8px, 1.2vw, 14px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 25px -5px rgba(74,42,107,0.4);
-    background-size: 200% auto;
-    position: relative;
-    overflow: hidden;
-}
-
-.primary-btn::before, .scrape-btn::before, .crawl-btn::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-}
-
-.primary-btn:hover::before, .scrape-btn:hover::before, .crawl-btn:hover::before {
-    width: 300px;
-    height: 300px;
-}
-
-.primary-btn:hover, .scrape-btn:hover, .crawl-btn:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 20px 30px -5px rgba(74,42,107,0.6);
-}
-
-.crawl-btn {
-    width: 100%;
-    margin-top: clamp(8px, 1.5vw, 16px);
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    background: linear-gradient(135deg, #4a2a6b, #d4af37, #c85cb8);
-}
-
-/* ===== CRAWL OPTIONS ===== */
-.crawl-options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.option-item {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.option-item label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.option-item input {
-    padding: 10px 16px;
-    border-radius: 30px;
-    border: 1px solid var(--input-border);
-    background: var(--input-bg);
-    color: var(--text-primary);
-}
-
-/* ===== LOADING ANIMATION ===== */
-.loading {
-    display: none;
-    text-align: center;
-    margin-top: clamp(16px, 2.5vw, 24px);
-}
-
-.loading-spinner {
-    width: clamp(32px, 4vw, 40px);
-    height: clamp(32px, 4vw, 40px);
-    border: 3px solid var(--border-color);
-    border-top: 3px solid #d4af37;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-    margin: 0 auto clamp(8px, 1.2vw, 12px);
-}
-
-@keyframes spin { 
-    0% { transform: rotate(0deg); } 
-    100% { transform: rotate(360deg); } 
-}
-
-.loading p {
-    color: #d4af37;
-    font-weight: 500;
-    font-size: clamp(13px, 1.1vw, 15px);
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse { 
-    0%, 100% { opacity: 0.6; } 
-    50% { opacity: 1; } 
-}
-
-/* ===== PROGRESS BAR ===== */
-.progress-container {
-    margin-top: 20px;
-    padding: 15px;
-    background: var(--input-bg);
-    border-radius: 40px;
-    border: 1px solid var(--border-color);
-}
-
-.progress-bar {
-    width: 100%;
-    height: 8px;
-    background: var(--border-color);
-    border-radius: 40px;
-    overflow: hidden;
-    margin-bottom: 10px;
-}
-
-.progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #d4af37, #c85cb8);
-    width: 0%;
-    transition: width 0.3s ease;
-    border-radius: 40px;
-}
-
-.progress-stats {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    color: var(--text-muted);
-}
-
-/* ===== PREVIEW CONTENT ===== */
-.preview-content {
-    background: var(--input-bg);
-    padding: clamp(16px, 2.5vw, 24px);
-    border-radius: clamp(16px, 2.5vw, 24px);
-    max-height: 400px;
-    overflow: auto;
-    font-size: clamp(12px, 1vw, 14px);
-    border: 1px solid var(--border-color);
-    white-space: pre-wrap;
-    font-family: 'Fira Code', 'JetBrains Mono', monospace;
-    line-height: 1.6;
-}
-
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 16px;
-    margin: 16px 0;
-}
-
-.product-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 16px;
-    padding: 16px;
-    transition: all 0.3s ease;
-}
-
-.product-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(212,175,55,0.2);
-    border-color: #d4af37;
-}
-
-.product-card img {
-    max-width: 100%;
-    height: 150px;
-    object-fit: contain;
-    margin-bottom: 10px;
-}
-
-.product-name {
-    font-weight: 600;
-    font-size: 16px;
-    margin-bottom: 8px;
-}
-
-.product-price {
-    color: #d4af37;
-    font-weight: 700;
-    font-size: 18px;
-    margin-bottom: 8px;
-}
-
-/* ===== EXPORT GRID ===== */
-.export-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100px, 100%), 1fr));
-    gap: clamp(6px, 1vw, 12px);
-    margin-top: clamp(16px, 2.5vw, 24px);
-}
-
-.export-btn {
-    padding: clamp(10px, 1.5vw, 16px) clamp(8px, 1.2vw, 14px);
-    border: none;
-    border-radius: 40px;
-    background: linear-gradient(135deg, #d4af37, #c85cb8);
-    color: white;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(4px, 0.8vw, 8px);
-    cursor: pointer;
-    font-size: clamp(11px, 1vw, 14px);
-    transition: all 0.3s ease;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(4px);
-}
-
-.export-btn:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 10px 20px -5px rgba(212,175,55,0.5);
-}
-
-/* ===== MODE TOGGLE ===== */
-.toggle-container {
-    display: flex;
-    gap: clamp(8px, 1.2vw, 16px);
-    margin-bottom: clamp(16px, 2.5vw, 24px);
-    background: var(--input-bg);
-    padding: clamp(6px, 1vw, 10px);
-    border-radius: 60px;
-    border: 1px solid var(--border-color);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.toggle-btn {
-    flex: 1;
-    padding: clamp(12px, 1.8vw, 18px) clamp(12px, 2vw, 20px);
-    border: none;
-    border-radius: 50px;
-    background: transparent;
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: clamp(12px, 1.1vw, 14px);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: clamp(6px, 1vw, 12px);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.toggle-btn.active {
-    background: var(--accent-gradient);
-    color: white;
-    box-shadow: 0 5px 15px rgba(212,175,55,0.3);
-    transform: scale(1.02);
-}
-
-/* ===== CHAT CONTAINERS ===== */
-.chat-container {
-    background: var(--input-bg);
-    padding: clamp(16px, 2.5vw, 24px);
-    border-radius: clamp(20px, 3vw, 28px);
-    max-height: 400px;
-    overflow-y: auto;
-    border: 1px solid var(--border-color);
-    margin-bottom: clamp(16px, 2.5vw, 24px);
-    display: flex;
-    flex-direction: column;
-    gap: clamp(12px, 1.8vw, 20px);
-    scroll-behavior: smooth;
-}
-
-.message {
-    display: flex;
-    animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.message-content {
-    display: inline-block;
-    padding: clamp(12px, 1.8vw, 18px) clamp(16px, 2.2vw, 24px);
-    border-radius: 24px;
-    max-width: 85%;
-    font-size: clamp(13px, 1.1vw, 15px);
-    line-height: 1.6;
-    word-wrap: break-word;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.user .message-content {
-    background: linear-gradient(135deg, #d4af37, #c85cb8);
-    color: white;
-    border-bottom-right-radius: 8px;
-    margin-left: auto;
-}
-
-.assistant .message-content {
-    background: var(--chat-assistant);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-bottom-left-radius: 8px;
-}
-
-/* ===== TYPING INDICATOR ===== */
-.typing {
-    display: flex;
-    align-items: center;
-    gap: clamp(6px, 1vw, 10px);
-    padding: clamp(8px, 1.2vw, 12px) 0;
-}
-
-.typing span {
-    width: clamp(6px, 1vw, 8px);
-    height: clamp(6px, 1vw, 8px);
-    background: linear-gradient(135deg, #d4af37, #c85cb8);
-    border-radius: 50%;
-    display: inline-block;
-    animation: blink 1.4s infinite;
-}
-
-.typing span:nth-child(2) { animation-delay: 0.2s; }
-.typing span:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes blink {
-    0%, 100% { transform: scale(0.8); opacity: 0.3; }
-    50% { transform: scale(1.3); opacity: 1; }
-}
-
-/* ===== MODEL BADGE ===== */
-.model-badge {
-    display: inline-block;
-    padding: clamp(4px, 0.8vw, 8px) clamp(10px, 1.5vw, 16px);
-    background: var(--accent-gradient);
-    color: white;
-    border-radius: 40px;
-    font-size: clamp(10px, 0.9vw, 12px);
-    font-weight: 600;
-    margin-left: clamp(6px, 1vw, 12px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-/* ===== STATS BADGES ===== */
-.stats-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.stat-badge {
-    background: linear-gradient(135deg, var(--input-bg), var(--card-bg));
-    border: 1px solid var(--border-color);
-    padding: 12px 20px;
-    border-radius: 40px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-weight: 600;
-}
-
-.stat-badge i {
-    color: #d4af37;
-    font-size: 20px;
-}
-
-.stat-badge span {
-    color: var(--text-primary);
-}
-
-/* ===== FOOTER ===== */
-.footer {
-    margin-top: clamp(20px, 4vw, 40px);
-    padding: clamp(24px, 4vw, 48px) clamp(20px, 5vw, 80px);
-    background: var(--footer-gradient);
-    color: var(--footer-text);
-    border-radius: clamp(24px, 4vw, 48px) clamp(24px, 4vw, 48px) 0 0;
-    box-shadow: 
-        0 -20px 30px -10px rgba(0,0,0,0.3),
-        0 0 0 1px rgba(212,175,55,0.2) inset,
-        0 0 30px rgba(212,175,55,0.1);
-    backdrop-filter: blur(10px);
-    width: 100%;
-    position: relative;
-    overflow: hidden;
-}
-
-.footer::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -10%;
-    width: 60%;
-    height: 200%;
-    background: radial-gradient(circle at 30% 30%, rgba(212,175,55,0.2), transparent 70%);
-    filter: blur(60px);
-    animation: floatGlow1 15s infinite alternate ease-in-out;
-    z-index: 0;
-}
-
-.footer::after {
-    content: '';
-    position: absolute;
-    bottom: -50%;
-    right: -10%;
-    width: 60%;
-    height: 200%;
-    background: radial-gradient(circle at 70% 70%, rgba(200,80,192,0.2), transparent 70%);
-    filter: blur(60px);
-    animation: floatGlow2 18s infinite alternate-reverse ease-in-out;
-    z-index: 0;
-}
-
-@keyframes floatGlow1 {
-    0% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-    50% { transform: translate(5%, 5%) scale(1.1); opacity: 0.5; }
-    100% { transform: translate(10%, 10%) scale(1.2); opacity: 0.7; }
-}
-
-@keyframes floatGlow2 {
-    0% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-    50% { transform: translate(-5%, -5%) scale(1.1); opacity: 0.5; }
-    100% { transform: translate(-10%, -10%) scale(1.2); opacity: 0.7; }
-}
-
-.footer * { position: relative; z-index: 2; }
-
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-    .crawl-options {
-        grid-template-columns: 1fr;
-    }
-    
-    .product-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .stats-badges {
-        flex-direction: column;
-    }
-}
-
-@media (max-width: 576px) {
-    .export-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .toggle-container {
-        flex-direction: column;
-        border-radius: 40px;
-    }
-    
-    .toggle-btn {
-        width: 100%;
-    }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI SCRAPER ULTIMATE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --card: #ffffff;
+            --text: #1a1a2e;
+            --border: #e2e8f0;
+            --gold: #d4af37;
+            --pink: #c85cb8;
+            --gradient: linear-gradient(135deg, #d4af37, #c85cb8);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f0c29;
+            --card: #1a1a2e;
+            --text: #ffffff;
+            --border: #2d2d4a;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card);
+            padding: 16px 28px;
+            border-radius: 40px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .theme-toggle {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 40px;
+            background: var(--gradient);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 32px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 i {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Inputs */
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .input-group input,
+        .input-group select {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+        }
+
+        /* Buttons */
+        .crawl-btn, .primary-btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 50px;
+            background: var(--gradient);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            width: 100%;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .crawl-btn:hover, .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Options */
+        .crawl-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .option-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .option-item label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            opacity: 0.7;
+        }
+
+        .option-item input {
+            padding: 10px 16px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        /* Progress */
+        .progress-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--bg);
+            border-radius: 40px;
+            border: 1px solid var(--border);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--border);
+            border-radius: 40px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top: 3px solid #d4af37;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Products Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .product-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            transition: all 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-3px);
+            border-color: #d4af37;
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
+        }
+
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .product-price {
+            color: #d4af37;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        /* Export Grid */
+        .export-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .export-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 30px;
+            background: var(--gradient);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Toggle */
+        .toggle-container {
+            display: flex;
+            gap: 10px;
+            background: var(--bg);
+            padding: 6px;
+            border-radius: 60px;
+            border: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 50px;
+            background: transparent;
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: var(--gradient);
+            color: white;
+        }
+
+        /* Chat */
+        .chat-container {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 24px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .message {
+            margin-bottom: 12px;
+        }
+
+        .message-content {
+            display: inline-block;
+            padding: 12px 16px;
+            border-radius: 20px;
+            max-width: 80%;
+        }
+
+        .user .message-content {
+            background: var(--gradient);
+            color: white;
+            margin-left: auto;
+        }
+
+        .assistant .message-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+        }
+
+        /* Stats */
+        .stats-badges {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-badge {
+            background: var(--gradient);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        /* Preview */
+        .preview-content {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 20px;
+            max-height: 400px;
+            overflow: auto;
+            border: 1px solid var(--border);
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #10b981;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            animation: slideIn 0.3s;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            padding: 30px;
+            background: linear-gradient(145deg, #0f0c29, #1a1033);
+            color: white;
+            border-radius: 40px 40px 0 0;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .export-grid { grid-template-columns: repeat(3, 1fr); }
+            .crawl-options { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
-
 <body data-theme="light">
-
-<div class="container">
-
-<!-- ===== HEADER ===== -->
-<div class="header">
-    <h1>
-        <i class="fas fa-bolt"></i> AI SCRAPER PRO 
-        <span class="badge-pro">v5.0 · FULL SITE CRAWLER</span>
-    </h1>
-    <button class="theme-toggle" onclick="toggleTheme()">
-        <i class="fas fa-moon"></i> <span id="themeText">Dark</span>
-    </button>
-</div>
-
-<!-- ===== FULL WEBSITE CRAWLER SECTION ===== -->
-<div class="card">
-    <h2><i class="fas fa-sitemap"></i> Full Website Crawler · Product Scraper</h2>
-    <div class="input-group">
-        <input type="url" id="urlInput" placeholder="Enter website URL (e.g., example.com)" value="">
-        <button class="primary-btn" onclick="previewUrl()"><i class="fas fa-eye"></i> Preview</button>
-    </div>
-    
-    <!-- Crawl Options -->
-    <div class="crawl-options">
-        <div class="option-item">
-            <label><i class="fas fa-maximize"></i> Max Pages</label>
-            <input type="number" id="maxPages" value="100" min="10" max="500" step="10">
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-bolt"></i> AI SCRAPER ULTIMATE</h1>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i> <span id="themeText">Dark</span>
+            </button>
         </div>
-        <div class="option-item">
-            <label><i class="fas fa-clock"></i> Delay (seconds)</label>
-            <input type="number" id="delay" value="0.5" min="0.1" max="5" step="0.1">
-        </div>
-        <div class="option-item">
-            <label><i class="fas fa-filter"></i> Scrape Mode</label>
-            <select id="scrapeMode">
-                <option value="comprehensive">🔍 Comprehensive (All Data)</option>
-                <option value="smart">⚡ Smart (Optimized)</option>
-                <option value="basic">📄 Basic (Minimal)</option>
-            </select>
-        </div>
-    </div>
-    
-    <!-- Crawl Button -->
-    <button class="crawl-btn" onclick="crawlWebsite()">
-        <i class="fas fa-sitemap"></i> CRAWL ENTIRE WEBSITE & EXTRACT ALL PRODUCTS
-    </button>
-    
-    <!-- Progress Bar -->
-    <div id="progressContainer" class="progress-container" style="display: none;">
-        <div class="progress-bar">
-            <div id="progressFill" class="progress-fill" style="width: 0%;"></div>
-        </div>
-        <div class="progress-stats">
-            <span id="progressPages">0 pages</span>
-            <span id="progressProducts">0 products</span>
-            <span id="progressStatus">Starting...</span>
-        </div>
-    </div>
-    
-    <!-- Loading Animation -->
-    <div id="loading" class="loading">
-        <div class="loading-spinner"></div>
-        <p>Crawling website... This may take a few minutes</p>
-    </div>
-</div>
 
-<!-- ===== CRAWL RESULTS CARD ===== -->
-<div class="card" id="dataCard" style="display:none">
-    <h2>
-        <i class="fas fa-database"></i> 
-        <span id="resultTitle">Crawl Results</span>
-        <span id="productCount" class="model-badge">0 products</span>
-    </h2>
-    
-    <!-- Stats Badges -->
-    <div id="statsBadges" class="stats-badges"></div>
-    
-    <!-- Products Grid -->
-    <div id="productsGrid" class="product-grid"></div>
-    
-    <!-- Preview Tabs -->
-    <div class="toggle-container" style="margin-top: 20px;">
-        <button class="toggle-btn active" onclick="showPreviewTab('products')">
-            <i class="fas fa-box"></i> Products
-        </button>
-        <button class="toggle-btn" onclick="showPreviewTab('json')">
-            <i class="fas fa-code"></i> JSON
-        </button>
-        <button class="toggle-btn" onclick="showPreviewTab('stats')">
-            <i class="fas fa-chart-bar"></i> Statistics
-        </button>
-    </div>
-    
-    <!-- Preview Content -->
-    <div id="previewContent" class="preview-content"></div>
-    
-    <!-- Export Buttons -->
-    <div class="export-grid">
-        <button class="export-btn" onclick="exportData('json')"><i class="fas fa-code"></i> JSON</button>
-        <button class="export-btn" onclick="exportData('csv')"><i class="fas fa-table"></i> CSV</button>
-        <button class="export-btn" onclick="exportData('excel')"><i class="fas fa-file-excel"></i> Excel</button>
-        <button class="export-btn" onclick="exportData('txt')"><i class="fas fa-file-alt"></i> Text</button>
-        <button class="export-btn" onclick="exportData('pdf')"><i class="fas fa-file-pdf"></i> PDF</button>
-        <button class="export-btn" onclick="exportData('markdown')"><i class="fas fa-markdown"></i> MD</button>
-    </div>
-</div>
-
-<!-- ===== AI CHAT CARD ===== -->
-<div class="card" id="combinedChatCard" style="display:none">
-    <h2><i class="fas fa-robot"></i> AI Assistants <span class="model-badge">Dual Mode</span></h2>
-    
-    <div class="toggle-container">
-        <button class="toggle-btn active" id="groqToggle" onclick="switchMode('groq')">
-            <i class="fas fa-brain"></i> 
-            <span>AI · Scraped Data Only</span>
-        </button>
-        <button class="toggle-btn" id="grokToggle" onclick="switchMode('grok')">
-            <i class="fas fa-bolt"></i> 
-            <span>Mode · Universal Knowledge</span>
-        </button>
-    </div>
-
-    <!-- Groq Section (Scraped Data Only) -->
-    <div id="groqSection" class="chat-section active">
-        <div class="mode-header">
-            <h2><i class="fas fa-microchip"></i> AI · Scraped Data Analysis</h2>
-            <p>Ask questions about the crawled products and website content</p>
-        </div>
-        <div id="chatContainer" class="chat-container"></div>
-        <div class="input-group">
-            <input type="text" id="questionInput" placeholder="Ask about products, prices, descriptions..." onkeypress="if(event.key==='Enter') askGroq()">
-            <button class="primary-btn" onclick="askGroq()"><i class="fas fa-paper-plane"></i></button>
-            <button class="primary-btn" onclick="clearGroqChat()" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fas fa-trash"></i></button>
-        </div>
-    </div>
-
-    <!-- Grok Section (Universal Knowledge) -->
-    <div id="grokSection" class="chat-section">
-        <div class="mode-header">
-            <h2><i class="fas fa-brain"></i> AI · Universal Knowledge</h2>
-            <p>Ask any question - not limited to scraped data</p>
-        </div>
-        <div id="grokChatContainer" class="chat-container"></div>
-        <div class="input-group">
-            <input type="text" id="grokQuestionInput" placeholder="Ask anything about products, market analysis, comparisons..." onkeypress="if(event.key==='Enter') askGrokMode()">
-            <button class="primary-btn" onclick="askGrokMode()"><i class="fas fa-bolt"></i></button>
-            <button class="primary-btn" onclick="clearGrokChat()" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fas fa-trash"></i></button>
-        </div>
-    </div>
-</div>
-
-<!-- ===== FOOTER ===== -->
-<footer class="footer">
-    <div class="footer-main">
-        <div class="footer-logo">
-            <i class="fas fa-crown"></i> 
-            <span id="footerBrand">AI·SCRAPER PRO</span>
-        </div>
-        <div class="footer-tagline">
-            <span>FULL SITE CRAWLER</span>
-            <span>v5.0 · ENTERPRISE</span>
-        </div>
-    </div>
-
-    <div class="footer-badges">
-        <span class="footer-badge"><i class="fas fa-sitemap"></i> BFS CRAWLER</span>
-        <span class="footer-badge"><i class="fas fa-box"></i> PRODUCT DETECTION</span>
-        <span class="footer-badge"><i class="fas fa-bolt"></i> 100% ACCURATE</span>
-        <span class="footer-badge"><i class="fas fa-gem"></i> ENTERPRISE</span>
-    </div>
-
-    <div class="footer-copyright">
-        <span><i class="fas fa-copyright"></i> 2025 AMMAR·AI · FULL SITE CRAWLER</span>
-        <span><i class="fas fa-globe"></i> All rights reserved</span>
-        <span><i class="fas fa-heart" style="color: #d4af37;"></i> Made with precision</span>
-    </div>
-</footer>
-
-</div>
-
-<!-- ===== JAVASCRIPT ===== -->
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script>
-// ===== GLOBAL VARIABLES =====
-let scrapedData = null;          // Stores crawled website data
-let sessionId = null;             // Session identifier
-let groqChatHistory = [];         // History for Groq (data-only) chat
-let grokChatHistory = [];         // History for Grok (universal) chat
-let currentPreviewTab = 'products'; // Current preview tab
-
-// ===== THEME TOGGLE =====
-function toggleTheme() {
-    const body = document.body;
-    const themeText = document.getElementById('themeText');
-    const icon = document.querySelector('.theme-toggle i');
-    
-    if(body.getAttribute('data-theme') === 'light') {
-        body.setAttribute('data-theme', 'dark');
-        themeText.textContent = 'Light';
-        icon.className = 'fas fa-sun';
-    } else {
-        body.setAttribute('data-theme', 'light');
-        themeText.textContent = 'Dark';
-        icon.className = 'fas fa-moon';
-    }
-}
-
-// ===== URL PREVIEW =====
-function previewUrl() {
-    const url = document.getElementById('urlInput').value;
-    if(!url) { 
-        showNotification("Please enter a URL first", "warning"); 
-        return; 
-    }
-    
-    // Add protocol if missing
-    let fullUrl = url;
-    if(!url.startsWith('http')) { 
-        fullUrl = 'https://' + url; 
-    }
-    
-    // Open in new tab
-    window.open(fullUrl, '_blank');
-}
-
-// ===== SHOW NOTIFICATION =====
-function showNotification(message, type = "success") {
-    const notification = document.createElement('div');
-    notification.className = 'export-notification';
-    
-    // Set background color based on type
-    if(type === 'success') {
-        notification.style.background = 'var(--success)';
-        notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-    } else if(type === 'warning') {
-        notification.style.background = 'var(--warning)';
-        notification.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
-    } else {
-        notification.style.background = 'var(--danger)';
-        notification.innerHTML = `<i class="fas fa-times-circle"></i> ${message}`;
-    }
-    
-    document.body.appendChild(notification);
-    
-    // Auto remove after 2.5 seconds
-    setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease-out';
-        setTimeout(() => notification.remove(), 300);
-    }, 2500);
-}
-
-// ===== FULL WEBSITE CRAWLER =====
-async function crawlWebsite() {
-    const url = document.getElementById('urlInput').value;
-    const maxPages = document.getElementById('maxPages').value;
-    const delay = document.getElementById('delay').value;
-    
-    // Validate URL
-    if(!url) { 
-        showNotification("Please enter a website URL", "warning"); 
-        return; 
-    }
-    
-    // Add protocol if missing
-    let fullUrl = url;
-    if(!url.startsWith('http')) { 
-        fullUrl = 'https://' + url; 
-    }
-    
-    // Show loading and progress
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('progressContainer').style.display = 'block';
-    document.querySelector('.crawl-btn').disabled = true;
-    
-    // Reset progress
-    updateProgress(0, 0, "Starting crawl...");
-    
-    try {
-        // Prepare form data
-        const formData = new FormData();
-        formData.append('url', fullUrl);
-        formData.append('max_pages', maxPages);
-        formData.append('delay', delay);
-        
-        // Send crawl request
-        const response = await fetch('/crawl', { 
-            method: 'POST', 
-            body: formData 
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Server error:', errorText);
-            throw new Error(`Server error: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        
-        if(result.success) {
-            // Store crawled data
-            scrapedData = result.data;
-            sessionId = result.session_id;
-            
-            // Update UI with results
-            displayCrawlResults(scrapedData);
-            
-            // Show result card and chat
-            document.getElementById('dataCard').style.display = 'block';
-            document.getElementById('combinedChatCard').style.display = 'block';
-            
-            // Add welcome messages
-            addMessage('assistant', '✅ Website crawl complete! I can answer questions about the products and content found.');
-            addGrokMessage('assistant', '🚀 Grok Mode ready! Ask me anything about these products or any other topic.');
-            
-            showNotification(`Crawled ${scrapedData.crawl_stats.pages_crawled} pages, found ${scrapedData.product_count} products!`, 'success');
-        } else {
-            showNotification('Error: ' + (result.error || 'Unknown error'), 'error');
-        }
-    } catch(error) {
-        showNotification('Error: ' + error.message, 'error');
-        console.error('Crawl error:', error);
-    } finally {
-        // Hide loading and re-enable button
-        document.getElementById('loading').style.display = 'none';
-        document.querySelector('.crawl-btn').disabled = false;
-    }
-}
-
-// ===== UPDATE PROGRESS =====
-function updateProgress(pages, products, status) {
-    document.getElementById('progressPages').textContent = `${pages} pages`;
-    document.getElementById('progressProducts').textContent = `${products} products`;
-    document.getElementById('progressStatus').textContent = status;
-    
-    // Simulate progress (in real implementation, this would come from server)
-    // For demo, we'll just show indeterminate progress
-}
-
-// ===== DISPLAY CRAWL RESULTS =====
-function displayCrawlResults(data) {
-    // Update title
-    document.getElementById('resultTitle').innerHTML = `<i class="fas fa-sitemap"></i> Crawl Results: ${data.start_url}`;
-    document.getElementById('productCount').textContent = `${data.product_count} products`;
-    
-    // Display stats badges
-    const statsHtml = `
-        <div class="stat-badge">
-            <i class="fas fa-file-alt"></i>
-            <span>${data.crawl_stats.pages_crawled} Pages Crawled</span>
-        </div>
-        <div class="stat-badge">
-            <i class="fas fa-box"></i>
-            <span>${data.product_count} Products Found</span>
-        </div>
-        <div class="stat-badge">
-            <i class="fas fa-clock"></i>
-            <span>Completed: ${new Date(data.crawl_stats.end_time).toLocaleTimeString()}</span>
-        </div>
-    `;
-    document.getElementById('statsBadges').innerHTML = statsHtml;
-    
-    // Display products grid
-    displayProductsGrid(data.products);
-    
-    // Show products tab by default
-    showPreviewTab('products');
-}
-
-// ===== DISPLAY PRODUCTS GRID =====
-function displayProductsGrid(products) {
-    const grid = document.getElementById('productsGrid');
-    
-    if (!products || products.length === 0) {
-        grid.innerHTML = '<p style="text-align: center; padding: 40px;">No products found on this website.</p>';
-        return;
-    }
-    
-    let html = '';
-    products.slice(0, 12).forEach((product, index) => {  // Show first 12 products
-        html += `
-            <div class="product-card">
-                ${product.image ? `<img src="${product.image}" alt="${product.name || 'Product'}" onerror="this.style.display='none'">` : ''}
-                <div class="product-name">${product.name || 'Unnamed Product'}</div>
-                ${product.price ? `<div class="product-price">${product.price}</div>` : ''}
-                ${product.description ? `<div style="font-size: 12px; color: var(--text-muted);">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</div>` : ''}
-                ${product.sku ? `<div style="font-size: 11px; margin-top: 8px;">SKU: ${product.sku}</div>` : ''}
+        <!-- Crawler Card -->
+        <div class="card">
+            <h2><i class="fas fa-sitemap"></i> Full Website Crawler</h2>
+            <div class="input-group">
+                <input type="text" id="urlInput" placeholder="Enter website URL (e.g., example.com)" value="https://books.toscrape.com">
+                <button class="primary-btn" onclick="previewUrl()"><i class="fas fa-eye"></i> Preview</button>
             </div>
-        `;
-    });
-    
-    if (products.length > 12) {
-        html += `<div style="text-align: center; padding: 20px; grid-column: 1/-1;">... and ${products.length - 12} more products</div>`;
-    }
-    
-    grid.innerHTML = html;
-}
+            
+            <div class="crawl-options">
+                <div class="option-item">
+                    <label><i class="fas fa-maximize"></i> Max Pages</label>
+                    <input type="number" id="maxPages" value="30" min="5" max="100">
+                </div>
+                <div class="option-item">
+                    <label><i class="fas fa-clock"></i> Delay (sec)</label>
+                    <input type="number" id="delay" value="0.2" min="0.1" max="2" step="0.1">
+                </div>
+            </div>
+            
+            <button class="crawl-btn" onclick="crawlWebsite()">
+                <i class="fas fa-rocket"></i> START CRAWLING - FAST MODE
+            </button>
+            
+            <div id="progressContainer" class="progress-container" style="display:none">
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+                <div class="progress-stats">
+                    <span id="progressPages">0 pages</span>
+                    <span id="progressProducts">0 products</span>
+                    <span id="progressStatus">Starting...</span>
+                </div>
+            </div>
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Crawling... Please wait</p>
+            </div>
+        </div>
 
-// ===== SHOW PREVIEW TAB =====
-function showPreviewTab(tab) {
-    currentPreviewTab = tab;
-    
-    // Update toggle buttons
-    document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    if (!scrapedData) return;
-    
-    const preview = document.getElementById('previewContent');
-    
-    if (tab === 'products') {
-        // Show products list in preview
-        let html = '<h3>All Extracted Products</h3>';
-        scrapedData.products.forEach((product, idx) => {
-            html += `<div style="margin-bottom: 15px; padding: 10px; background: var(--card-bg); border-radius: 8px;">`;
-            html += `<strong>${idx + 1}. ${product.name || 'Unnamed'}</strong><br>`;
-            if (product.price) html += `💰 Price: ${product.price}<br>`;
-            if (product.description) html += `📝 Description: ${product.description.substring(0, 150)}...<br>`;
-            if (product.url) html += `🔗 <a href="${product.url}" target="_blank">View Product</a><br>`;
-            html += `</div>`;
-        });
-        preview.innerHTML = html;
-        
-    } else if (tab === 'json') {
-        // Show JSON preview
-        preview.innerHTML = '<pre>' + JSON.stringify(scrapedData, null, 2) + '</pre>';
-        
-    } else if (tab === 'stats') {
-        // Show statistics
-        const stats = scrapedData.crawl_stats;
-        let html = '<h3>Crawl Statistics</h3>';
-        html += '<table style="width:100%; border-collapse: collapse;">';
-        for (let [key, value] of Object.entries(stats)) {
-            if (key !== 'product_urls_found') {
-                html += `<tr><td style="padding: 8px; border-bottom: 1px solid var(--border-color);"><strong>${key.replace(/_/g, ' ').toUpperCase()}</strong></td>`;
-                html += `<td style="padding: 8px; border-bottom: 1px solid var(--border-color);">${value}</td></tr>`;
+        <!-- Results Card -->
+        <div class="card" id="dataCard" style="display:none">
+            <h2>
+                <i class="fas fa-database"></i> 
+                Crawl Results
+                <span id="productCount" class="stat-badge" style="padding:5px 15px">0 products</span>
+            </h2>
+            
+            <div id="statsBadges" class="stats-badges"></div>
+            
+            <div class="toggle-container">
+                <button class="toggle-btn active" onclick="showTab('products')">
+                    <i class="fas fa-box"></i> Products
+                </button>
+                <button class="toggle-btn" onclick="showTab('json')">
+                    <i class="fas fa-code"></i> JSON
+                </button>
+                <button class="toggle-btn" onclick="showTab('stats')">
+                    <i class="fas fa-chart-bar"></i> Stats
+                </button>
+            </div>
+            
+            <div id="productsGrid" class="product-grid"></div>
+            <div id="previewContent" class="preview-content" style="display:none"></div>
+            
+            <div class="export-grid">
+                <button class="export-btn" onclick="exportData('json')">JSON</button>
+                <button class="export-btn" onclick="exportData('csv')">CSV</button>
+                <button class="export-btn" onclick="exportData('excel')">Excel</button>
+                <button class="export-btn" onclick="exportData('txt')">Text</button>
+                <button class="export-btn" onclick="exportData('pdf')">PDF</button>
+                <button class="export-btn" onclick="exportData('markdown')">MD</button>
+            </div>
+        </div>
+
+        <!-- AI Chat Card -->
+        <div class="card" id="chatCard" style="display:none">
+            <h2><i class="fas fa-robot"></i> AI Assistant</h2>
+            
+            <div class="toggle-container">
+                <button class="toggle-btn active" onclick="switchMode('groq')">
+                    <i class="fas fa-brain"></i> Data Only
+                </button>
+                <button class="toggle-btn" onclick="switchMode('grok')">
+                    <i class="fas fa-bolt"></i> Universal
+                </button>
+            </div>
+            
+            <div id="groqSection">
+                <div id="chatContainer" class="chat-container"></div>
+                <div class="input-group">
+                    <input type="text" id="questionInput" placeholder="Ask about products...">
+                    <button class="primary-btn" onclick="askGroq()"><i class="fas fa-paper-plane"></i></button>
+                    <button class="primary-btn" onclick="clearChat()" style="background:#ef4444"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+            
+            <div id="grokSection" style="display:none">
+                <div id="grokChatContainer" class="chat-container"></div>
+                <div class="input-group">
+                    <input type="text" id="grokInput" placeholder="Ask anything...">
+                    <button class="primary-btn" onclick="askGrok()"><i class="fas fa-bolt"></i></button>
+                    <button class="primary-btn" onclick="clearGrok()" style="background:#ef4444"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><i class="fas fa-crown" style="color:#d4af37"></i> AI SCRAPER ULTIMATE · 100% WORKING · FAST MODE</p>
+            <p style="opacity:0.7; font-size:12px; margin-top:10px">© 2025 AMMAR HAIDER</p>
+        </div>
+    </div>
+
+    <script>
+        // ========== GLOBAL VARIABLES ==========
+        let scrapedData = null;
+        let groqHistory = [];
+        let grokHistory = [];
+
+        // ========== THEME ==========
+        function toggleTheme() {
+            const body = document.body;
+            const text = document.getElementById('themeText');
+            const icon = document.querySelector('.theme-toggle i');
+            
+            if(body.getAttribute('data-theme') === 'light') {
+                body.setAttribute('data-theme', 'dark');
+                text.textContent = 'Light';
+                icon.className = 'fas fa-sun';
+            } else {
+                body.setAttribute('data-theme', 'light');
+                text.textContent = 'Dark';
+                icon.className = 'fas fa-moon';
             }
         }
-        html += '</table>';
-        preview.innerHTML = html;
-    }
-}
 
-// ===== GROQ CHAT (Data Only) =====
-async function askGroq() {
-    const question = document.getElementById('questionInput').value;
-    if(!question) { 
-        showNotification("Please enter a question", "warning"); 
-        return; 
-    }
-    
-    if(!scrapedData) { 
-        addMessage('assistant', '⚠️ Please crawl a website first!'); 
-        return; 
-    }
-    
-    // Add user message to chat
-    addMessage('user', question);
-    document.getElementById('questionInput').value = '';
-    
-    // Show typing indicator
-    const typingId = 'typing-' + Date.now();
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'message assistant';
-    typingDiv.id = typingId;
-    typingDiv.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Analyzing data...</div>';
-    document.getElementById('chatContainer').appendChild(typingDiv);
-    
-    try {
-        // Prepare request
-        const formData = new FormData();
-        formData.append('message', question);
-        formData.append('scraped_data', JSON.stringify(scrapedData));
-        formData.append('history', JSON.stringify(groqChatHistory));
-        
-        // Send to server
-        const response = await fetch('/groq-chat', { 
-            method: 'POST', 
-            body: formData 
-        });
-        const result = await response.json();
-        
-        // Remove typing indicator
-        document.getElementById(typingId)?.remove();
-        
-        if(result.success) {
-            // Add assistant response with markdown formatting
-            addMessage('assistant', marked.parse(result.response));
+        // ========== NOTIFICATION ==========
+        function notify(msg, type = 'success') {
+            const div = document.createElement('div');
+            div.className = 'notification';
+            div.style.background = type === 'success' ? '#10b981' : '#ef4444';
+            div.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i> ${msg}`;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 2500);
+        }
+
+        // ========== PREVIEW ==========
+        function previewUrl() {
+            const url = document.getElementById('urlInput').value;
+            if(!url) return notify('Enter URL', 'warning');
+            window.open(url.startsWith('http') ? url : 'https://' + url, '_blank');
+        }
+
+        // ========== CRAWL WEBSITE ==========
+        async function crawlWebsite() {
+            const url = document.getElementById('urlInput').value;
+            const maxPages = document.getElementById('maxPages').value;
+            const delay = document.getElementById('delay').value;
             
-            // Update history
-            groqChatHistory.push({ role: 'user', content: question });
-            groqChatHistory.push({ role: 'assistant', content: result.response });
-        } else {
-            addMessage('assistant', '❌ Error: ' + (result.error || 'Unknown error'));
-        }
-    } catch(error) {
-        document.getElementById(typingId)?.remove();
-        addMessage('assistant', '❌ Error: ' + error.message);
-    }
-}
-
-// ===== ADD MESSAGE TO GROQ CHAT =====
-function addMessage(role, content) {
-    const chatContainer = document.getElementById('chatContainer');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message ' + role;
-    messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
-    chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-}
-
-// ===== ADD MESSAGE TO GROK CHAT =====
-function addGrokMessage(role, content) {
-    const chatContainer = document.getElementById('grokChatContainer');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message ' + role;
-    messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
-    chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
-}
-
-// ===== GROK MODE (Universal Knowledge) =====
-async function askGrokMode() {
-    const question = document.getElementById('grokQuestionInput').value;
-    if(!question) { 
-        showNotification("Please enter a question", "warning"); 
-        return; 
-    }
-    
-    // Add user message
-    addGrokMessage('user', question);
-    document.getElementById('grokQuestionInput').value = '';
-    
-    // Show typing indicator
-    const typingId = 'grok-typing-' + Date.now();
-    const typingDiv = document.createElement('div');
-    typingDiv.className = 'message assistant';
-    typingDiv.id = typingId;
-    typingDiv.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Thinking...</div>';
-    document.getElementById('grokChatContainer').appendChild(typingDiv);
-    
-    try {
-        // Prepare request
-        const formData = new FormData();
-        formData.append('message', question);
-        formData.append('scraped_data', JSON.stringify(scrapedData || {}));
-        formData.append('analysis_type', 'comprehensive');
-        formData.append('history', JSON.stringify(grokChatHistory));
-        
-        // Send to server
-        const response = await fetch('/grok-mode', { 
-            method: 'POST', 
-            body: formData 
-        });
-        const result = await response.json();
-        
-        // Remove typing indicator
-        document.getElementById(typingId)?.remove();
-        
-        if(result.success) {
-            // Add assistant response with markdown
-            addGrokMessage('assistant', marked.parse(result.response));
+            if(!url) return notify('Enter URL', 'warning');
             
-            // Update history
-            grokChatHistory.push({ role: 'user', content: question });
-            grokChatHistory.push({ role: 'assistant', content: result.response });
-        } else {
-            addGrokMessage('assistant', '❌ Error: ' + (result.error || 'Unknown error'));
+            // Show UI
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('progressContainer').style.display = 'block';
+            document.querySelector('.crawl-btn').disabled = true;
+            
+            const formData = new FormData();
+            formData.append('url', url);
+            formData.append('max_pages', maxPages);
+            formData.append('delay', delay);
+            
+            try {
+                const res = await fetch('/crawl', { method: 'POST', body: formData });
+                const result = await res.json();
+                
+                if(result.success) {
+                    scrapedData = result.data;
+                    
+                    // Update UI
+                    document.getElementById('dataCard').style.display = 'block';
+                    document.getElementById('chatCard').style.display = 'block';
+                    
+                    displayResults(scrapedData);
+                    notify(`Found ${scrapedData.product_count} products!`);
+                    
+                    // Add welcome messages
+                    addMessage('assistant', '✅ Crawl complete! Ask me about the products.');
+                    addGrokMessage('assistant', '🚀 Ask me anything!');
+                    
+                    // Update progress
+                    updateProgress(scrapedData.crawl_stats.pages_crawled, scrapedData.product_count, 'Complete!');
+                } else {
+                    notify('Error: ' + (result.error || 'Unknown'), 'error');
+                }
+            } catch(e) {
+                notify('Error: ' + e.message, 'error');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                document.querySelector('.crawl-btn').disabled = false;
+            }
         }
-    } catch(error) {
-        document.getElementById(typingId)?.remove();
-        addGrokMessage('assistant', '❌ Error: ' + error.message);
-    }
-}
 
-// ===== CLEAR CHATS =====
-function clearGroqChat() {
-    document.getElementById('chatContainer').innerHTML = '';
-    groqChatHistory = [];
-    addMessage('assistant', '🧹 Chat cleared. Ask about the crawled data!');
-    showNotification('Groq chat cleared', 'success');
-}
-
-function clearGrokChat() {
-    document.getElementById('grokChatContainer').innerHTML = '';
-    grokChatHistory = [];
-    addGrokMessage('assistant', '🧹 Chat cleared. Ask me anything!');
-    showNotification('Grok chat cleared', 'success');
-}
-
-// ===== SWITCH AI MODE =====
-function switchMode(mode) {
-    const groqSection = document.getElementById('groqSection');
-    const grokSection = document.getElementById('grokSection');
-    const groqToggle = document.getElementById('groqToggle');
-    const grokToggle = document.getElementById('grokToggle');
-    
-    if(mode === 'groq') {
-        groqSection.classList.add('active');
-        grokSection.classList.remove('active');
-        groqToggle.classList.add('active');
-        grokToggle.classList.remove('active');
-    } else {
-        grokSection.classList.add('active');
-        groqSection.classList.remove('active');
-        grokToggle.classList.add('active');
-        groqToggle.classList.remove('active');
-    }
-}
-
-// ===== EXPORT DATA =====
-async function exportData(format) {
-    if(!scrapedData) { 
-        showNotification("Please crawl a website first", "warning"); 
-        return; 
-    }
-    
-    try {
-        // Show loading
-        showNotification(`Preparing ${format.toUpperCase()} export...`, 'success');
-        
-        // Send export request
-        const response = await fetch('/export', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                format: format,
-                data: scrapedData
-            })
-        });
-        
-        if (!response.ok) throw new Error('Export failed');
-        
-        // Get blob from response
-        const blob = await response.blob();
-        
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        
-        // Set filename from Content-Disposition header or create default
-        const contentDisposition = response.headers.get('Content-Disposition');
-        let filename = `export.${format}`;
-        if (contentDisposition) {
-            const match = contentDisposition.match(/filename="?(.+)"?/);
-            if (match) filename = match[1];
+        // ========== UPDATE PROGRESS ==========
+        function updateProgress(pages, products, status) {
+            document.getElementById('progressPages').textContent = pages + ' pages';
+            document.getElementById('progressProducts').textContent = products + ' products';
+            document.getElementById('progressStatus').textContent = status;
+            document.getElementById('progressFill').style.width = '100%';
         }
-        
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        
-        showNotification(`Exported as ${format.toUpperCase()} successfully!`, 'success');
-        
-    } catch(error) {
-        showNotification('Export error: ' + error.message, 'error');
-        console.error('Export error:', error);
-    }
-}
 
-// ===== INITIALIZE ON PAGE LOAD =====
-window.onload = function() {
-    // Set default theme
-    document.body.setAttribute('data-theme', 'light');
-    
-    // Add welcome messages after a short delay
-    setTimeout(() => {
-        if(document.getElementById('combinedChatCard').style.display !== 'block') {
-            addMessage('assistant', '👋 Enter a website URL and click CRAWL ENTIRE WEBSITE to start!');
-            addGrokMessage('assistant', '🚀 Grok Mode ready! I can answer anything after you crawl a site.');
+        // ========== DISPLAY RESULTS ==========
+        function displayResults(data) {
+            document.getElementById('productCount').textContent = data.product_count + ' products';
+            
+            // Stats badges
+            const stats = data.crawl_stats;
+            document.getElementById('statsBadges').innerHTML = `
+                <div class="stat-badge"><i class="fas fa-file-alt"></i> ${stats.pages_crawled} Pages</div>
+                <div class="stat-badge"><i class="fas fa-box"></i> ${data.product_count} Products</div>
+            `;
+            
+            // Products grid
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+            
+            if(data.products && data.products.length) {
+                data.products.slice(0, 12).forEach(p => {
+                    grid.innerHTML += `
+                        <div class="product-card">
+                            <div class="product-name">${p.name || 'Unnamed'}</div>
+                            <div class="product-price">${p.price || 'Price N/A'}</div>
+                            ${p.url ? `<small><a href="${p.url}" target="_blank">View</a></small>` : ''}
+                        </div>
+                    `;
+                });
+            } else {
+                grid.innerHTML = '<p style="text-align:center; padding:40px;">No products found</p>';
+            }
+            
+            showTab('products');
         }
-    }, 500);
-}
-</script>
 
+        // ========== SHOW TAB ==========
+        function showTab(tab) {
+            const btns = document.querySelectorAll('.toggle-btn');
+            btns.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const grid = document.getElementById('productsGrid');
+            const preview = document.getElementById('previewContent');
+            
+            if(tab === 'products') {
+                grid.style.display = 'grid';
+                preview.style.display = 'none';
+            } else {
+                grid.style.display = 'none';
+                preview.style.display = 'block';
+                
+                if(tab === 'json') {
+                    preview.innerHTML = '<pre>' + JSON.stringify(scrapedData, null, 2) + '</pre>';
+                } else {
+                    const stats = scrapedData.crawl_stats;
+                    preview.innerHTML = `
+                        <h3>Crawl Statistics</h3>
+                        <p>Pages: ${stats.pages_crawled}</p>
+                        <p>Products: ${scrapedData.product_count}</p>
+                        <p>Start: ${new Date(stats.start_time).toLocaleString()}</p>
+                        <p>End: ${new Date(stats.end_time).toLocaleString()}</p>
+                    `;
+                }
+            }
+        }
+
+        // ========== GROQ CHAT ==========
+        async function askGroq() {
+            const q = document.getElementById('questionInput').value;
+            if(!q) return notify('Enter question', 'warning');
+            if(!scrapedData) return addMessage('assistant', '⚠️ Crawl a website first!');
+            
+            addMessage('user', q);
+            document.getElementById('questionInput').value = '';
+            
+            const typingId = addTyping('chatContainer');
+            
+            const formData = new FormData();
+            formData.append('message', q);
+            formData.append('scraped_data', JSON.stringify(scrapedData));
+            
+            try {
+                const res = await fetch('/groq-chat', { method: 'POST', body: formData });
+                const result = await res.json();
+                
+                document.getElementById(typingId)?.remove();
+                
+                if(result.success) {
+                    addMessage('assistant', result.response);
+                } else {
+                    addMessage('assistant', '❌ Error: ' + (result.error || 'Unknown'));
+                }
+            } catch(e) {
+                document.getElementById(typingId)?.remove();
+                addMessage('assistant', '❌ Error: ' + e.message);
+            }
+        }
+
+        // ========== GROK CHAT ==========
+        async function askGrok() {
+            const q = document.getElementById('grokInput').value;
+            if(!q) return notify('Enter question', 'warning');
+            
+            addGrokMessage('user', q);
+            document.getElementById('grokInput').value = '';
+            
+            const typingId = addTyping('grokChatContainer');
+            
+            const formData = new FormData();
+            formData.append('message', q);
+            
+            try {
+                const res = await fetch('/grok-mode', { method: 'POST', body: formData });
+                const result = await res.json();
+                
+                document.getElementById(typingId)?.remove();
+                
+                if(result.success) {
+                    addGrokMessage('assistant', result.response);
+                } else {
+                    addGrokMessage('assistant', '❌ Error: ' + (result.error || 'Unknown'));
+                }
+            } catch(e) {
+                document.getElementById(typingId)?.remove();
+                addGrokMessage('assistant', '❌ Error: ' + e.message);
+            }
+        }
+
+        // ========== HELPERS ==========
+        function addMessage(role, content) {
+            const div = document.createElement('div');
+            div.className = 'message ' + role;
+            div.innerHTML = '<div class="message-content">' + content + '</div>';
+            document.getElementById('chatContainer').appendChild(div);
+            document.getElementById('chatContainer').scrollTop = 999999;
+        }
+
+        function addGrokMessage(role, content) {
+            const div = document.createElement('div');
+            div.className = 'message ' + role;
+            div.innerHTML = '<div class="message-content">' + content + '</div>';
+            document.getElementById('grokChatContainer').appendChild(div);
+            document.getElementById('grokChatContainer').scrollTop = 999999;
+        }
+
+        function addTyping(containerId) {
+            const id = 'typing-' + Date.now();
+            const div = document.createElement('div');
+            div.className = 'message assistant';
+            div.id = id;
+            div.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Thinking...</div>';
+            document.getElementById(containerId).appendChild(div);
+            return id;
+        }
+
+        function clearChat() {
+            document.getElementById('chatContainer').innerHTML = '';
+            addMessage('assistant', '🧹 Chat cleared');
+        }
+
+        function clearGrok() {
+            document.getElementById('grokChatContainer').innerHTML = '';
+            addGrokMessage('assistant', '🧹 Chat cleared');
+        }
+
+        function switchMode(mode) {
+            const groq = document.getElementById('groqSection');
+            const grok = document.getElementById('grokSection');
+            const btns = document.querySelectorAll('.toggle-btn');
+            
+            if(mode === 'groq') {
+                groq.style.display = 'block';
+                grok.style.display = 'none';
+                btns[0].classList.add('active');
+                btns[1].classList.remove('active');
+            } else {
+                groq.style.display = 'none';
+                grok.style.display = 'block';
+                btns[1].classList.add('active');
+                btns[0].classList.remove('active');
+            }
+        }
+
+        // ========== EXPORT ==========
+        async function exportData(format) {
+            if(!scrapedData) return notify('No data to export', 'warning');
+            
+            try {
+                const res = await fetch('/export', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({format, data: scrapedData})
+                });
+                
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `export.${format}`;
+                a.click();
+                
+                notify(`Exported as ${format.toUpperCase()}`);
+            } catch(e) {
+                notify('Export failed: ' + e.message, 'error');
+            }
+        }
+
+        // ========== INIT ==========
+        window.onload = function() {
+            addMessage('assistant', '👋 Enter URL and click START CRAWLING');
+            addGrokMessage('assistant', '🚀 Ready to answer anything!');
+            
+            // Test URL
+            document.getElementById('urlInput').value = 'https://books.toscrape.com';
+        }
+    </script>
 </body>
 </html>
