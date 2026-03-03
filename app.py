@@ -6,9 +6,10 @@
 # Export functions as is
 
 from fastapi import FastAPI, Request  # Ye imports FastAPI aur Request ke liye hain
-from fastapi.responses import HTMLResponse, FileResponse  # Ye HTML aur File responses ke liye
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse  # Ye HTML aur File responses ke liye
 from fastapi.templating import Jinja2Templates  # Ye templates ke liye
 from fastapi.staticfiles import StaticFiles  # Ye static files serve ke liye
+from fastapi.middleware.cors import CORSMiddleware  # Ye CORS handle ke liye
 from dotenv import load_dotenv  # Ye .env load ke liye
 import os, json, time, uuid  # Ye basic imports hain (os for paths, json for data, etc.)
 import requests  # Ye requests import hai for direct Groq API
@@ -23,8 +24,25 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")  # Ye templates set karti hai
 scraper = UltraScraper()  # Ye scraper object create karti hai
 
+# Add CORS middleware - Ye line CORS enable karti hai
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Production mein specific domain set karein
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Mount static files - Ye line static files serve karti hai
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Global exception handler - Ye HTML response ki jagah JSON return karta hai
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"success": False, "error": f"Server error: {str(exc)}"},
+    )
 
 # GROQ - Using direct API calls for Python 3.14 compatibility - Ye comment Groq ke bare mein hai
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")  # Ye API key get karti hai
