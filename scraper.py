@@ -1,304 +1,412 @@
-"""
-ULTRA FAST SCRAPER - 100% WORKING
-No errors | Blazing fast | Production ready
-Author: AMMAR HAIDER
-"""
-
-import requests
-import re
-import time
-import uuid
-import csv
-import os
-import json
+# scraper.py
+import requests, re, time, uuid, csv, os, json, urllib3
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from datetime import datetime
 from fpdf import FPDF
 import pandas as pd
-from collections import deque
-import hashlib
-import logging
 
-# Setup logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Disable SSL warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class UltraScraper:
-    """ULTRA FAST Website Scraper & Crawler"""
-    
-    def __init__(self):
-        """Initialize with fast settings"""
-        self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "Accept": "text/html,application/xhtml+xml",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Connection": "keep-alive",
-        })
-        self.session.verify = False  # Fast mode - skip SSL verification
-        
-        # Create downloads directory
-        self.downloads_dir = "downloads"
-        os.makedirs(self.downloads_dir, exist_ok=True)
-        
-        # Stats
-        self.crawl_stats = {"pages": 0, "products": 0, "start": None, "end": None}
-        
-        logger.info("✅ UltraScraper initialized")
 
-    # ========== FAST CRAWLER ==========
-    def crawl_website(self, start_url, max_pages=50, delay=0.2):
-        """FAST website crawler - Limited pages for speed"""
-        self.crawl_stats = {
-            "pages_crawled": 0,
-            "products_found": 0,
-            "start_time": datetime.now().isoformat(),
-            "status": "running"
-        }
-        
-        visited = set()
-        queue = deque([start_url])
-        all_products = []
-        product_urls = set()
-        
-        base_domain = urlparse(start_url).netloc
-        
-        logger.info(f"🚀 Starting FAST crawl: {start_url}")
-        
-        while queue and len(visited) < max_pages:
-            url = queue.popleft()
-            
-            if url in visited:
-                continue
-                
-            visited.add(url)
-            self.crawl_stats["pages_crawled"] = len(visited)
-            
-            try:
-                # FAST fetch - timeout 5 seconds
-                response = self.session.get(url, timeout=5)
-                if response.status_code != 200:
-                    continue
-                    
-                soup = BeautifulSoup(response.text, "html.parser")
-                
-                # FAST product detection
-                page_products = self.extract_products_fast(soup, url)
-                
-                for product in page_products:
-                    # Simple duplicate check
-                    if product.get('url') not in product_urls:
-                        product_urls.add(product.get('url', ''))
-                        all_products.append(product)
-                        self.crawl_stats["products_found"] = len(all_products)
-                
-                # Find more links (limit for speed)
-                if len(visited) < max_pages:
-                    for a in soup.find_all('a', href=True)[:20]:  # Limit links per page
-                        href = a['href']
-                        if href.startswith('/') or href.startswith(start_url):
-                            full_url = urljoin(url, href)
-                            if base_domain in full_url and full_url not in visited:
-                                queue.append(full_url)
-                
-                time.sleep(delay)  # Small delay
-                
-            except Exception as e:
-                logger.debug(f"Skipping {url}: {str(e)}")
-                continue
-        
-        self.crawl_stats["end_time"] = datetime.now().isoformat()
-        self.crawl_stats["status"] = "completed"
-        
-        logger.info(f"✅ Crawl complete: {len(all_products)} products from {len(visited)} pages")
-        
-        return {
-            "crawl_stats": self.crawl_stats,
-            "products": all_products,
-            "product_count": len(all_products),
-            "pages": list(visited)[:100],  # Limited for speed
-            "start_url": start_url
-        }
-    
-    # ========== FAST PRODUCT EXTRACTION ==========
-    def extract_products_fast(self, soup, url):
-        """Extract products FAST - minimal processing"""
-        products = []
-        
-        # Method 1: Look for common product containers (FAST)
-        containers = soup.find_all(['div', 'li', 'article'], class_=re.compile(r'product|item|card', re.I))
-        
-        for container in containers[:20]:  # Limit per page for speed
-            product = {}
-            
-            # Get name - FAST
-            name_elem = container.find(['h2', 'h3', 'h4', 'strong'])
-            if name_elem:
-                product['name'] = self.clean_text(name_elem.get_text())[:100]
-            
-            # Get price - FAST
-            price_elem = container.find(class_=re.compile(r'price|cost|sale', re.I))
-            if price_elem:
-                product['price'] = self.clean_text(price_elem.get_text())[:50]
-            
-            # Get link - FAST
-            link = container.find('a', href=True)
-            if link:
-                product['url'] = urljoin(url, link['href'])
-            
-            # Get image - FAST
-            img = container.find('img')
-            if img and img.get('src'):
-                product['image'] = urljoin(url, img['src'])
-            
-            if product.get('name') or product.get('price'):
-                products.append(product)
-        
-        # If no containers found, check if page itself is product
-        if not products:
-            product = {}
-            
-            # Title as name
-            title = soup.find('h1')
-            if title:
-                product['name'] = self.clean_text(title.get_text())[:100]
-            
-            # Find price
-            price = soup.find(class_=re.compile(r'price|cost', re.I))
-            if price:
-                product['price'] = self.clean_text(price.get_text())[:50]
-            
-            if product.get('name') or product.get('price'):
-                product['url'] = url
-                products.append(product)
-        
-        return products[:10]  # Max 10 products per page for speed
-    
-    # ========== FAST SINGLE PAGE SCRAPE ==========
-    def scrape_website_fast(self, url):
-        """Scrape single page - ULTRA FAST"""
+    def __init__(self):
+        self.session = requests.Session()
+        self.session.headers.update({"User-Agent": "Mozilla/5.0"})
+        self.session.verify = False
+
+    # ---------- UTILS ----------
+    def clean(self, text):
+        return re.sub(r"\s+", " ", text).strip() if text else ""
+
+    def abs_url(self, url, base):
+        return urljoin(base, url)
+
+    def remove_empty(self, data):
+        return {k: v for k, v in data.items() if v not in ("", None, [], {})}
+
+    # ---------- SCRAPER ----------
+    def scrape_website(self, url, mode="comprehensive"):
         start = time.time()
-        
         try:
-            response = self.session.get(url, timeout=5)
-            soup = BeautifulSoup(response.text, "html.parser")
-            
-            # Remove scripts for speed
-            for tag in soup(["script", "style"]):
+            if not url.startswith("http"):
+                url = "https://" + url
+
+            r = self.session.get(url, timeout=30)
+            r.raise_for_status()
+            soup = BeautifulSoup(r.text, "html.parser")
+
+            # Remove scripts/styles
+            for tag in soup(["script", "style", "noscript"]):
                 tag.decompose()
-            
-            # Get basic data FAST
-            data = {
-                "url": url,
-                "title": self.clean_text(soup.title.string) if soup.title else "",
-                "text": self.clean_text(soup.get_text())[:5000],  # Limit text
-                "products": self.extract_products_fast(soup, url),
-                "time": round(time.time() - start, 2)
-            }
-            
-            return data
-            
+
+            # Metadata
+            title = self.clean(soup.title.string) if soup.title else ""
+            description = ""
+            meta_desc = soup.find("meta", attrs={"name": "description"})
+            if meta_desc:
+                description = self.clean(meta_desc.get("content"))
+
+            # Headings
+            headings = {f"h{i}": [self.clean(h.get_text()) for h in soup.find_all(f"h{i}")]
+                        for i in range(1, 7)}
+
+            # Paragraphs
+            paragraphs = [self.clean(p.get_text()) for p in soup.find_all("p") if len(p.get_text()) > 30]
+
+            # Structured data: tables + lists + Google Sheets
+            structured_data = self.extract_structured_data(soup, url)
+
+            # Images
+            images = [{"url": self.abs_url(img.get("src"), url), "alt": self.clean(img.get("alt"))}
+                      for img in soup.find_all("img") if img.get("src")]
+
+            # Links
+            domain = urlparse(url).netloc
+            internal_links, external_links = [], []
+            for a in soup.find_all("a", href=True):
+                link = self.abs_url(a["href"], url)
+                text = self.clean(a.get_text())
+                if urlparse(link).netloc == domain:
+                    internal_links.append({"url": link, "text": text})
+                else:
+                    external_links.append({"url": link, "text": text})
+
+            # Full readable text
+            full_text = self.generate_professional_text(soup, structured_data, url)
+
+            # Compose final JSON based on mode
+            if mode == "basic":
+                # Basic mode - minimal data
+                data = {
+                    "scrape_id": str(uuid.uuid4()),
+                    "url": url,
+                    "title": title,
+                    "description": description,
+                    "paragraphs": paragraphs[:5],  # Only first 5 paragraphs
+                    "stats": {
+                        "paragraph_count": len(paragraphs[:5]),
+                        "scrape_time": round(time.time() - start, 2)
+                    },
+                    "scraped_at": datetime.now().isoformat()
+                }
+            elif mode == "smart":
+                # Smart mode - moderate data
+                data = {
+                    "scrape_id": str(uuid.uuid4()),
+                    "url": url,
+                    "title": title,
+                    "description": description,
+                    "headings": {k: v[:3] for k, v in headings.items()},  # Limit headings
+                    "paragraphs": paragraphs[:10],  # First 10 paragraphs
+                    "images": images[:5],  # First 5 images
+                    "stats": {
+                        "paragraph_count": len(paragraphs[:10]),
+                        "image_count": len(images[:5]),
+                        "scrape_time": round(time.time() - start, 2)
+                    },
+                    "scraped_at": datetime.now().isoformat()
+                }
+            else:
+                # Comprehensive mode - all data
+                data = {
+                    "scrape_id": str(uuid.uuid4()),
+                    "url": url,
+                    "title": title,
+                    "description": description,
+                    "headings": headings,
+                    "paragraphs": paragraphs,
+                    "structured_data": structured_data,
+                    "images": images,
+                    "internal_links": internal_links,
+                    "external_links": external_links,
+                    "full_text": full_text,
+                    "stats": {
+                        "paragraph_count": len(paragraphs),
+                        "image_count": len(images),
+                        "internal_links_count": len(internal_links),
+                        "external_links_count": len(external_links),
+                        "table_count": len(structured_data.get("tables", [])),
+                        "list_count": len(structured_data.get("lists", [])),
+                        "scrape_time": round(time.time() - start, 2)
+                    },
+                    "scraped_at": datetime.now().isoformat()
+                }
+
+            return self.remove_empty(data)
+
         except Exception as e:
             return {"error": str(e)}
-    
-    # ========== HELPER FUNCTIONS ==========
-    def clean_text(self, text):
-        """Clean text FAST"""
-        if not text:
-            return ""
-        return re.sub(r'\s+', ' ', text).strip()
-    
-    # ========== EXPORT FUNCTIONS ==========
+
+    # ---------- STRUCTURED DATA ----------
+    def extract_structured_data(self, soup, url):
+        structured_data = {"tables": [], "lists": []}
+
+        # Tables
+        for table in soup.find_all("table"):
+            t = self.extract_table_data(table)
+            if t:
+                structured_data["tables"].append(t)
+
+        # Lists
+        for list_tag in soup.find_all(["ul", "ol"]):
+            l = self.extract_list_data(list_tag)
+            if l:
+                structured_data["lists"].append(l)
+
+        # Google Sheets (optional)
+        if "docs.google.com/spreadsheets" in url:
+            sheets = self.extract_google_sheets_data(soup)
+            if sheets:
+                structured_data["tables"].extend(sheets)
+
+        return structured_data
+
+    def extract_table_data(self, table):
+        headers, rows = [], []
+        header_row = table.find("tr")
+        if header_row:
+            headers = [self.clean(th.get_text()) for th in header_row.find_all(["th", "td"])]
+        for tr in table.find_all("tr")[1:]:
+            row = [self.clean(td.get_text()) for td in tr.find_all("td")]
+            if any(row):
+                rows.append(row)
+        if headers or rows:
+            return {"headers": headers, "rows": rows,
+                    "row_count": len(rows), "column_count": len(headers) if headers else (len(rows[0]) if rows else 0)}
+        return None
+
+    def extract_list_data(self, list_tag):
+        items = [self.clean(li.get_text()) for li in list_tag.find_all("li") if self.clean(li.get_text())]
+        if items:
+            return {"type": list_tag.name, "items": items, "item_count": len(items)}
+        return None
+
+    def extract_google_sheets_data(self, soup):
+        tables = []
+        for table in soup.find_all("table"):
+            t = self.extract_table_data(table)
+            if t:
+                t["source"] = "google_sheets"
+                tables.append(t)
+        return tables
+
+    # ---------- PROFESSIONAL TEXT ----------
+    def generate_professional_text(self, soup, structured_data, base_url=""):
+        parts = []
+
+        # Title
+        if soup.title:
+            parts.append(f"# TITLE: {self.clean(soup.title.string)}\n")
+
+        # Headings
+        for i in range(1, 7):
+            for h in soup.find_all(f"h{i}"):
+                parts.append(f"{'#' * i} {self.clean(h.get_text())}")
+
+        # Tables
+        if structured_data.get("tables"):
+            parts.append("\n## TABLES")
+            for idx, table in enumerate(structured_data["tables"], 1):
+                parts.append(f"\n### Table {idx}")
+                if table.get("headers"):
+                    parts.append(" | ".join(table["headers"]))
+                    parts.append("-" * (len(" | ".join(table["headers"]))))
+                for row in table.get("rows", []):
+                    parts.append(" | ".join(str(cell) for cell in row))
+
+        # Lists
+        if structured_data.get("lists"):
+            parts.append("\n## LISTS")
+            for lst in structured_data["lists"]:
+                parts.append(f"\n### {lst['type'].upper()} LIST")
+                for item in lst["items"]:
+                    parts.append(f"- {item}")
+
+        # Paragraphs
+        for p in soup.find_all("p"):
+            text = self.clean(p.get_text())
+            if len(text) > 30:
+                parts.append(f"\n{text}")
+
+        # Images URLs
+        if soup.find_all("img"):
+            parts.append("\n## IMAGES")
+            for img in soup.find_all("img"):
+                src = img.get("src")
+                if src:
+                    parts.append(f"- {self.abs_url(src, base_url)}")
+
+        # Links URLs
+        parts.append("\n## LINKS")
+        domain = urlparse(base_url).netloc
+        for a in soup.find_all("a", href=True):
+            link = self.abs_url(a["href"], base_url)
+            parts.append(f"- {link}")
+
+        return "\n".join(parts).strip()
+
+    # ---------- EXPORT METHODS ----------
     def save_as_json(self, data, filename):
-        """Save as JSON"""
-        path = os.path.join(self.downloads_dir, f"{filename}.json")
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2)
-        return path
-    
+        downloads_dir = "downloads"
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
+        
+        filepath = os.path.join(downloads_dir, f"{filename}.json")
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        return filepath
+
     def save_as_csv(self, data, filename):
-        """Save as CSV"""
-        path = os.path.join(self.downloads_dir, f"{filename}.csv")
+        downloads_dir = "downloads"
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
         
-        rows = []
-        if isinstance(data, dict) and data.get('products'):
-            for p in data['products']:
-                rows.append([p.get('name', ''), p.get('price', ''), p.get('url', '')])
+        filepath = os.path.join(downloads_dir, f"{filename}.csv")
         
-        with open(path, 'w', newline='', encoding='utf-8') as f:
+        # Extract relevant data for CSV
+        csv_data = []
+        
+        # Add basic info
+        if data.get('title'):
+            csv_data.append(['Type', 'Content'])
+            csv_data.append(['Title', data['title']])
+        
+        # Add headings
+        if data.get('headings'):
+            for level, headings in data['headings'].items():
+                for heading in headings:
+                    csv_data.append([level.upper(), heading])
+        
+        # Add paragraphs
+        if data.get('paragraphs'):
+            for para in data['paragraphs']:
+                csv_data.append(['Paragraph', para])
+        
+        # Write to CSV
+        with open(filepath, 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
-            writer.writerow(['Name', 'Price', 'URL'])
-            writer.writerows(rows)
+            writer.writerows(csv_data)
         
-        return path
-    
+        return filepath
+
     def save_as_excel(self, data, filename):
-        """Save as Excel"""
-        path = os.path.join(self.downloads_dir, f"{filename}.xlsx")
+        downloads_dir = "downloads"
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
         
-        rows = []
-        if isinstance(data, dict) and data.get('products'):
-            for p in data['products']:
-                rows.append({'Name': p.get('name', ''), 'Price': p.get('price', ''), 'URL': p.get('url', '')})
+        filepath = os.path.join(downloads_dir, f"{filename}.xlsx")
         
-        df = pd.DataFrame(rows)
-        df.to_excel(path, index=False)
+        # Create Excel workbook
+        with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
+            # Summary sheet
+            summary_data = {
+                'Property': ['URL', 'Title', 'Description', 'Scraped At'],
+                'Value': [
+                    data.get('url', ''),
+                    data.get('title', ''),
+                    data.get('description', ''),
+                    data.get('scraped_at', '')
+                ]
+            }
+            pd.DataFrame(summary_data).to_excel(writer, sheet_name='Summary', index=False)
+            
+            # Headings sheet
+            if data.get('headings'):
+                for level, headings in data['headings'].items():
+                    if headings:
+                        df = pd.DataFrame({level.upper(): headings})
+                        df.to_excel(writer, sheet_name=level.upper(), index=False)
+            
+            # Paragraphs sheet
+            if data.get('paragraphs'):
+                df = pd.DataFrame({'Paragraphs': data['paragraphs']})
+                df.to_excel(writer, sheet_name='Paragraphs', index=False)
         
-        return path
-    
+        return filepath
+
     def save_as_text(self, data, filename):
-        """Save as Text"""
-        path = os.path.join(self.downloads_dir, f"{filename}.txt")
+        downloads_dir = "downloads"
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
         
-        with open(path, 'w', encoding='utf-8') as f:
-            if isinstance(data, dict) and data.get('products'):
-                f.write(f"Products Found: {len(data['products'])}\n\n")
-                for i, p in enumerate(data['products'], 1):
-                    f.write(f"{i}. {p.get('name', 'N/A')} - {p.get('price', 'N/A')}\n")
+        filepath = os.path.join(downloads_dir, f"{filename}.txt")
         
-        return path
-    
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(f"TITLE: {data.get('title', 'N/A')}\n")
+            f.write(f"URL: {data.get('url', 'N/A')}\n")
+            f.write(f"DESCRIPTION: {data.get('description', 'N/A')}\n")
+            f.write(f"SCRAPED AT: {data.get('scraped_at', 'N/A')}\n")
+            f.write("=" * 50 + "\n\n")
+            
+            # Add headings
+            if data.get('headings'):
+                for level, headings in data['headings'].items():
+                    for heading in headings:
+                        f.write(f"{level.upper()}: {heading}\n\n")
+            
+            # Add paragraphs
+            if data.get('paragraphs'):
+                f.write("PARAGRAPHS:\n")
+                f.write("-" * 20 + "\n")
+                for para in data['paragraphs']:
+                    f.write(f"{para}\n\n")
+            
+            # Add full text if available
+            if data.get('full_text'):
+                f.write("FULL TEXT:\n")
+                f.write("-" * 20 + "\n")
+                f.write(data['full_text'])
+        
+        return filepath
+
     def save_as_pdf(self, data, filename):
-        """Save as PDF - SIMPLE VERSION"""
-        path = os.path.join(self.downloads_dir, f"{filename}.pdf")
+        downloads_dir = "downloads"
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
+        
+        filepath = os.path.join(downloads_dir, f"{filename}.pdf")
         
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
         
-        if isinstance(data, dict) and data.get('products'):
-            pdf.cell(0, 10, f"Products: {len(data['products'])}", ln=True)
-            pdf.ln(5)
-            
-            for i, p in enumerate(data['products'][:20], 1):  # Limit for PDF
-                pdf.cell(0, 8, f"{i}. {p.get('name', 'N/A')[:50]}", ln=True)
-                if p.get('price'):
-                    pdf.cell(0, 8, f"   Price: {p['price']}", ln=True)
+        # Title
+        if data.get('title'):
+            pdf.set_font("Arial", size=16, style='B')
+            pdf.cell(0, 10, data['title'], ln=True, align='C')
+            pdf.ln(10)
         
-        pdf.output(path)
-        return path
-    
-    def save_as_markdown(self, data, filename):
-        """Save as Markdown"""
-        path = os.path.join(self.downloads_dir, f"{filename}.md")
+        # URL and description
+        pdf.set_font("Arial", size=12)
+        if data.get('url'):
+            pdf.cell(0, 10, f"URL: {data['url']}", ln=True)
+        if data.get('description'):
+            pdf.cell(0, 10, f"Description: {data['description']}", ln=True)
+        pdf.ln(10)
         
-        with open(path, 'w', encoding='utf-8') as f:
-            if isinstance(data, dict) and data.get('products'):
-                f.write(f"# Crawl Results\n\n")
-                f.write(f"**Products Found:** {len(data['products'])}\n\n")
-                
-                for i, p in enumerate(data['products'], 1):
-                    f.write(f"## Product {i}\n")
-                    f.write(f"- **Name:** {p.get('name', 'N/A')}\n")
-                    f.write(f"- **Price:** {p.get('price', 'N/A')}\n")
-                    if p.get('url'):
-                        f.write(f"- **URL:** {p['url']}\n")
-                    f.write("\n")
+        # Headings
+        if data.get('headings'):
+            pdf.set_font("Arial", size=14, style='B')
+            pdf.cell(0, 10, "Headings:", ln=True)
+            pdf.set_font("Arial", size=12)
+            for level, headings in data['headings'].items():
+                for heading in headings:
+                    pdf.cell(0, 8, f"{level.upper()}: {heading}", ln=True)
+            pdf.ln(10)
         
-        return path
-    
-    # Legacy method for compatibility
-    def scrape_website(self, url, mode="fast"):
-        """Compatibility method"""
-        return self.scrape_website_fast(url)
+        # Paragraphs
+        if data.get('paragraphs'):
+            pdf.set_font("Arial", size=14, style='B')
+            pdf.cell(0, 10, "Content:", ln=True)
+            pdf.set_font("Arial", size=12)
+            for para in data['paragraphs']:
+                # Handle long paragraphs by splitting them
+                lines = [para[i:i+80] for i in range(0, len(para), 80)]
+                for line in lines:
+                    pdf.cell(0, 8, line, ln=True)
+                pdf.ln(5)
+        
+        pdf.output(filepath)
+        return filepath
