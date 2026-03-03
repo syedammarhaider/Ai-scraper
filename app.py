@@ -12,8 +12,6 @@ from fastapi.staticfiles import StaticFiles  # Ye static files serve ke liye
 from dotenv import load_dotenv  # Ye .env load ke liye
 import os, json, time, uuid  # Ye basic imports hain (os for paths, json for data, etc.)
 import requests  # Ye requests import hai for direct Groq API
-from datetime import datetime, timedelta  # Ye datetime imports for session management
-from collections import defaultdict  # Ye defaultdict ke liye
 
 from scraper import UltraScraper  # Ye custom scraper import karti hai
 
@@ -24,14 +22,6 @@ load_dotenv()
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")  # Ye templates set karti hai
 scraper = UltraScraper()  # Ye scraper object create karti hai
-
-# Mount static files - Ye line static files serve karta hai
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# In-memory storage for scraped data (per session)
-# In production → use redis / file / database
-scraped_sessions = defaultdict(dict)   # session_id → data
-last_cleanup = 0  # Global variable for cleanup tracking
 
 # GROQ - Using direct API calls for Python 3.14 compatibility - Ye comment Groq ke bare mein hai
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")  # Ye API key get karti hai
@@ -99,34 +89,6 @@ def initialize_grok_clients():
 # Initialize clients at startup - Ye line function call karti hai
 initialize_grok_clients()
 
-# ========== SESSION CLEANUP MIDDLEWARE ==========
-# Ye middleware old sessions clean karta hai memory leak se bachne ke liye
-@app.middleware("http")
-async def cleanup_old_sessions(request: Request, call_next):
-    global last_cleanup
-    response = await call_next(request)
-    
-    now = time.time()
-    if now - last_cleanup > 1800:  # 30 minutes
-        to_remove = []
-        for sid, d in scraped_sessions.items():
-            if "scraped_at" in d:
-                try:
-                    ts = datetime.fromisoformat(d["scraped_at"]).timestamp()
-                    if now - ts > 7200:  # 2 hours old
-                        to_remove.append(sid)
-                except:
-                    to_remove.append(sid)  # Remove if timestamp invalid
-        
-        for sid in to_remove:
-            del scraped_sessions[sid]
-        
-        last_cleanup = now
-        if to_remove:
-            print(f"🧹 Cleaned up {len(to_remove)} old sessions")
-    
-    return response
-
 # ========== HOME ==========
 # Ye endpoint root par HTML serve karta hai
 @app.get("/", response_class=HTMLResponse)
@@ -166,13 +128,8 @@ async def scrape(request: Request):
         if "error" in data:   # Ye check error hai
             return {"success": False, "error": data["error"]}  # Ye error return
         
-        # Generate session ID and save data to session storage
-        session_id = str(uuid.uuid4())
-        data["session_id"] = session_id
-        data["scraped_at"] = datetime.now().isoformat()
-        scraped_sessions[session_id] = data  # ← save here
-        
-        return {"success": True, "data": data, "session_id": session_id}  # Ye success return
+        data["session_id"] = str(uuid.uuid4())  # Ye session ID add (frontend ke liye)
+        return {"success": True, "data": data}  # Ye success return
     
     except Exception as e:  # Ye exception handle
         print(f"❌ Scraping error: {str(e)}")  # Ye print
@@ -184,18 +141,13 @@ async def scrape(request: Request):
 async def chat(request: Request):
     form = await request.form()  # Ye form get
     message = form.get("message")  # Ye message
-    session_id = form.get("session_id")  # Ye session_id
-    
-    if not message or not session_id:  # Ye check missing
-        return {"success": False, "error": "Missing message or session_id"}  # Ye error
-    
-    if session_id not in scraped_sessions:  # Ye check session exists
-        return {"success": False, "error": "Invalid or expired session_id"}  # Ye error
-        
+    scraped = form.get("scraped_data")  # Ye scraped data
+    if not message or not scraped:  # Ye check missing
+        return {"success": False, "error": "Missing data"}  # Ye error
     if not groq_ai:  # Ye check client initialized nahi
         return {"success": False, "error": "Groq AI client not initialized"}  # Ye error
 
-    data = scraped_sessions[session_id]  # Ye data from session storage
+    data = json.loads(scraped)  # Ye JSON parse
     system_prompt = """  # Ye system prompt define
 You are an EXACT factual AI assistant.
 Rules:
@@ -205,26 +157,7 @@ Rules:
 4. Be precise and factual.
 5. For greetings, respond naturally but briefly.
 """
-    
-    # Handle both single page and aggregated crawl data
-    if "pages" in data:  # Aggregated crawl data
-        context_parts = [f"CRAWLED WEBSITE: {data.get('start_url', '')}"]
-        context_parts.append(f"Total Pages Scraped: {data.get('total_stats', {}).get('pages_scraped', 0)}")
-        context_parts.append(f"Total Paragraphs: {data.get('total_stats', {}).get('total_paragraphs', 0)}")
-        context_parts.append("\nSCRAPED CONTENT FROM ALL PAGES:")
-        
-        for i, page in enumerate(data.get("pages", [])[:10]):  # Limit to first 10 pages for context
-            context_parts.append(f"\n--- PAGE {i+1}: {page.get('url', '')} ---")
-            if page.get('title'):
-                context_parts.append(f"Title: {page['title']}")
-            if page.get('description'):
-                context_parts.append(f"Description: {page['description']}")
-            if page.get('paragraphs'):
-                context_parts.append("Content:\n" + "\n".join(page['paragraphs'][:20]))  # Limit paragraphs per page
-        
-        context = "\n".join(context_parts) + f"\n\nQUESTION:\n{message}"
-    else:  # Single page data
-        context = f"SCRAPED DATA:\n{json.dumps(data, indent=2)[:8000]}\n\nQUESTION:\n{message}"  # Ye context banati hai
+    context = f"SCRAPED DATA:\n{json.dumps(data, indent=2)[:8000]}\n\nQUESTION:\n{message}"  # Ye context banati hai
 
     try:  # Ye try
         response = groq_ai.chat_completions_create(  # Ye call
@@ -275,19 +208,18 @@ async def grok_mode_endpoint(request: Request):
     try:  # Ye try
         form = await request.form()  # Ye form
         message = form.get("message")  # Ye message
-        session_id = form.get("session_id")  # Ye session_id
+        scraped = form.get("scraped_data")  # Ye scraped
         analysis_type = form.get("analysis_type", "comprehensive")  # Ye type
         
-        if not message or not session_id:  # Ye check
-            return {"success": False, "error": "Missing message or session_id"}  # Ye error
-            
-        if session_id not in scraped_sessions:  # Ye check session exists
-            return {"success": False, "error": "Invalid or expired session_id"}  # Ye error
-            
+        if not message or not scraped:  # Ye check
+            return {"success": False, "error": "Missing message or scraped data"}  # Ye error
         if not grok_mode:  # Ye check
             return {"success": False, "error": "Grok Mode client not initialized"}  # Ye error
         
-        data = scraped_sessions[session_id]  # Ye data from session storage
+        try:  # Ye try
+            data = json.loads(scraped)  # Ye parse
+        except:  # Ye except
+            return {"success": False, "error": "Invalid scraped data format"}  # Ye error
         
         system_prompt = f"""You are Grok Mode - an advanced AI assistant for universal questions.
 
@@ -340,56 +272,32 @@ Provide expert answers on any topic using your knowledge base. The scraped data 
 @app.post("/grok-summary")
 async def grok_summary(request: Request):
     form = await request.form()  # Ye form
-    session_id = form.get("session_id")  # Ye session_id
+    scraped = form.get("scraped_data")  # Ye scraped
     
-    if not session_id:  # Ye check
-        return {"success": False, "error": "Missing session_id"}  # Ye error
-        
-    if session_id not in scraped_sessions:  # Ye check session exists
-        return {"success": False, "error": "Invalid or expired session_id"}  # Ye error
-        
+    if not scraped:  # Ye check
+        return {"success": False, "error": "Missing scraped data"}  # Ye error
     if not groq_ai:  # Ye check
         return {"success": False, "error": "Groq AI client not initialized"}  # Ye error
     
-    data = scraped_sessions[session_id]  # Ye data from session storage
+    data = json.loads(scraped)  # Ye parse
     
     system_prompt = """You are GROK MODE SUMMARY - Extract key facts instantly and accurately.
 
 Provide a structured summary with:
-1. MAIN TOPIC - What the page/site is about
+1. MAIN TOPIC - What the page is about
 2. KEY POINTS - 3-5 most important facts
 3. STATISTICS - Any numbers/data found
 4. CONCLUSION - Main takeaway
 
-Only use data from the scraped content. If info missing, say "Not found"."""  # Ye prompt
+Only use data from the page. If info missing, say "Not found"."""  # Ye prompt
     
-    # Handle both single page and aggregated crawl data
-    if "pages" in data:  # Aggregated crawl data
-        context_parts = [f"CRAWLED WEBSITE: {data.get('start_url', '')}"]
-        context_parts.append(f"Total Pages: {data.get('total_stats', {}).get('pages_scraped', 0)}")
-        context_parts.append(f"Total Paragraphs: {data.get('total_stats', {}).get('total_paragraphs', 0)}")
-        
-        # Collect content from first few pages for summary
-        all_titles = []
-        all_paragraphs = []
-        for page in data.get("pages", [])[:5]:  # First 5 pages
-            if page.get('title'):
-                all_titles.append(page['title'])
-            if page.get('paragraphs'):
-                all_paragraphs.extend(page['paragraphs'][:10])  # First 10 paragraphs per page
-        
-        if all_titles:
-            context_parts.append(f"\nPage Titles:\n" + "\n".join([f"- {title}" for title in all_titles]))
-        if all_paragraphs:
-            context_parts.append(f"\nContent Sample:\n" + "\n".join(all_paragraphs[:30]))  # Limit total paragraphs
-    else:  # Single page data
-        context_parts = [f"URL: {data.get('url', '')}"]
-        if data.get('title'):
-            context_parts.append(f"Title: {data['title']}")
-        if data.get('description'):
-            context_parts.append(f"Description: {data['description']}")
-        if data.get('paragraphs'):
-            context_parts.append("\nContent:\n" + "\n".join(data['paragraphs'][:15]))
+    context_parts = [f"URL: {data.get('url', '')}"]  # Ye parts list
+    if data.get('title'):  # Ye check
+        context_parts.append(f"Title: {data['title']}")  # Ye append
+    if data.get('description'):  # Ye check
+        context_parts.append(f"Description: {data['description']}")  # Ye append
+    if data.get('paragraphs'):  # Ye check
+        context_parts.append("\nContent:\n" + "\n".join(data['paragraphs'][:15]))  # Ye content append
     
     try:  # Ye try
         response = groq_ai.chat_completions_create(  # Ye call
