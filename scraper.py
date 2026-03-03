@@ -1,233 +1,412 @@
-import requests                     # HTTP requests bhejne ke liye
-import re                           # regex matching ke liye
-import time                         # time tracking ke liye
-import uuid                         # unique scrape id banane ke liye
-import os                           # file system operations ke liye
-import json                         # JSON export ke liye
-import csv                          # CSV export ke liye
-import queue                        # BFS queue ke liye
-import urllib3                      # SSL warnings disable karne ke liye
-from bs4 import BeautifulSoup       # HTML parse karne ke liye
+
+import requests, re, time, uuid, csv, os, json, urllib3
+from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from datetime import datetime
-import pandas as pd
 from fpdf import FPDF
+import pandas as pd
 
+# Disable SSL warnings
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-
-class UltraWebsiteCrawler:
+class UltraScraper:
 
     def __init__(self):
-        # Session create karte hain taake har request same connection use kare
         self.session = requests.Session()
         self.session.headers.update({"User-Agent": "Mozilla/5.0"})
         self.session.verify = False
 
-        # visited URLs store karne ke liye set
-        self.visited = set()
-
-        # products store karne ke liye list
-        self.products = []
-
-        # duplicate products avoid karne ke liye
-        self.product_urls = set()
-
-    # ---------------- CLEAN TEXT ----------------
+    # ---------- UTILS ----------
     def clean(self, text):
-        # extra spaces remove karta hai
         return re.sub(r"\s+", " ", text).strip() if text else ""
 
-    # ---------------- IS PRODUCT PAGE ----------------
-    def is_product_page(self, soup, url):
-        """
-        Yeh function check karta hai ke page product page hai ya nahi
-        Common ecommerce patterns check karta hai
-        """
+    def abs_url(self, url, base):
+        return urljoin(base, url)
 
-        text = soup.get_text().lower()
+    def remove_empty(self, data):
+        return {k: v for k, v in data.items() if v not in ("", None, [], {})}
 
-        product_keywords = [
-            "add to cart",
-            "buy now",
-            "price",
-            "sku",
-            "product description",
-            "rating"
-        ]
+    # ---------- SCRAPER ----------
+    def scrape_website(self, url, mode="comprehensive"):
+        start = time.time()
+        try:
+            if not url.startswith("http"):
+                url = "https://" + url
 
-        # agar keywords kaafi mil jayein to product page samjhenge
-        score = sum(1 for k in product_keywords if k in text)
+            r = self.session.get(url, timeout=30)
+            r.raise_for_status()
+            soup = BeautifulSoup(r.text, "html.parser")
 
-        return score >= 2  # minimum 2 signals required
+            # Remove scripts/styles
+            for tag in soup(["script", "style", "noscript"]):
+                tag.decompose()
 
-    # ---------------- EXTRACT PRODUCT ----------------
-    def extract_product(self, soup, url):
-        """
-        Product data extract karta hai
-        """
+            # Metadata
+            title = self.clean(soup.title.string) if soup.title else ""
+            description = ""
+            meta_desc = soup.find("meta", attrs={"name": "description"})
+            if meta_desc:
+                description = self.clean(meta_desc.get("content"))
 
-        product = {}
+            # Headings
+            headings = {f"h{i}": [self.clean(h.get_text()) for h in soup.find_all(f"h{i}")]
+                        for i in range(1, 7)}
 
-        # Product URL
-        product["url"] = url
+            # Paragraphs
+            paragraphs = [self.clean(p.get_text()) for p in soup.find_all("p") if len(p.get_text()) > 30]
 
-        # Name detect karne ki koshish
-        title = soup.find("h1")
-        product["name"] = self.clean(title.get_text()) if title else ""
+            # Structured data: tables + lists + Google Sheets
+            structured_data = self.extract_structured_data(soup, url)
 
-        # Price detect karne ki koshish
-        price_text = soup.find(text=re.compile(r"\$|€|£|Rs|PKR"))
-        product["price"] = self.clean(price_text) if price_text else ""
+            # Images
+            images = [{"url": self.abs_url(img.get("src"), url), "alt": self.clean(img.get("alt"))}
+                      for img in soup.find_all("img") if img.get("src")]
 
-        # Image detect
-        img = soup.find("img")
-        product["image"] = urljoin(url, img["src"]) if img and img.get("src") else ""
+            # Links
+            domain = urlparse(url).netloc
+            internal_links, external_links = [], []
+            for a in soup.find_all("a", href=True):
+                link = self.abs_url(a["href"], url)
+                text = self.clean(a.get_text())
+                if urlparse(link).netloc == domain:
+                    internal_links.append({"url": link, "text": text})
+                else:
+                    external_links.append({"url": link, "text": text})
 
-        # Description
-        desc = soup.find("p")
-        product["description"] = self.clean(desc.get_text()) if desc else ""
+            # Full readable text
+            full_text = self.generate_professional_text(soup, structured_data, url)
 
-        # SKU detect
-        sku = soup.find(text=re.compile("sku", re.I))
-        product["sku"] = self.clean(sku) if sku else ""
+            # Compose final JSON based on mode
+            if mode == "basic":
+                # Basic mode - minimal data
+                data = {
+                    "scrape_id": str(uuid.uuid4()),
+                    "url": url,
+                    "title": title,
+                    "description": description,
+                    "paragraphs": paragraphs[:5],  # Only first 5 paragraphs
+                    "stats": {
+                        "paragraph_count": len(paragraphs[:5]),
+                        "scrape_time": round(time.time() - start, 2)
+                    },
+                    "scraped_at": datetime.now().isoformat()
+                }
+            elif mode == "smart":
+                # Smart mode - moderate data
+                data = {
+                    "scrape_id": str(uuid.uuid4()),
+                    "url": url,
+                    "title": title,
+                    "description": description,
+                    "headings": {k: v[:3] for k, v in headings.items()},  # Limit headings
+                    "paragraphs": paragraphs[:10],  # First 10 paragraphs
+                    "images": images[:5],  # First 5 images
+                    "stats": {
+                        "paragraph_count": len(paragraphs[:10]),
+                        "image_count": len(images[:5]),
+                        "scrape_time": round(time.time() - start, 2)
+                    },
+                    "scraped_at": datetime.now().isoformat()
+                }
+            else:
+                # Comprehensive mode - all data
+                data = {
+                    "scrape_id": str(uuid.uuid4()),
+                    "url": url,
+                    "title": title,
+                    "description": description,
+                    "headings": headings,
+                    "paragraphs": paragraphs,
+                    "structured_data": structured_data,
+                    "images": images,
+                    "internal_links": internal_links,
+                    "external_links": external_links,
+                    "full_text": full_text,
+                    "stats": {
+                        "paragraph_count": len(paragraphs),
+                        "image_count": len(images),
+                        "internal_links_count": len(internal_links),
+                        "external_links_count": len(external_links),
+                        "table_count": len(structured_data.get("tables", [])),
+                        "list_count": len(structured_data.get("lists", [])),
+                        "scrape_time": round(time.time() - start, 2)
+                    },
+                    "scraped_at": datetime.now().isoformat()
+                }
 
-        # Rating detect
-        rating = soup.find(text=re.compile("rating", re.I))
-        product["rating"] = self.clean(rating) if rating else ""
+            return self.remove_empty(data)
 
-        return product
+        except Exception as e:
+            return {"error": str(e)}
 
-    # ---------------- BFS WEBSITE CRAWLER ----------------
-    def crawl_website(self, base_url, max_pages=500):
-        """
-        BFS algorithm se poori website crawl karta hai
-        """
+    # ---------- STRUCTURED DATA ----------
+    def extract_structured_data(self, soup, url):
+        structured_data = {"tables": [], "lists": []}
 
-        if not base_url.startswith("http"):
-            base_url = "https://" + base_url
+        # Tables
+        for table in soup.find_all("table"):
+            t = self.extract_table_data(table)
+            if t:
+                structured_data["tables"].append(t)
 
+        # Lists
+        for list_tag in soup.find_all(["ul", "ol"]):
+            l = self.extract_list_data(list_tag)
+            if l:
+                structured_data["lists"].append(l)
+
+        # Google Sheets (optional)
+        if "docs.google.com/spreadsheets" in url:
+            sheets = self.extract_google_sheets_data(soup)
+            if sheets:
+                structured_data["tables"].extend(sheets)
+
+        return structured_data
+
+    def extract_table_data(self, table):
+        headers, rows = [], []
+        header_row = table.find("tr")
+        if header_row:
+            headers = [self.clean(th.get_text()) for th in header_row.find_all(["th", "td"])]
+        for tr in table.find_all("tr")[1:]:
+            row = [self.clean(td.get_text()) for td in tr.find_all("td")]
+            if any(row):
+                rows.append(row)
+        if headers or rows:
+            return {"headers": headers, "rows": rows,
+                    "row_count": len(rows), "column_count": len(headers) if headers else (len(rows[0]) if rows else 0)}
+        return None
+
+    def extract_list_data(self, list_tag):
+        items = [self.clean(li.get_text()) for li in list_tag.find_all("li") if self.clean(li.get_text())]
+        if items:
+            return {"type": list_tag.name, "items": items, "item_count": len(items)}
+        return None
+
+    def extract_google_sheets_data(self, soup):
+        tables = []
+        for table in soup.find_all("table"):
+            t = self.extract_table_data(table)
+            if t:
+                t["source"] = "google_sheets"
+                tables.append(t)
+        return tables
+
+    # ---------- PROFESSIONAL TEXT ----------
+    def generate_professional_text(self, soup, structured_data, base_url=""):
+        parts = []
+
+        # Title
+        if soup.title:
+            parts.append(f"# TITLE: {self.clean(soup.title.string)}\n")
+
+        # Headings
+        for i in range(1, 7):
+            for h in soup.find_all(f"h{i}"):
+                parts.append(f"{'#' * i} {self.clean(h.get_text())}")
+
+        # Tables
+        if structured_data.get("tables"):
+            parts.append("\n## TABLES")
+            for idx, table in enumerate(structured_data["tables"], 1):
+                parts.append(f"\n### Table {idx}")
+                if table.get("headers"):
+                    parts.append(" | ".join(table["headers"]))
+                    parts.append("-" * (len(" | ".join(table["headers"]))))
+                for row in table.get("rows", []):
+                    parts.append(" | ".join(str(cell) for cell in row))
+
+        # Lists
+        if structured_data.get("lists"):
+            parts.append("\n## LISTS")
+            for lst in structured_data["lists"]:
+                parts.append(f"\n### {lst['type'].upper()} LIST")
+                for item in lst["items"]:
+                    parts.append(f"- {item}")
+
+        # Paragraphs
+        for p in soup.find_all("p"):
+            text = self.clean(p.get_text())
+            if len(text) > 30:
+                parts.append(f"\n{text}")
+
+        # Images URLs
+        if soup.find_all("img"):
+            parts.append("\n## IMAGES")
+            for img in soup.find_all("img"):
+                src = img.get("src")
+                if src:
+                    parts.append(f"- {self.abs_url(src, base_url)}")
+
+        # Links URLs
+        parts.append("\n## LINKS")
         domain = urlparse(base_url).netloc
+        for a in soup.find_all("a", href=True):
+            link = self.abs_url(a["href"], base_url)
+            parts.append(f"- {link}")
 
-        q = queue.Queue()
-        q.put(base_url)
+        return "\n".join(parts).strip()
 
-        self.visited.add(base_url)
-
-        print(f"🚀 Crawling started on {base_url}")
-
-        while not q.empty() and len(self.visited) < max_pages:
-
-            current_url = q.get()
-
-            try:
-                r = self.session.get(current_url, timeout=15)
-                soup = BeautifulSoup(r.text, "html.parser")
-
-                print(f"🔎 Crawling: {current_url}")
-
-                # Product detection
-                if self.is_product_page(soup, current_url):
-                    if current_url not in self.product_urls:
-                        product = self.extract_product(soup, current_url)
-                        self.products.append(product)
-                        self.product_urls.add(current_url)
-                        print(f"🛒 Product Found: {product.get('name')}")
-
-                # Internal links collect karo
-                for a in soup.find_all("a", href=True):
-                    link = urljoin(current_url, a["href"])
-                    parsed = urlparse(link)
-
-                    if parsed.netloc == domain:
-                        if link not in self.visited:
-                            self.visited.add(link)
-                            q.put(link)
-
-            except Exception as e:
-                print(f"❌ Error: {e}")
-
-        print(f"✅ Crawling Finished. Total Products: {len(self.products)}")
-
-        return {
-            "scrape_id": str(uuid.uuid4()),
-            "base_url": base_url,
-            "total_products": len(self.products),
-            "products": self.products,
-            "scraped_at": datetime.now().isoformat()
-        }
-
-    # ---------------- EXPORT JSON ----------------
-    def save_json(self, data, filename):
-        os.makedirs("downloads", exist_ok=True)
-        path = f"downloads/{filename}.json"
-        with open(path, "w", encoding="utf-8") as f:
+    # ---------- EXPORT METHODS ----------
+    def save_as_json(self, data, filename):
+        downloads_dir = "downloads"
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
+        
+        filepath = os.path.join(downloads_dir, f"{filename}.json")
+        with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-        return path
+        return filepath
 
-    # ---------------- EXPORT CSV ----------------
-    def save_csv(self, data, filename):
-        os.makedirs("downloads", exist_ok=True)
-        path = f"downloads/{filename}.csv"
+    def save_as_csv(self, data, filename):
+        downloads_dir = "downloads"
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
+        
+        filepath = os.path.join(downloads_dir, f"{filename}.csv")
+        
+        # Extract relevant data for CSV
+        csv_data = []
+        
+        # Add basic info
+        if data.get('title'):
+            csv_data.append(['Type', 'Content'])
+            csv_data.append(['Title', data['title']])
+        
+        # Add headings
+        if data.get('headings'):
+            for level, headings in data['headings'].items():
+                for heading in headings:
+                    csv_data.append([level.upper(), heading])
+        
+        # Add paragraphs
+        if data.get('paragraphs'):
+            for para in data['paragraphs']:
+                csv_data.append(['Paragraph', para])
+        
+        # Write to CSV
+        with open(filepath, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerows(csv_data)
+        
+        return filepath
 
-        keys = data["products"][0].keys() if data["products"] else []
+    def save_as_excel(self, data, filename):
+        downloads_dir = "downloads"
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
+        
+        filepath = os.path.join(downloads_dir, f"{filename}.xlsx")
+        
+        # Create Excel workbook
+        with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
+            # Summary sheet
+            summary_data = {
+                'Property': ['URL', 'Title', 'Description', 'Scraped At'],
+                'Value': [
+                    data.get('url', ''),
+                    data.get('title', ''),
+                    data.get('description', ''),
+                    data.get('scraped_at', '')
+                ]
+            }
+            pd.DataFrame(summary_data).to_excel(writer, sheet_name='Summary', index=False)
+            
+            # Headings sheet
+            if data.get('headings'):
+                for level, headings in data['headings'].items():
+                    if headings:
+                        df = pd.DataFrame({level.upper(): headings})
+                        df.to_excel(writer, sheet_name=level.upper(), index=False)
+            
+            # Paragraphs sheet
+            if data.get('paragraphs'):
+                df = pd.DataFrame({'Paragraphs': data['paragraphs']})
+                df.to_excel(writer, sheet_name='Paragraphs', index=False)
+        
+        return filepath
 
-        with open(path, "w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=keys)
-            writer.writeheader()
-            writer.writerows(data["products"])
+    def save_as_text(self, data, filename):
+        downloads_dir = "downloads"
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
+        
+        filepath = os.path.join(downloads_dir, f"{filename}.txt")
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(f"TITLE: {data.get('title', 'N/A')}\n")
+            f.write(f"URL: {data.get('url', 'N/A')}\n")
+            f.write(f"DESCRIPTION: {data.get('description', 'N/A')}\n")
+            f.write(f"SCRAPED AT: {data.get('scraped_at', 'N/A')}\n")
+            f.write("=" * 50 + "\n\n")
+            
+            # Add headings
+            if data.get('headings'):
+                for level, headings in data['headings'].items():
+                    for heading in headings:
+                        f.write(f"{level.upper()}: {heading}\n\n")
+            
+            # Add paragraphs
+            if data.get('paragraphs'):
+                f.write("PARAGRAPHS:\n")
+                f.write("-" * 20 + "\n")
+                for para in data['paragraphs']:
+                    f.write(f"{para}\n\n")
+            
+            # Add full text if available
+            if data.get('full_text'):
+                f.write("FULL TEXT:\n")
+                f.write("-" * 20 + "\n")
+                f.write(data['full_text'])
+        
+        return filepath
 
-        return path
-
-    # ---------------- EXPORT EXCEL ----------------
-    def save_excel(self, data, filename):
-        os.makedirs("downloads", exist_ok=True)
-        path = f"downloads/{filename}.xlsx"
-        df = pd.DataFrame(data["products"])
-        df.to_excel(path, index=False)
-        return path
-
-    # ---------------- EXPORT PDF ----------------
-    def save_pdf(self, data, filename):
-        os.makedirs("downloads", exist_ok=True)
-        path = f"downloads/{filename}.pdf"
-
+    def save_as_pdf(self, data, filename):
+        downloads_dir = "downloads"
+        if not os.path.exists(downloads_dir):
+            os.makedirs(downloads_dir)
+        
+        filepath = os.path.join(downloads_dir, f"{filename}.pdf")
+        
         pdf = FPDF()
         pdf.add_page()
-        pdf.set_font("Arial", size=10)
-
-        for p in data["products"]:
-            pdf.multi_cell(0, 6, f"Name: {p.get('name')}")
-            pdf.multi_cell(0, 6, f"Price: {p.get('price')}")
-            pdf.multi_cell(0, 6, f"URL: {p.get('url')}")
-            pdf.ln(5)
-
-        pdf.output(path)
-        return path
-
-    # ---------------- EXPORT TEXT ----------------
-    def save_txt(self, data, filename):
-        os.makedirs("downloads", exist_ok=True)
-        path = f"downloads/{filename}.txt"
+        pdf.set_font("Arial", size=12)
         
-        with open(path, "w", encoding="utf-8") as f:
-            f.write(f"AI SCRAPER - WEBSITE CRAWL RESULTS\n")
-            f.write(f"="*50 + "\n\n")
-            f.write(f"Base URL: {data.get('base_url', 'N/A')}\n")
-            f.write(f"Total Products: {data.get('total_products', 0)}\n")
-            f.write(f"Scraped At: {data.get('scraped_at', 'N/A')}\n\n")
-            f.write(f"="*50 + "\n")
-            f.write(f"PRODUCTS:\n")
-            f.write(f"="*50 + "\n\n")
-            
-            for i, product in enumerate(data.get("products", []), 1):
-                f.write(f"{i}. {product.get('name', 'Unknown')}\n")
-                if product.get('price'):
-                    f.write(f"   Price: {product['price']}\n")
-                if product.get('url'):
-                    f.write(f"   URL: {product['url']}\n")
-                if product.get('description'):
-                    f.write(f"   Description: {product['description'][:100]}...\n")
-                f.write("\n")
+        # Title
+        if data.get('title'):
+            pdf.set_font("Arial", size=16, style='B')
+            pdf.cell(0, 10, data['title'], ln=True, align='C')
+            pdf.ln(10)
         
-        return path
+        # URL and description
+        pdf.set_font("Arial", size=12)
+        if data.get('url'):
+            pdf.cell(0, 10, f"URL: {data['url']}", ln=True)
+        if data.get('description'):
+            pdf.cell(0, 10, f"Description: {data['description']}", ln=True)
+        pdf.ln(10)
+        
+        # Headings
+        if data.get('headings'):
+            pdf.set_font("Arial", size=14, style='B')
+            pdf.cell(0, 10, "Headings:", ln=True)
+            pdf.set_font("Arial", size=12)
+            for level, headings in data['headings'].items():
+                for heading in headings:
+                    pdf.cell(0, 8, f"{level.upper()}: {heading}", ln=True)
+            pdf.ln(10)
+        
+        # Paragraphs
+        if data.get('paragraphs'):
+            pdf.set_font("Arial", size=14, style='B')
+            pdf.cell(0, 10, "Content:", ln=True)
+            pdf.set_font("Arial", size=12)
+            for para in data['paragraphs']:
+                # Handle long paragraphs by splitting them
+                lines = [para[i:i+80] for i in range(0, len(para), 80)]
+                for line in lines:
+                    pdf.cell(0, 8, line, ln=True)
+                pdf.ln(5)
+        
+        pdf.output(filepath)
+        return filepath

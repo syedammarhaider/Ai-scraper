@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 from groq import Groq
-from scraper import UltraWebsiteCrawler
+from scraper import UltraScraper
 import os, json, time
 
 # Load .env variables
@@ -14,7 +14,7 @@ load_dotenv()
 # Initialize FastAPI
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
-scraper = UltraWebsiteCrawler()
+scraper = UltraScraper()
 
 # ---------- GROQ ----------
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -47,7 +47,7 @@ async def scrape(request: Request):
     if not url.startswith("http"):
         url = "https://" + url
 
-    data = scraper.crawl_website(url, 500)
+    data = scraper.scrape_website(url, mode)
 
     if "error" in data:
         return {"success": False, "error": data["error"]}
@@ -205,11 +205,11 @@ async def export(request: Request):
     filename = f"scraped_{int(time.time())}"
 
     handlers = {
-        "json": scraper.save_json,
-        "csv": scraper.save_csv,
-        "excel": scraper.save_excel,
-        "txt": scraper.save_txt,
-        "pdf": scraper.save_pdf
+        "json": scraper.save_as_json,
+        "csv": scraper.save_as_csv,
+        "excel": scraper.save_as_excel,
+        "txt": scraper.save_as_text,
+        "pdf": scraper.save_as_pdf
     }
 
     if fmt not in handlers:
