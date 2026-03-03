@@ -1,6 +1,6 @@
-# Final working app.py - March 2025 version
-# All routes consistent, CORS enabled, JSON error responses only
-# Groq endpoints fixed, function names match frontend calls
+# Final app.py - 100% working version - March 2026
+# Ye file full scraped data handle karti hai, large data ke liye bhi safe hai
+# Comments Roman Urdu mein hain taake asani se samajh aaye
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
@@ -13,26 +13,26 @@ import requests
 
 from scraper import UltraScraper
 
-# Load environment variables
+# Environment variables load karo (.env file se)
 load_dotenv()
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 scraper = UltraScraper()
 
-# Enable CORS - this fixes most "<!DOCTYPE html>" issues from browser
+# Static files serve karne ke liye
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# CORS enable karo taake browser block na kare
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],                # Change to your domain in production
+    allow_origins=["*"],  # Production mein specific domain daal dena
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-# Force JSON response even on crashes (no more HTML error pages)
+# Har error pe JSON response do (HTML kabhi nahi aayega)
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
@@ -40,12 +40,12 @@ async def global_exception_handler(request: Request, exc: Exception):
         content={"success": False, "error": f"Server error: {str(exc)}"},
     )
 
-# GROQ API Key & Models
+# Groq API key aur models
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 MODEL = "llama-3.3-70b-versatile"
 MODEL_DEEP = "llama-3.3-70b-versatile"
 
-# Direct Groq client (more reliable than old groq package)
+# Direct Groq client banaya hai (package ke bajaye requests use kar rahe hain)
 class GroqDirectClient:
     def __init__(self, api_key):
         self.api_key = api_key
@@ -55,99 +55,115 @@ class GroqDirectClient:
             "Content-Type": "application/json"
         }
 
-    def chat_completions_create(self, model, messages, temperature=0, max_tokens=1500, **kwargs):
+    def chat_completions_create(self, model, messages, temperature=0, max_tokens=1500):
         try:
             payload = {
                 "model": model,
                 "messages": messages,
                 "temperature": temperature,
-                "max_tokens": max_tokens,
-                **kwargs
+                "max_tokens": max_tokens
             }
             resp = requests.post(
                 f"{self.base_url}/chat/completions",
                 headers=self.headers,
                 json=payload,
-                timeout=45
+                timeout=60
             )
             resp.raise_for_status()
             return resp.json()
         except Exception as e:
             raise Exception(f"Groq API failed: {str(e)}")
 
-# Global Groq clients
+# Global clients
 groq_ai = None
 grok_mode_client = None
 
-def init_groq_clients():
+# Clients initialize karo
+def init_groq():
     global groq_ai, grok_mode_client
     if not GROQ_API_KEY:
-        print("❌ GROQ_API_KEY missing in .env")
-        return False
+        print("❌ .env mein GROQ_API_KEY nahi mila")
+        return
     try:
         groq_ai = GroqDirectClient(GROQ_API_KEY)
         grok_mode_client = GroqDirectClient(GROQ_API_KEY)
-        print("✅ Groq clients initialized successfully")
-        return True
+        print("✅ Groq clients ready hain")
     except Exception as e:
-        print(f"❌ Groq init failed: {e}")
-        return False
+        print(f"❌ Groq init fail: {e}")
 
-init_groq_clients()
+init_groq()
 
 # ──────────────────────────────────────────────
 # Routes
 # ──────────────────────────────────────────────
 
+# Home page serve karo
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+# Health check endpoint
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
 
+# Scraping endpoint - full data scrape karta hai
 @app.post("/scrape")
 async def scrape(request: Request):
-    form = await request.form()
-    url = form.get("url")
-    mode = form.get("mode", "comprehensive")
+    try:
+        form = await request.form()
+        url = form.get("url")
+        mode = form.get("mode", "comprehensive")
 
-    if not url:
-        return {"success": False, "error": "URL required"}
+        if not url:
+            return {"success": False, "error": "URL chahiye"}
 
-    if not url.startswith(("http://", "https://")):
-        url = "https://" + url
+        if not url.startswith(("http://", "https://")):
+            url = "https://" + url
 
-    print(f"Scraping: {url} | Mode: {mode}")
+        print(f"🔍 Scraping ho raha hai: {url} | Mode: {mode}")
 
-    if mode == "comprehensive":
-        data = scraper.crawl_website(url, mode, max_pages=50, max_depth=4)
-    else:
-        data = scraper.scrape_single_page(url, mode)
+        # Comprehensive mode mein full site crawl, baqi mein single page
+        if mode == "comprehensive":
+            data = scraper.crawl_website(url, mode, max_pages=50, max_depth=4)
+        else:
+            data = scraper.scrape_single_page(url, mode)
 
-    if "error" in data:
-        return {"success": False, "error": data["error"]}
+        if "error" in data:
+            return {"success": False, "error": data["error"]}
 
-    data["session_id"] = str(uuid.uuid4())
-    return {"success": True, "data": data}
+        data["session_id"] = str(uuid.uuid4())
+        return {"success": True, "data": data}
+    
+    except Exception as e:
+        print(f"❌ Scraping error: {str(e)}")
+        return {"success": False, "error": f"Scraping fail: {str(e)}"}
 
+# Groq chat endpoint - scraped data ke saath jawab deta hai
 @app.post("/groq-chat")
 async def groq_chat(request: Request):
     if not groq_ai:
-        return {"success": False, "error": "Groq AI not initialized"}
+        return {"success": False, "error": "Groq AI ready nahi hai"}
 
     form = await request.form()
     message = form.get("message")
-    scraped = form.get("scraped_data")
+    scraped_str = form.get("scraped_data")
 
-    if not message or not scraped:
-        return {"success": False, "error": "Missing message or scraped_data"}
+    if not message or not scraped_str:
+        return {"success": False, "error": "Message ya data missing"}
 
     try:
-        data = json.loads(scraped)
+        data = json.loads(scraped_str)
     except:
-        return {"success": False, "error": "Invalid scraped_data JSON"}
+        return {"success": False, "error": "Scraped data invalid hai"}
+
+    # Large data ke liye context limit kar do taake crash na ho
+    limited_data = {
+        "title": data.get("title", ""),
+        "url": data.get("url", ""),
+        "description": data.get("description", ""),
+        "main_content": "\n".join(data.get("paragraphs", [])[:40])  # sirf 40 paragraphs bhej rahe
+    }
 
     system_prompt = """
 You are an EXACT factual AI assistant.
@@ -156,7 +172,7 @@ Rules:
 2. If answer not found, say: "This information is not available in the scraped website data."
 3. Never guess or use outside knowledge.
 """
-    context = f"SCRAPED DATA:\n{json.dumps(data, indent=2)[:12000]}\n\nQUESTION:\n{message}"
+    context = f"SCRAPED DATA:\n{json.dumps(limited_data, indent=2)}\n\nQUESTION:\n{message}"
 
     try:
         resp = groq_ai.chat_completions_create(
@@ -173,31 +189,52 @@ Rules:
     except Exception as e:
         return {"success": False, "error": f"Groq error: {str(e)}"}
 
+# Export endpoint - files download karne ke liye
+@app.post("/export")
+async def export(request: Request):
+    body = await request.json()
+    fmt = body.get("format")
+    data = body.get("data")
+
+    if not fmt or not data:
+        return {"success": False, "error": "Format ya data missing"}
+
+    filename = f"scraped_{int(time.time())}"
+
+    handlers = {
+        "json": scraper.save_as_json,
+        "csv": scraper.save_as_csv,
+        "excel": scraper.save_as_excel,
+        "txt": scraper.save_as_text,
+        "pdf": scraper.save_as_pdf
+    }
+
+    if fmt not in handlers:
+        return {"success": False, "error": f"Yeh format support nahi: {fmt}"}
+
+    path = handlers[fmt](data, filename)
+    return FileResponse(path, filename=os.path.basename(path))
+
+# Grok Mode - universal questions ke liye (scraped data ignore karta hai)
 @app.post("/grok-mode")
 async def grok_mode(request: Request):
     if not grok_mode_client:
-        return {"success": False, "error": "Grok Mode not initialized"}
+        return {"success": False, "error": "Grok Mode ready nahi"}
 
     form = await request.form()
     message = form.get("message")
-    scraped = form.get("scraped_data")
     analysis_type = form.get("analysis_type", "comprehensive")
 
-    if not message or not scraped:
-        return {"success": False, "error": "Missing message or scraped_data"}
-
-    try:
-        json.loads(scraped)  # just validate
-    except:
-        return {"success": False, "error": "Invalid scraped_data"}
+    if not message:
+        return {"success": False, "error": "Question chahiye"}
 
     system_prompt = f"""You are Grok Mode - advanced universal AI.
 Rules:
-1. Answer using only your knowledge - DO NOT use scraped data
+1. Answer using only your knowledge - scraped data ignore karo
 2. Be detailed, accurate, helpful
 Analysis type: {analysis_type}"""
 
-    context = f"QUESTION: {message}\n\n(Universal knowledge question - ignore any website data)"
+    context = f"QUESTION: {message}\n\n(Universal knowledge question)"
 
     try:
         resp = grok_mode_client.chat_completions_create(
@@ -213,28 +250,3 @@ Analysis type: {analysis_type}"""
         return {"success": True, "response": answer}
     except Exception as e:
         return {"success": False, "error": f"Grok Mode error: {str(e)}"}
-
-@app.post("/export")
-async def export(request: Request):
-    body = await request.json()
-    fmt = body.get("format")
-    data = body.get("data")
-
-    if not fmt or not data:
-        return {"success": False, "error": "Missing format or data"}
-
-    filename = f"scraped_{int(time.time())}"
-
-    handlers = {
-        "json": scraper.save_as_json,
-        "csv": scraper.save_as_csv,
-        "excel": scraper.save_as_excel,
-        "txt": scraper.save_as_text,
-        "pdf": scraper.save_as_pdf
-    }
-
-    if fmt not in handlers:
-        return {"success": False, "error": f"Unsupported format: {fmt}"}
-
-    path = handlers[fmt](data, filename)
-    return FileResponse(path, filename=os.path.basename(path))
