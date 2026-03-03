@@ -272,7 +272,7 @@ async function scrapeWebsite() {
 async function askGroq() {
     const question = document.getElementById('questionInput').value;
     if(!question) { showNotification("Enter question", "warning"); return; }
-    if(!scrapedData) { addMessage('assistant', '⚠️ Scrape a website first!'); return; }
+    if(!sessionId) { addMessage('assistant', '⚠️ Scrape a website first!'); return; }
     
     addMessage('user', question);
     document.getElementById('questionInput').value = '';
@@ -287,7 +287,7 @@ async function askGroq() {
     try {
         const formData = new FormData();
         formData.append('message', question);
-        formData.append('scraped_data', JSON.stringify(scrapedData));
+        formData.append('session_id', sessionId);
         formData.append('history', JSON.stringify(groqChatHistory));
         
         const response = await fetch('/groq-chat', { method: 'POST', body: formData });
@@ -343,7 +343,7 @@ async function askGrokMode() {
     try {
         const fd = new FormData();
         fd.append('message', q);
-        fd.append('scraped_data', JSON.stringify(scrapedData || {}));
+        fd.append('session_id', sessionId);
         fd.append('analysis_type', 'comprehensive');
         fd.append('history', JSON.stringify(grokChatHistory));
         
