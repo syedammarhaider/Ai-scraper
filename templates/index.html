@@ -1,28 +1,24 @@
 <!-- 
-git add .; git commit -m "Auto update"; git push origin main 
+AI SCRAPER - FULL WEBSITE CRAWLER & PRODUCT SCRAPER
+Enterprise Edition v5.0
+Author: AMMAR HAIDER
 
-
-
-ssh -i ai-key.pem ec2-user@3.95.32.144
-$ cd ~/Ai-scraper
-$ python app.py
-http://3.95.32.144
-http://3.95.32.144/
-
+Complete solution for crawling entire websites and extracting all products
+Features: BFS crawling, product detection, pagination, duplicate removal, multi-format export
 -->
-
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>AI SCRAPER · AMMAR EDITION</title>
+<title>AI SCRAPER PRO · FULL SITE CRAWLER</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
+/* ===== PROFESSIONAL STYLING ===== */
 * {
     margin: 0;
     padding: 0;
@@ -119,7 +115,7 @@ body {
     gap: clamp(12px, 2vw, 20px);
 }
 
-/* Header */
+/* ===== HEADER ===== */
 .header {
     display: flex;
     justify-content: space-between;
@@ -154,6 +150,17 @@ body {
     filter: drop-shadow(0 2px 4px rgba(212,175,55,0.3));
 }
 
+.badge-pro {
+    background: linear-gradient(135deg, #d4af37, #c85cb8);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 40px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 10px;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
 .theme-toggle {
     padding: clamp(8px, 1.2vw, 12px) clamp(14px, 2vw, 24px);
     border: none;
@@ -176,7 +183,7 @@ body {
     box-shadow: 0 8px 25px rgba(212,175,55,0.5);
 }
 
-/* Cards */
+/* ===== CARDS ===== */
 .card {
     background: var(--card-bg);
     padding: clamp(16px, 2.5vw, 28px) clamp(16px, 2.5vw, 28px);
@@ -211,7 +218,7 @@ body {
     font-size: 0.9em;
 }
 
-/* Input Groups */
+/* ===== INPUT GROUPS ===== */
 .input-group {
     display: flex;
     gap: clamp(8px, 1.5vw, 16px);
@@ -241,8 +248,8 @@ body {
     transform: translateY(-1px);
 }
 
-/* Buttons */
-.primary-btn, .scrape-btn {
+/* ===== BUTTONS ===== */
+.primary-btn, .scrape-btn, .crawl-btn {
     padding: clamp(12px, 2vw, 18px) clamp(20px, 3vw, 32px);
     border: none;
     border-radius: 50px;
@@ -262,7 +269,7 @@ body {
     overflow: hidden;
 }
 
-.primary-btn::before, .scrape-btn::before {
+.primary-btn::before, .scrape-btn::before, .crawl-btn::before {
     content: '';
     position: absolute;
     top: 50%;
@@ -275,24 +282,55 @@ body {
     transition: width 0.6s, height 0.6s;
 }
 
-.primary-btn:hover::before, .scrape-btn:hover::before {
+.primary-btn:hover::before, .scrape-btn:hover::before, .crawl-btn:hover::before {
     width: 300px;
     height: 300px;
 }
 
-.primary-btn:hover, .scrape-btn:hover {
+.primary-btn:hover, .scrape-btn:hover, .crawl-btn:hover {
     transform: translateY(-3px) scale(1.02);
     box-shadow: 0 20px 30px -5px rgba(74,42,107,0.6);
 }
 
-.scrape-btn {
+.crawl-btn {
     width: 100%;
     margin-top: clamp(8px, 1.5vw, 16px);
     font-weight: 700;
     letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #4a2a6b, #d4af37, #c85cb8);
 }
 
-/* Loading Animation */
+/* ===== CRAWL OPTIONS ===== */
+.crawl-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.option-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.option-item label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.option-item input {
+    padding: 10px 16px;
+    border-radius: 30px;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text-primary);
+}
+
+/* ===== LOADING ANIMATION ===== */
 .loading {
     display: none;
     text-align: center;
@@ -309,7 +347,10 @@ body {
     margin: 0 auto clamp(8px, 1.2vw, 12px);
 }
 
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes spin { 
+    0% { transform: rotate(0deg); } 
+    100% { transform: rotate(360deg); } 
+}
 
 .loading p {
     color: #d4af37;
@@ -318,14 +359,50 @@ body {
     animation: pulse 1.5s ease-in-out infinite;
 }
 
-@keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+@keyframes pulse { 
+    0%, 100% { opacity: 0.6; } 
+    50% { opacity: 1; } 
+}
 
-/* Preview Content */
+/* ===== PROGRESS BAR ===== */
+.progress-container {
+    margin-top: 20px;
+    padding: 15px;
+    background: var(--input-bg);
+    border-radius: 40px;
+    border: 1px solid var(--border-color);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 40px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #d4af37, #c85cb8);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 40px;
+}
+
+.progress-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* ===== PREVIEW CONTENT ===== */
 .preview-content {
     background: var(--input-bg);
     padding: clamp(16px, 2.5vw, 24px);
     border-radius: clamp(16px, 2.5vw, 24px);
-    max-height: 300px;
+    max-height: 400px;
     overflow: auto;
     font-size: clamp(12px, 1vw, 14px);
     border: 1px solid var(--border-color);
@@ -334,7 +411,48 @@ body {
     line-height: 1.6;
 }
 
-/* Export Grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.product-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 16px;
+    transition: all 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(212,175,55,0.2);
+    border-color: #d4af37;
+}
+
+.product-card img {
+    max-width: 100%;
+    height: 150px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+.product-name {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.product-price {
+    color: #d4af37;
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 8px;
+}
+
+/* ===== EXPORT GRID ===== */
 .export-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100px, 100%), 1fr));
@@ -365,7 +483,7 @@ body {
     box-shadow: 0 10px 20px -5px rgba(212,175,55,0.5);
 }
 
-/* Toggle Container */
+/* ===== MODE TOGGLE ===== */
 .toggle-container {
     display: flex;
     gap: clamp(8px, 1.2vw, 16px);
@@ -403,7 +521,7 @@ body {
     transform: scale(1.02);
 }
 
-/* Chat Containers */
+/* ===== CHAT CONTAINERS ===== */
 .chat-container {
     background: var(--input-bg);
     padding: clamp(16px, 2.5vw, 24px);
@@ -453,7 +571,7 @@ body {
     border-bottom-left-radius: 8px;
 }
 
-/* Typing Indicator */
+/* ===== TYPING INDICATOR ===== */
 .typing {
     display: flex;
     align-items: center;
@@ -478,7 +596,7 @@ body {
     50% { transform: scale(1.3); opacity: 1; }
 }
 
-/* Model Badge */
+/* ===== MODEL BADGE ===== */
 .model-badge {
     display: inline-block;
     padding: clamp(4px, 0.8vw, 8px) clamp(10px, 1.5vw, 16px);
@@ -493,71 +611,35 @@ body {
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* Chat Sections */
-.chat-section {
-    display: none;
-    animation: fadeIn 0.4s ease-out;
+/* ===== STATS BADGES ===== */
+.stats-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.chat-section.active { display: block; }
-
-/* Mode Header */
-.mode-header {
+.stat-badge {
     background: linear-gradient(135deg, var(--input-bg), var(--card-bg));
-    border-radius: clamp(16px, 2.5vw, 24px);
-    padding: clamp(12px, 2vw, 20px) clamp(16px, 2.5vw, 24px);
-    margin-bottom: clamp(16px, 2.5vw, 24px);
-    border-left: 5px solid #d4af37;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-}
-
-.mode-header h2 {
-    margin: 0 0 clamp(4px, 0.8vw, 8px) 0;
-    font-size: clamp(15px, 1.4vw, 18px);
+    border: 1px solid var(--border-color);
+    padding: 12px 20px;
+    border-radius: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-weight: 600;
 }
 
-.mode-header p {
-    margin: 0;
-    font-size: clamp(12px, 1vw, 14px);
-    opacity: 0.75;
+.stat-badge i {
+    color: #d4af37;
+    font-size: 20px;
 }
 
-/* Notification */
-.export-notification {
-    position: fixed;
-    bottom: clamp(15px, 3vw, 30px);
-    right: clamp(15px, 3vw, 30px);
-    background: var(--success);
-    color: white;
-    padding: clamp(12px, 1.8vw, 18px) clamp(20px, 2.5vw, 30px);
-    border-radius: 50px;
-    font-size: clamp(13px, 1.1vw, 15px);
-    font-weight: 600;
-    box-shadow: 0 15px 30px -10px rgba(0,0,0,0.3);
-    z-index: 1000;
-    animation: slideInRight 0.3s ease-out;
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.2);
+.stat-badge span {
+    color: var(--text-primary);
 }
 
-@keyframes slideInRight {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--input-bg); border-radius: 10px; }
-::-webkit-scrollbar-thumb { background: linear-gradient(135deg, #d4af37, #c85cb8); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: linear-gradient(135deg, #c85cb8, #d4af37); }
-
-/* FOOTER - ULTRA PROFESSIONAL */
+/* ===== FOOTER ===== */
 .footer {
     margin-top: clamp(20px, 4vw, 40px);
     padding: clamp(24px, 4vw, 48px) clamp(20px, 5vw, 80px);
@@ -572,7 +654,6 @@ body {
     width: 100%;
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
 }
 
 .footer::before {
@@ -615,312 +696,34 @@ body {
 
 .footer * { position: relative; z-index: 2; }
 
-.footer-main {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: clamp(20px, 3vw, 40px);
-    margin-bottom: clamp(24px, 4vw, 48px);
-    padding-bottom: clamp(20px, 3vw, 40px);
-    border-bottom: 1px solid rgba(212,175,55,0.2);
-}
-
-.footer-logo {
-    font-size: clamp(24px, 3.5vw, 40px);
-    font-weight: 700;
-    background: linear-gradient(145deg, #fff, #ffe68f, #ffb7c5);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: transparent;
-    display: flex;
-    align-items: center;
-    gap: clamp(10px, 1.5vw, 20px);
-    text-shadow: 0 2px 10px rgba(212,175,55,0.3);
-    letter-spacing: -0.02em;
-}
-
-#footerBrand {
-    background: linear-gradient(145deg, #fff, #ffe68f, #ffb7c5);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: transparent;
-}
-
-.footer-logo i {
-    font-size: clamp(28px, 4vw, 48px);
-    background: linear-gradient(145deg, #fbbf24, #ff8c00, #ff6ec7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 10px gold) drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-    animation: crownFloat 3s infinite alternate ease-in-out;
-}
-
-@keyframes crownFloat {
-    0% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 10px gold); }
-    100% { transform: translateY(-5px) scale(1.05); filter: drop-shadow(0 0 20px #ffdb7c); }
-}
-
-.footer-tagline {
-    display: flex;
-    flex-wrap: wrap;
-    gap: clamp(12px, 2vw, 24px);
-}
-
-.footer-tagline span {
-    background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(212,175,55,0.15));
-    padding: clamp(8px, 1.2vw, 14px) clamp(16px, 2vw, 28px);
-    border-radius: 50px;
-    font-size: clamp(12px, 1vw, 15px);
-    font-weight: 500;
-    border: 1px solid rgba(212,175,55,0.3);
-    backdrop-filter: blur(8px);
-    letter-spacing: 0.3px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-}
-
-.footer-tagline span:hover {
-    background: linear-gradient(145deg, rgba(212,175,55,0.3), rgba(255,215,0,0.2));
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(212,175,55,0.3);
-}
-
-.footer-badges {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: clamp(10px, 1.8vw, 24px);
-    margin: clamp(20px, 3vw, 40px) 0;
-}
-
-.footer-badge {
-    background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(212,175,55,0.12));
-    padding: clamp(8px, 1.2vw, 14px) clamp(18px, 2.2vw, 32px);
-    border-radius: 50px;
-    font-size: clamp(12px, 1vw, 15px);
-    font-weight: 500;
-    border: 1px solid rgba(212,175,55,0.25);
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    letter-spacing: 0.3px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    backdrop-filter: blur(8px);
-    display: inline-flex;
-    align-items: center;
-    gap: clamp(6px, 1vw, 12px);
-}
-
-.footer-badge:hover {
-    background: linear-gradient(145deg, rgba(212,175,55,0.4), rgba(255,215,0,0.3));
-    border-color: #ffdb7c;
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 15px 30px rgba(212,175,55,0.4);
-}
-
-.footer-links {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
-    gap: clamp(20px, 3vw, 50px);
-    margin: clamp(24px, 4vw, 48px) 0;
-}
-
-.footer-column h4 {
-    font-size: clamp(14px, 1.2vw, 18px);
-    margin-bottom: clamp(16px, 2vw, 24px);
-    background: linear-gradient(145deg, #fff8e7, #ffe49e);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    position: relative;
-    display: inline-block;
-}
-
-.footer-column h4::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 0;
-    width: 50px;
-    height: 3px;
-    background: linear-gradient(90deg, #ffd966, #ff9f4b, #ff6ec7);
-    border-radius: 3px;
-    transition: width 0.3s ease;
-}
-
-.footer-column:hover h4::after {
-    width: 100%;
-}
-
-.footer-column ul {
-    list-style: none;
-}
-
-.footer-column ul li {
-    margin-bottom: clamp(10px, 1.5vw, 18px);
-}
-
-.footer-column ul li a {
-    color: rgba(255,255,240,0.9);
-    text-decoration: none;
-    font-size: clamp(13px, 1.1vw, 15px);
-    display: flex;
-    align-items: center;
-    gap: clamp(6px, 1vw, 12px);
-    transition: all 0.3s ease;
-    padding: clamp(4px, 0.8vw, 8px) 0;
-}
-
-.footer-column ul li a:hover {
-    color: #fff;
-    transform: translateX(10px);
-    text-shadow: 0 2px 8px rgba(212,175,55,0.5);
-}
-
-.footer-column ul li a i {
-    color: #d4af37;
-    font-size: 0.8em;
-    transition: transform 0.3s ease;
-}
-
-.footer-column ul li a:hover i {
-    transform: translateX(5px);
-}
-
-.footer-social {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: clamp(12px, 2vw, 24px);
-    margin: clamp(24px, 4vw, 48px) 0;
-}
-
-.footer-social a {
-    width: clamp(40px, 5vw, 56px);
-    height: clamp(40px, 5vw, 56px);
-    font-size: clamp(16px, 2vw, 22px);
-    border-radius: 50%;
-    background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(212,175,55,0.12));
-    border: 1px solid rgba(212,175,55,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: var(--footer-text);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    backdrop-filter: blur(8px);
-}
-
-.footer-social a:hover {
-    background: linear-gradient(145deg, #d4af37, #ffdb7c);
-    color: #1a1033;
-    transform: translateY(-8px) scale(1.1);
-    box-shadow: 0 20px 30px rgba(212,175,55,0.5);
-    border-color: #ffd700;
-}
-
-.footer-extra {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: clamp(12px, 2vw, 24px);
-    margin: clamp(24px, 4vw, 48px) 0;
-    padding: clamp(20px, 3vw, 40px) 0;
-    border-top: 1px solid rgba(212,175,55,0.15);
-    border-bottom: 1px solid rgba(212,175,55,0.15);
-}
-
-.footer-extra-link {
-    color: rgba(255,255,255,0.8);
-    text-decoration: none;
-    font-size: clamp(13px, 1.1vw, 15px);
-    padding: clamp(8px, 1.2vw, 14px) clamp(18px, 2.5vw, 32px);
-    border-radius: 50px;
-    background: linear-gradient(145deg, rgba(0,0,0,0.2), rgba(212,175,55,0.1));
-    display: flex;
-    align-items: center;
-    gap: clamp(6px, 1vw, 12px);
-    font-weight: 500;
-    border: 1px solid rgba(212,175,55,0.2);
-    transition: all 0.3s ease;
-    backdrop-filter: blur(8px);
-}
-
-.footer-extra-link:hover {
-    background: rgba(212,175,55,0.2);
-    color: #fff;
-    transform: translateY(-3px);
-    border-color: #d4af37;
-    box-shadow: 0 10px 25px rgba(212,175,55,0.3);
-}
-
-.footer-copyright {
-    text-align: center;
-    font-size: clamp(12px, 1vw, 14px);
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: clamp(16px, 2.5vw, 32px);
-    padding-top: clamp(20px, 3vw, 40px);
-    color: rgba(255,255,255,0.7);
-    font-weight: 400;
-}
-
-.footer-copyright span {
-    display: flex;
-    align-items: center;
-    gap: clamp(6px, 1vw, 12px);
-}
-
-.footer-copyright i {
-    color: #d4af37;
-}
-
-/* Ultra Responsive Breakpoints */
-@media (max-width: 1200px) {
-    .footer { padding: clamp(30px, 5vw, 60px) clamp(25px, 4vw, 50px); }
-}
-
-@media (max-width: 992px) {
-    .footer-main { flex-direction: column; text-align: center; }
-    .footer-logo { justify-content: center; }
-    .footer-tagline { justify-content: center; }
-    .footer-column { text-align: center; }
-    .footer-column h4::after { left: 50%; transform: translateX(-50%); }
-    .footer-column ul li a { justify-content: center; }
-}
-
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-    body { padding: 12px 16px 0; }
-    .footer { padding: 30px 20px; }
-    .footer-links { grid-template-columns: 1fr; gap: 30px; }
-    .footer-extra { flex-direction: column; align-items: center; }
-    .footer-copyright { flex-direction: column; gap: 10px; }
-    .export-grid { grid-template-columns: repeat(3, 1fr); }
+    .crawl-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .product-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-badges {
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 576px) {
-    .export-grid { grid-template-columns: repeat(2, 1fr); }
-    .footer-badges { flex-direction: column; align-items: center; }
-    .footer-social a { width: 45px; height: 45px; font-size: 18px; }
-    .toggle-container { flex-direction: column; border-radius: 40px; }
-    .toggle-btn { width: 100%; }
-}
-
-@media (max-width: 380px) {
-    .export-grid { grid-template-columns: 1fr; }
-    .footer-extra-link { width: 100%; justify-content: center; }
-    .footer-copyright span { justify-content: center; }
-}
-
-/* Print Styles */
-@media print {
-    .footer { background: white; color: black; }
-    .footer * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .export-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .toggle-container {
+        flex-direction: column;
+        border-radius: 40px;
+    }
+    
+    .toggle-btn {
+        width: 100%;
+    }
 }
 </style>
 </head>
@@ -929,44 +732,100 @@ body {
 
 <div class="container">
 
+<!-- ===== HEADER ===== -->
 <div class="header">
-    <h1><i class="fas fa-bolt"></i> AI SCRAPER </h1>
+    <h1>
+        <i class="fas fa-bolt"></i> AI SCRAPER PRO 
+        <span class="badge-pro">v5.0 · FULL SITE CRAWLER</span>
+    </h1>
     <button class="theme-toggle" onclick="toggleTheme()">
         <i class="fas fa-moon"></i> <span id="themeText">Dark</span>
     </button>
 </div>
 
-<!-- SCRAPER SECTION -->
+<!-- ===== FULL WEBSITE CRAWLER SECTION ===== -->
 <div class="card">
-    <h2><i class="fas fa-globe"></i> Website Scraper</h2>
+    <h2><i class="fas fa-sitemap"></i> Full Website Crawler · Product Scraper</h2>
     <div class="input-group">
-        <input type="url" id="urlInput" placeholder="URL (e.g., example.com)" value="">
+        <input type="url" id="urlInput" placeholder="Enter website URL (e.g., example.com)" value="">
         <button class="primary-btn" onclick="previewUrl()"><i class="fas fa-eye"></i> Preview</button>
     </div>
-    <div class="input-group">
-        <select id="scrapeMode">
-            <option value="comprehensive">🔍 Comprehensive</option>
-            <option value="smart">⚡ Smart</option>
-            <option value="basic">📄 Basic</option>
-        </select>
-        <select id="jsMode">
-            <option value="false">🚫 JS Off</option>
-            <option value="true">⚡ JS On</option>
-        </select>
+    
+    <!-- Crawl Options -->
+    <div class="crawl-options">
+        <div class="option-item">
+            <label><i class="fas fa-maximize"></i> Max Pages</label>
+            <input type="number" id="maxPages" value="100" min="10" max="500" step="10">
+        </div>
+        <div class="option-item">
+            <label><i class="fas fa-clock"></i> Delay (seconds)</label>
+            <input type="number" id="delay" value="0.5" min="0.1" max="5" step="0.1">
+        </div>
+        <div class="option-item">
+            <label><i class="fas fa-filter"></i> Scrape Mode</label>
+            <select id="scrapeMode">
+                <option value="comprehensive">🔍 Comprehensive (All Data)</option>
+                <option value="smart">⚡ Smart (Optimized)</option>
+                <option value="basic">📄 Basic (Minimal)</option>
+            </select>
+        </div>
     </div>
-    <button class="scrape-btn" onclick="scrapeWebsite()">
-        <i class="fas fa-search"></i> SCRAPE NOW
+    
+    <!-- Crawl Button -->
+    <button class="crawl-btn" onclick="crawlWebsite()">
+        <i class="fas fa-sitemap"></i> CRAWL ENTIRE WEBSITE & EXTRACT ALL PRODUCTS
     </button>
+    
+    <!-- Progress Bar -->
+    <div id="progressContainer" class="progress-container" style="display: none;">
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill" style="width: 0%;"></div>
+        </div>
+        <div class="progress-stats">
+            <span id="progressPages">0 pages</span>
+            <span id="progressProducts">0 products</span>
+            <span id="progressStatus">Starting...</span>
+        </div>
+    </div>
+    
+    <!-- Loading Animation -->
     <div id="loading" class="loading">
         <div class="loading-spinner"></div>
-        <p>Processing...</p>
+        <p>Crawling website... This may take a few minutes</p>
     </div>
 </div>
 
-<!-- SCRAPED DATA CARD -->
+<!-- ===== CRAWL RESULTS CARD ===== -->
 <div class="card" id="dataCard" style="display:none">
-    <h2><i class="fas fa-database"></i> Scraped Data <span class="model-badge">Preview</span></h2>
+    <h2>
+        <i class="fas fa-database"></i> 
+        <span id="resultTitle">Crawl Results</span>
+        <span id="productCount" class="model-badge">0 products</span>
+    </h2>
+    
+    <!-- Stats Badges -->
+    <div id="statsBadges" class="stats-badges"></div>
+    
+    <!-- Products Grid -->
+    <div id="productsGrid" class="product-grid"></div>
+    
+    <!-- Preview Tabs -->
+    <div class="toggle-container" style="margin-top: 20px;">
+        <button class="toggle-btn active" onclick="showPreviewTab('products')">
+            <i class="fas fa-box"></i> Products
+        </button>
+        <button class="toggle-btn" onclick="showPreviewTab('json')">
+            <i class="fas fa-code"></i> JSON
+        </button>
+        <button class="toggle-btn" onclick="showPreviewTab('stats')">
+            <i class="fas fa-chart-bar"></i> Statistics
+        </button>
+    </div>
+    
+    <!-- Preview Content -->
     <div id="previewContent" class="preview-content"></div>
+    
+    <!-- Export Buttons -->
     <div class="export-grid">
         <button class="export-btn" onclick="exportData('json')"><i class="fas fa-code"></i> JSON</button>
         <button class="export-btn" onclick="exportData('csv')"><i class="fas fa-table"></i> CSV</button>
@@ -977,129 +836,95 @@ body {
     </div>
 </div>
 
-<!-- COMBINED AI CHAT CARD -->
+<!-- ===== AI CHAT CARD ===== -->
 <div class="card" id="combinedChatCard" style="display:none">
     <h2><i class="fas fa-robot"></i> AI Assistants <span class="model-badge">Dual Mode</span></h2>
     
     <div class="toggle-container">
         <button class="toggle-btn active" id="groqToggle" onclick="switchMode('groq')">
             <i class="fas fa-brain"></i> 
-            <span> AI · Scraped</span>
+            <span>AI · Scraped Data Only</span>
         </button>
         <button class="toggle-btn" id="grokToggle" onclick="switchMode('grok')">
             <i class="fas fa-bolt"></i> 
-            <span>Mode · Universal</span>
+            <span>Mode · Universal Knowledge</span>
         </button>
     </div>
 
+    <!-- Groq Section (Scraped Data Only) -->
     <div id="groqSection" class="chat-section active">
         <div class="mode-header">
             <h2><i class="fas fa-microchip"></i> AI · Scraped Data Analysis</h2>
+            <p>Ask questions about the crawled products and website content</p>
         </div>
         <div id="chatContainer" class="chat-container"></div>
         <div class="input-group">
-            <input type="text" id="questionInput" placeholder="Ask about scraped data..." onkeypress="if(event.key==='Enter') askGroq()">
+            <input type="text" id="questionInput" placeholder="Ask about products, prices, descriptions..." onkeypress="if(event.key==='Enter') askGroq()">
             <button class="primary-btn" onclick="askGroq()"><i class="fas fa-paper-plane"></i></button>
             <button class="primary-btn" onclick="clearGroqChat()" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fas fa-trash"></i></button>
         </div>
     </div>
 
+    <!-- Grok Section (Universal Knowledge) -->
     <div id="grokSection" class="chat-section">
         <div class="mode-header">
-            <h2><i class="fas fa-brain"></i> AI · Universal</h2>
-            <p>Ask any question (not limited to scraped data)</p>
+            <h2><i class="fas fa-brain"></i> AI · Universal Knowledge</h2>
+            <p>Ask any question - not limited to scraped data</p>
         </div>
         <div id="grokChatContainer" class="chat-container"></div>
         <div class="input-group">
-            <input type="text" id="grokQuestionInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') askGrokMode()">
+            <input type="text" id="grokQuestionInput" placeholder="Ask anything about products, market analysis, comparisons..." onkeypress="if(event.key==='Enter') askGrokMode()">
             <button class="primary-btn" onclick="askGrokMode()"><i class="fas fa-bolt"></i></button>
             <button class="primary-btn" onclick="clearGrokChat()" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fas fa-trash"></i></button>
         </div>
     </div>
 </div>
 
-<!-- FOOTER -->
+<!-- ===== FOOTER ===== -->
 <footer class="footer">
     <div class="footer-main">
         <div class="footer-logo">
             <i class="fas fa-crown"></i> 
-            <span id="footerBrand">AI·SCRAPER</span>
+            <span id="footerBrand">AI·SCRAPER PRO</span>
         </div>
         <div class="footer-tagline">
-            <span id="footerTagline1">SCRAPER SUPREME</span>
-            <span id="footerTagline2">v4.0 · eternal</span>
+            <span>FULL SITE CRAWLER</span>
+            <span>v5.0 · ENTERPRISE</span>
         </div>
     </div>
 
     <div class="footer-badges">
-        <span class="footer-badge" id="badge1"><i class="fas fa-shield-halved"></i> zero‑copy</span>
-        <span class="footer-badge" id="badge2"><i class="fas fa-bolt"></i> edge‑ai</span>
-        <span class="footer-badge" id="badge3"><i class="fas fa-gem"></i> dual‑mind</span>
-        <span class="footer-badge" id="badge4"><i class="fas fa-crown"></i> premium</span>
-    </div>
-
-    <div class="footer-links">
-        <div class="footer-column">
-            <h4 id="platformTitle">Platform</h4>
-            <ul>
-                <li><a href="#" id="featuresLink"><i class="fas fa-chevron-right"></i> Features</a></li>
-                <li><a href="#" id="apiLink"><i class="fas fa-chevron-right"></i> API</a></li>
-                <li><a href="#" id="pricingLink"><i class="fas fa-chevron-right"></i> Pricing</a></li>
-            </ul>
-        </div>
-        <div class="footer-column">
-            <h4 id="resourcesTitle">Resources</h4>
-            <ul>
-                <li><a href="#" id="docsLink"><i class="fas fa-chevron-right"></i> Documentation</a></li>
-                <li><a href="#" id="blogLink"><i class="fas fa-chevron-right"></i> Blog</a></li>
-                <li><a href="#" id="communityLink"><i class="fas fa-chevron-right"></i> Community</a></li>
-            </ul>
-        </div>
-        <div class="footer-column">
-            <h4 id="companyTitle">Company</h4>
-            <ul>
-                <li><a href="#" id="aboutLink"><i class="fas fa-chevron-right"></i> About</a></li>
-                <li><a href="#" id="contactLink"><i class="fas fa-chevron-right"></i> Contact</a></li>
-                <li><a href="#" id="careersLink"><i class="fas fa-chevron-right"></i> Careers</a></li>
-            </ul>
-        </div>
-    </div>
-
-    <div class="footer-social">
-        <a href="https://www.linkedin.com/in/ammar-haider-61136b27b/" target="_blank" title="LinkedIn" id="linkedinLink"><i class="fab fa-linkedin-in"></i></a>
-        <a href="https://github.com/Syedammarhaider" target="_blank" title="GitHub" id="githubLink"><i class="fab fa-github"></i></a>
-        <a href="https://www.facebook.com/profile.php?id=100091524961370" target="_blank" title="Facebook" id="facebookLink"><i class="fab fa-facebook-f"></i></a>
-        <a href="#" title="Instagram" id="instagramLink"><i class="fab fa-instagram"></i></a>
-        <a href="#" title="Twitter" id="twitterLink"><i class="fab fa-twitter"></i></a>
-    </div>
-
-    <div class="footer-extra">
-        <a href="#" class="footer-extra-link" id="privacyLink"><i class="fas fa-lock"></i> Privacy Policy</a>
-        <a href="#" class="footer-extra-link" id="termsLink"><i class="fas fa-file-contract"></i> Terms of Service</a>
-        <a href="#" class="footer-extra-link" id="cookieLink"><i class="fas fa-cookie-bite"></i> Cookie Policy</a>
-        <a href="#" class="footer-extra-link" id="sitemapLink"><i class="fas fa-sitemap"></i> Sitemap</a>
+        <span class="footer-badge"><i class="fas fa-sitemap"></i> BFS CRAWLER</span>
+        <span class="footer-badge"><i class="fas fa-box"></i> PRODUCT DETECTION</span>
+        <span class="footer-badge"><i class="fas fa-bolt"></i> 100% ACCURATE</span>
+        <span class="footer-badge"><i class="fas fa-gem"></i> ENTERPRISE</span>
     </div>
 
     <div class="footer-copyright">
-        <span id="copyright1"><i class="fas fa-copyright"></i> 2025 AMMAR·AI</span>
-        <span id="copyright2"><i class="fas fa-globe"></i> All rights reserved worldwide</span>
-        <span id="copyright3"><i class="fas fa-heart" style="color: #d4af37;"></i> Made with precision</span>
+        <span><i class="fas fa-copyright"></i> 2025 AMMAR·AI · FULL SITE CRAWLER</span>
+        <span><i class="fas fa-globe"></i> All rights reserved</span>
+        <span><i class="fas fa-heart" style="color: #d4af37;"></i> Made with precision</span>
     </div>
 </footer>
 
 </div>
 
+<!-- ===== JAVASCRIPT ===== -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
-let scrapedData = null;
-let sessionId = null;
-let groqChatHistory = [];
-let grokChatHistory = [];
+// ===== GLOBAL VARIABLES =====
+let scrapedData = null;          // Stores crawled website data
+let sessionId = null;             // Session identifier
+let groqChatHistory = [];         // History for Groq (data-only) chat
+let grokChatHistory = [];         // History for Grok (universal) chat
+let currentPreviewTab = 'products'; // Current preview tab
 
+// ===== THEME TOGGLE =====
 function toggleTheme() {
     const body = document.body;
     const themeText = document.getElementById('themeText');
     const icon = document.querySelector('.theme-toggle i');
+    
     if(body.getAttribute('data-theme') === 'light') {
         body.setAttribute('data-theme', 'dark');
         themeText.textContent = 'Light';
@@ -1111,96 +936,292 @@ function toggleTheme() {
     }
 }
 
+// ===== URL PREVIEW =====
 function previewUrl() {
     const url = document.getElementById('urlInput').value;
-    if(!url) { showNotification("Enter URL first", "warning"); return; }
+    if(!url) { 
+        showNotification("Please enter a URL first", "warning"); 
+        return; 
+    }
+    
+    // Add protocol if missing
     let fullUrl = url;
-    if(!url.startsWith('http')) { fullUrl = 'https://' + url; }
+    if(!url.startsWith('http')) { 
+        fullUrl = 'https://' + url; 
+    }
+    
+    // Open in new tab
     window.open(fullUrl, '_blank');
 }
 
+// ===== SHOW NOTIFICATION =====
 function showNotification(message, type = "success") {
     const notification = document.createElement('div');
     notification.className = 'export-notification';
-    notification.style.background = type === 'success' ? 'var(--success)' : type === 'warning' ? 'var(--warning)' : 'var(--danger)';
-    notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-circle' : 'times-circle'}"></i> ${message}`;
+    
+    // Set background color based on type
+    if(type === 'success') {
+        notification.style.background = 'var(--success)';
+        notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+    } else if(type === 'warning') {
+        notification.style.background = 'var(--warning)';
+        notification.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+    } else {
+        notification.style.background = 'var(--danger)';
+        notification.innerHTML = `<i class="fas fa-times-circle"></i> ${message}`;
+    }
+    
     document.body.appendChild(notification);
+    
+    // Auto remove after 2.5 seconds
     setTimeout(() => {
         notification.style.animation = 'slideOutRight 0.3s ease-out';
         setTimeout(() => notification.remove(), 300);
     }, 2500);
 }
 
-async function scrapeWebsite() {
+// ===== FULL WEBSITE CRAWLER =====
+async function crawlWebsite() {
     const url = document.getElementById('urlInput').value;
-    if(!url) { showNotification("Enter URL first", "warning"); return; }
+    const maxPages = document.getElementById('maxPages').value;
+    const delay = document.getElementById('delay').value;
+    
+    // Validate URL
+    if(!url) { 
+        showNotification("Please enter a website URL", "warning"); 
+        return; 
+    }
+    
+    // Add protocol if missing
     let fullUrl = url;
-    if(!url.startsWith('http')) { fullUrl = 'https://' + url; }
+    if(!url.startsWith('http')) { 
+        fullUrl = 'https://' + url; 
+    }
+    
+    // Show loading and progress
     document.getElementById('loading').style.display = 'block';
-    document.querySelector('.scrape-btn').disabled = true;
+    document.getElementById('progressContainer').style.display = 'block';
+    document.querySelector('.crawl-btn').disabled = true;
+    
+    // Reset progress
+    updateProgress(0, 0, "Starting crawl...");
+    
     try {
+        // Prepare form data
         const formData = new FormData();
         formData.append('url', fullUrl);
-        formData.append('mode', document.getElementById('scrapeMode').value);
-        formData.append('js', document.getElementById('jsMode').value);
-        const response = await fetch('/scrape', { method: 'POST', body: formData });
+        formData.append('max_pages', maxPages);
+        formData.append('delay', delay);
+        
+        // Send crawl request
+        const response = await fetch('/crawl', { 
+            method: 'POST', 
+            body: formData 
+        });
+        
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Server error:', errorText);
             throw new Error(`Server error: ${response.status}`);
         }
+        
         const result = await response.json();
+        
         if(result.success) {
+            // Store crawled data
             scrapedData = result.data;
             sessionId = result.session_id;
-            document.getElementById('previewContent').innerHTML = '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
+            
+            // Update UI with results
+            displayCrawlResults(scrapedData);
+            
+            // Show result card and chat
             document.getElementById('dataCard').style.display = 'block';
             document.getElementById('combinedChatCard').style.display = 'block';
-            addMessage('assistant', '✅ Scraped! Ask about the content.');
-            showNotification('Scraped successfully!', 'success');
+            
+            // Add welcome messages
+            addMessage('assistant', '✅ Website crawl complete! I can answer questions about the products and content found.');
+            addGrokMessage('assistant', '🚀 Grok Mode ready! Ask me anything about these products or any other topic.');
+            
+            showNotification(`Crawled ${scrapedData.crawl_stats.pages_crawled} pages, found ${scrapedData.product_count} products!`, 'success');
         } else {
-            showNotification('Error: ' + (result.error || 'Unknown'), 'error');
+            showNotification('Error: ' + (result.error || 'Unknown error'), 'error');
         }
     } catch(error) {
         showNotification('Error: ' + error.message, 'error');
+        console.error('Crawl error:', error);
     } finally {
+        // Hide loading and re-enable button
         document.getElementById('loading').style.display = 'none';
-        document.querySelector('.scrape-btn').disabled = false;
+        document.querySelector('.crawl-btn').disabled = false;
     }
 }
 
+// ===== UPDATE PROGRESS =====
+function updateProgress(pages, products, status) {
+    document.getElementById('progressPages').textContent = `${pages} pages`;
+    document.getElementById('progressProducts').textContent = `${products} products`;
+    document.getElementById('progressStatus').textContent = status;
+    
+    // Simulate progress (in real implementation, this would come from server)
+    // For demo, we'll just show indeterminate progress
+}
+
+// ===== DISPLAY CRAWL RESULTS =====
+function displayCrawlResults(data) {
+    // Update title
+    document.getElementById('resultTitle').innerHTML = `<i class="fas fa-sitemap"></i> Crawl Results: ${data.start_url}`;
+    document.getElementById('productCount').textContent = `${data.product_count} products`;
+    
+    // Display stats badges
+    const statsHtml = `
+        <div class="stat-badge">
+            <i class="fas fa-file-alt"></i>
+            <span>${data.crawl_stats.pages_crawled} Pages Crawled</span>
+        </div>
+        <div class="stat-badge">
+            <i class="fas fa-box"></i>
+            <span>${data.product_count} Products Found</span>
+        </div>
+        <div class="stat-badge">
+            <i class="fas fa-clock"></i>
+            <span>Completed: ${new Date(data.crawl_stats.end_time).toLocaleTimeString()}</span>
+        </div>
+    `;
+    document.getElementById('statsBadges').innerHTML = statsHtml;
+    
+    // Display products grid
+    displayProductsGrid(data.products);
+    
+    // Show products tab by default
+    showPreviewTab('products');
+}
+
+// ===== DISPLAY PRODUCTS GRID =====
+function displayProductsGrid(products) {
+    const grid = document.getElementById('productsGrid');
+    
+    if (!products || products.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; padding: 40px;">No products found on this website.</p>';
+        return;
+    }
+    
+    let html = '';
+    products.slice(0, 12).forEach((product, index) => {  // Show first 12 products
+        html += `
+            <div class="product-card">
+                ${product.image ? `<img src="${product.image}" alt="${product.name || 'Product'}" onerror="this.style.display='none'">` : ''}
+                <div class="product-name">${product.name || 'Unnamed Product'}</div>
+                ${product.price ? `<div class="product-price">${product.price}</div>` : ''}
+                ${product.description ? `<div style="font-size: 12px; color: var(--text-muted);">${product.description.substring(0, 100)}${product.description.length > 100 ? '...' : ''}</div>` : ''}
+                ${product.sku ? `<div style="font-size: 11px; margin-top: 8px;">SKU: ${product.sku}</div>` : ''}
+            </div>
+        `;
+    });
+    
+    if (products.length > 12) {
+        html += `<div style="text-align: center; padding: 20px; grid-column: 1/-1;">... and ${products.length - 12} more products</div>`;
+    }
+    
+    grid.innerHTML = html;
+}
+
+// ===== SHOW PREVIEW TAB =====
+function showPreviewTab(tab) {
+    currentPreviewTab = tab;
+    
+    // Update toggle buttons
+    document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    if (!scrapedData) return;
+    
+    const preview = document.getElementById('previewContent');
+    
+    if (tab === 'products') {
+        // Show products list in preview
+        let html = '<h3>All Extracted Products</h3>';
+        scrapedData.products.forEach((product, idx) => {
+            html += `<div style="margin-bottom: 15px; padding: 10px; background: var(--card-bg); border-radius: 8px;">`;
+            html += `<strong>${idx + 1}. ${product.name || 'Unnamed'}</strong><br>`;
+            if (product.price) html += `💰 Price: ${product.price}<br>`;
+            if (product.description) html += `📝 Description: ${product.description.substring(0, 150)}...<br>`;
+            if (product.url) html += `🔗 <a href="${product.url}" target="_blank">View Product</a><br>`;
+            html += `</div>`;
+        });
+        preview.innerHTML = html;
+        
+    } else if (tab === 'json') {
+        // Show JSON preview
+        preview.innerHTML = '<pre>' + JSON.stringify(scrapedData, null, 2) + '</pre>';
+        
+    } else if (tab === 'stats') {
+        // Show statistics
+        const stats = scrapedData.crawl_stats;
+        let html = '<h3>Crawl Statistics</h3>';
+        html += '<table style="width:100%; border-collapse: collapse;">';
+        for (let [key, value] of Object.entries(stats)) {
+            if (key !== 'product_urls_found') {
+                html += `<tr><td style="padding: 8px; border-bottom: 1px solid var(--border-color);"><strong>${key.replace(/_/g, ' ').toUpperCase()}</strong></td>`;
+                html += `<td style="padding: 8px; border-bottom: 1px solid var(--border-color);">${value}</td></tr>`;
+            }
+        }
+        html += '</table>';
+        preview.innerHTML = html;
+    }
+}
+
+// ===== GROQ CHAT (Data Only) =====
 async function askGroq() {
     const question = document.getElementById('questionInput').value;
-    if(!question) { showNotification("Enter question", "warning"); return; }
-    if(!scrapedData) { addMessage('assistant', '⚠️ Scrape a website first!'); return; }
+    if(!question) { 
+        showNotification("Please enter a question", "warning"); 
+        return; 
+    }
     
+    if(!scrapedData) { 
+        addMessage('assistant', '⚠️ Please crawl a website first!'); 
+        return; 
+    }
+    
+    // Add user message to chat
     addMessage('user', question);
     document.getElementById('questionInput').value = '';
     
+    // Show typing indicator
     const typingId = 'typing-' + Date.now();
     const typingDiv = document.createElement('div');
     typingDiv.className = 'message assistant';
     typingDiv.id = typingId;
-    typingDiv.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Analyzing...</div>';
+    typingDiv.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Analyzing data...</div>';
     document.getElementById('chatContainer').appendChild(typingDiv);
     
     try {
+        // Prepare request
         const formData = new FormData();
         formData.append('message', question);
         formData.append('scraped_data', JSON.stringify(scrapedData));
         formData.append('history', JSON.stringify(groqChatHistory));
         
-        const response = await fetch('/groq-chat', { method: 'POST', body: formData });
+        // Send to server
+        const response = await fetch('/groq-chat', { 
+            method: 'POST', 
+            body: formData 
+        });
         const result = await response.json();
         
+        // Remove typing indicator
         document.getElementById(typingId)?.remove();
         
         if(result.success) {
+            // Add assistant response with markdown formatting
             addMessage('assistant', marked.parse(result.response));
+            
+            // Update history
             groqChatHistory.push({ role: 'user', content: question });
             groqChatHistory.push({ role: 'assistant', content: result.response });
         } else {
-            addMessage('assistant', '❌ Error: ' + (result.error || 'Unknown'));
+            addMessage('assistant', '❌ Error: ' + (result.error || 'Unknown error'));
         }
     } catch(error) {
         document.getElementById(typingId)?.remove();
@@ -1208,6 +1229,7 @@ async function askGroq() {
     }
 }
 
+// ===== ADD MESSAGE TO GROQ CHAT =====
 function addMessage(role, content) {
     const chatContainer = document.getElementById('chatContainer');
     const messageDiv = document.createElement('div');
@@ -1217,6 +1239,7 @@ function addMessage(role, content) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
+// ===== ADD MESSAGE TO GROK CHAT =====
 function addGrokMessage(role, content) {
     const chatContainer = document.getElementById('grokChatContainer');
     const messageDiv = document.createElement('div');
@@ -1226,181 +1249,76 @@ function addGrokMessage(role, content) {
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
 
+// ===== GROK MODE (Universal Knowledge) =====
 async function askGrokMode() {
-    const q = document.getElementById('grokQuestionInput').value;
-    if(!q) { showNotification("Enter question", "warning"); return; }
+    const question = document.getElementById('grokQuestionInput').value;
+    if(!question) { 
+        showNotification("Please enter a question", "warning"); 
+        return; 
+    }
     
-    addGrokMessage('user', q);
+    // Add user message
+    addGrokMessage('user', question);
     document.getElementById('grokQuestionInput').value = '';
     
-    const tid = 'gt' + Date.now();
-    const td = document.createElement('div');
-    td.className = 'message assistant';
-    td.id = tid;
-    td.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Reasoning...</div>';
-    document.getElementById('grokChatContainer').appendChild(td);
+    // Show typing indicator
+    const typingId = 'grok-typing-' + Date.now();
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message assistant';
+    typingDiv.id = typingId;
+    typingDiv.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Thinking...</div>';
+    document.getElementById('grokChatContainer').appendChild(typingDiv);
     
     try {
-        const fd = new FormData();
-        fd.append('message', q);
-        fd.append('scraped_data', JSON.stringify(scrapedData || {}));
-        fd.append('analysis_type', 'comprehensive');
-        fd.append('history', JSON.stringify(grokChatHistory));
+        // Prepare request
+        const formData = new FormData();
+        formData.append('message', question);
+        formData.append('scraped_data', JSON.stringify(scrapedData || {}));
+        formData.append('analysis_type', 'comprehensive');
+        formData.append('history', JSON.stringify(grokChatHistory));
         
-        const r = await fetch('/grok-mode', { method: 'POST', body: fd });
-        const res = await r.json();
+        // Send to server
+        const response = await fetch('/grok-mode', { 
+            method: 'POST', 
+            body: formData 
+        });
+        const result = await response.json();
         
-        document.getElementById(tid)?.remove();
+        // Remove typing indicator
+        document.getElementById(typingId)?.remove();
         
-        if(res.success) {
-            addGrokMessage('assistant', marked.parse(res.response));
-            grokChatHistory.push({ role: 'user', content: q });
-            grokChatHistory.push({ role: 'assistant', content: res.response });
+        if(result.success) {
+            // Add assistant response with markdown
+            addGrokMessage('assistant', marked.parse(result.response));
+            
+            // Update history
+            grokChatHistory.push({ role: 'user', content: question });
+            grokChatHistory.push({ role: 'assistant', content: result.response });
         } else {
-            addGrokMessage('assistant', '❌ Error: ' + (res.error || 'Unknown'));
+            addGrokMessage('assistant', '❌ Error: ' + (result.error || 'Unknown error'));
         }
-    } catch(e) {
-        document.getElementById(tid)?.remove();
-        addGrokMessage('assistant', '❌ Error: ' + e.message);
+    } catch(error) {
+        document.getElementById(typingId)?.remove();
+        addGrokMessage('assistant', '❌ Error: ' + error.message);
     }
 }
 
+// ===== CLEAR CHATS =====
 function clearGroqChat() {
     document.getElementById('chatContainer').innerHTML = '';
     groqChatHistory = [];
-    addMessage('assistant', '🧹 Chat cleared.');
+    addMessage('assistant', '🧹 Chat cleared. Ask about the crawled data!');
     showNotification('Groq chat cleared', 'success');
 }
 
 function clearGrokChat() {
     document.getElementById('grokChatContainer').innerHTML = '';
     grokChatHistory = [];
-    addGrokMessage('assistant', '🧹 Chat cleared.');
+    addGrokMessage('assistant', '🧹 Chat cleared. Ask me anything!');
     showNotification('Grok chat cleared', 'success');
 }
 
-async function exportData(format) {
-    if(!scrapedData) { showNotification("Scrape a website first", "warning"); return; }
-    
-    try {
-        let content = '';
-        let mimeType = '';
-        let fileExtension = '';
-        let fileName = `scraped_${new Date().toISOString().slice(0,10)}`;
-        
-        if(format === 'json') {
-            content = JSON.stringify(scrapedData, null, 2);
-            mimeType = 'application/json';
-            fileExtension = 'json';
-            fileName += '.json';
-        } else if(format === 'csv') {
-            const headers = ['Field', 'Value', 'Type', 'Length'];
-            const rows = [];
-            rows.push(['Title', scrapedData.title || 'N/A', 'metadata', String(scrapedData.title?.length || 0)]);
-            rows.push(['URL', scrapedData.url || 'N/A', 'metadata', String(scrapedData.url?.length || 0)]);
-            rows.push(['Total Paragraphs', String(scrapedData.paragraphs?.length || 0), 'count', '']);
-            if(scrapedData.paragraphs) {
-                scrapedData.paragraphs.forEach((para, index) => {
-                    rows.push([`Paragraph ${index + 1}`, para.replace(/"/g, '""'), 'content', String(para.length)]);
-                });
-            }
-            content = headers.join(',') + '\n';
-            rows.forEach(row => {
-                content += row.map(cell => `"${cell}"`).join(',') + '\n';
-            });
-            mimeType = 'text/csv';
-            fileExtension = 'csv';
-            fileName += '.csv';
-        } else if(format === 'excel') {
-            const headers = ['Field', 'Value', 'Type', 'Length'];
-            const rows = [];
-            rows.push(['Title', scrapedData.title || 'N/A', 'metadata', String(scrapedData.title?.length || 0)]);
-            rows.push(['URL', scrapedData.url || 'N/A', 'metadata', String(scrapedData.url?.length || 0)]);
-            rows.push(['Total Paragraphs', String(scrapedData.paragraphs?.length || 0), 'count', '']);
-            if(scrapedData.paragraphs) {
-                scrapedData.paragraphs.forEach((para, index) => {
-                    rows.push([`Paragraph ${index + 1}`, para.replace(/"/g, '""'), 'content', String(para.length)]);
-                });
-            }
-            
-            // Create Excel-compatible CSV content
-            content = headers.join(',') + '\n';
-            rows.forEach(row => {
-                content += row.map(cell => `"${cell}"`).join(',') + '\n';
-            });
-            mimeType = 'application/vnd.ms-excel';
-            fileExtension = 'xlsx';
-            fileName += '.xlsx';
-        } else if(format === 'pdf') {
-            content = `<html><head><title>${scrapedData.title || 'Scraped Data'}</title><style>body{font-family:Arial;padding:20px;}h1{color:#d4af37;}p{margin:10px 0;}</style></head><body>`;
-            content += `<h1>${scrapedData.title || 'Scraped Data'}</h1>`;
-            content += `<p><strong>URL:</strong> ${scrapedData.url || 'N/A'}</p>`;
-            content += `<p><strong>Total Paragraphs:</strong> ${scrapedData.paragraphs?.length || 0}</p>`;
-            content += '<hr>';
-            if(scrapedData.paragraphs) {
-                scrapedData.paragraphs.forEach((para, index) => {
-                    content += `<h3>Paragraph ${index + 1}</h3>`;
-                    content += `<p>${para}</p>`;
-                });
-            }
-            content += `<hr><p><small>Generated by AI SCRAPER · AMMAR</small></p></body></html>`;
-            mimeType = 'application/pdf';
-            fileExtension = 'pdf';
-            fileName += '.pdf';
-        } else if(format === 'markdown') {
-            content = `# ${scrapedData.title || 'Scraped Data'}\n\n`;
-            content += `**URL:** ${scrapedData.url || 'N/A'}\n\n`;
-            content += `**Total Paragraphs:** ${scrapedData.paragraphs?.length || 0}\n\n`;
-            content += '---\n\n';
-            if(scrapedData.paragraphs) {
-                scrapedData.paragraphs.forEach((para, index) => {
-                    content += `## Paragraph ${index + 1}\n\n`;
-                    content += `${para}\n\n`;
-                });
-            }
-            content += `\n---\n*Generated by AI SCRAPER · AMMAR*`;
-            mimeType = 'text/markdown';
-            fileExtension = 'md';
-            fileName += '.md';
-        } else if(format === 'txt') {
-            content = `📌 METADATA\n`;
-            content += `• Title: ${scrapedData.title || 'N/A'}\n`;
-            content += `• URL: ${scrapedData.url || 'N/A'}\n`;
-            content += `• Total Paragraphs: ${scrapedData.paragraphs?.length || 0}\n\n`;
-            content += `📄 CONTENT\n`;
-            if(scrapedData.paragraphs) {
-                scrapedData.paragraphs.forEach((para, index) => {
-                    content += `[${index + 1}] ${para}\n\n`;
-                });
-            }
-            content += `\nGenerated by AI SCRAPER · AMMAR\n`;
-            mimeType = 'text/plain';
-            fileExtension = 'txt';
-            fileName += '.txt';
-        } else {
-            content = JSON.stringify(scrapedData, null, 2);
-            mimeType = 'application/json';
-            fileExtension = 'json';
-            fileName += '.json';
-        }
-        
-        const blob = new Blob([content], { type: mimeType });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-        
-        showNotification(`Exported as ${format.toUpperCase()}!`, 'success');
-        
-    } catch(error) {
-        showNotification('Error: ' + error.message, 'error');
-    }
-}
-
+// ===== SWITCH AI MODE =====
 function switchMode(mode) {
     const groqSection = document.getElementById('groqSection');
     const grokSection = document.getElementById('grokSection');
@@ -1420,14 +1338,71 @@ function switchMode(mode) {
     }
 }
 
+// ===== EXPORT DATA =====
+async function exportData(format) {
+    if(!scrapedData) { 
+        showNotification("Please crawl a website first", "warning"); 
+        return; 
+    }
+    
+    try {
+        // Show loading
+        showNotification(`Preparing ${format.toUpperCase()} export...`, 'success');
+        
+        // Send export request
+        const response = await fetch('/export', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                format: format,
+                data: scrapedData
+            })
+        });
+        
+        if (!response.ok) throw new Error('Export failed');
+        
+        // Get blob from response
+        const blob = await response.blob();
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        // Set filename from Content-Disposition header or create default
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = `export.${format}`;
+        if (contentDisposition) {
+            const match = contentDisposition.match(/filename="?(.+)"?/);
+            if (match) filename = match[1];
+        }
+        
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showNotification(`Exported as ${format.toUpperCase()} successfully!`, 'success');
+        
+    } catch(error) {
+        showNotification('Export error: ' + error.message, 'error');
+        console.error('Export error:', error);
+    }
+}
+
+// ===== INITIALIZE ON PAGE LOAD =====
 window.onload = function() {
+    // Set default theme
     document.body.setAttribute('data-theme', 'light');
+    
+    // Add welcome messages after a short delay
     setTimeout(() => {
         if(document.getElementById('combinedChatCard').style.display !== 'block') {
-            addMessage('assistant', '👋 Enter URL and click SCRAPE NOW.');
-            addGrokMessage('assistant', '🚀 Grok Mode ready! Ask anything.');
+            addMessage('assistant', '👋 Enter a website URL and click CRAWL ENTIRE WEBSITE to start!');
+            addGrokMessage('assistant', '🚀 Grok Mode ready! I can answer anything after you crawl a site.');
         }
-    }, 300);
+    }, 500);
 }
 </script>
 
