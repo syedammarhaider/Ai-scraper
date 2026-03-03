@@ -400,3 +400,11 @@ async def get_status(session_id: str):
         "status": "completed",
         "timestamp": datetime.now().isoformat()
     }
+
+# ---------- START SERVER ----------
+if __name__ == "__main__":
+    import uvicorn
+    print("🚀 Starting AI Scraper Server...")
+    print("📡 Server will be available at: http://localhost:8000")
+    print("🔧 Health check: http://localhost:8000/health")
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=False)
