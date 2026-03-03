@@ -104,27 +104,91 @@
     </div>
 </div>
 
-<!-- FOOTER (same as before) -->
+<!-- FOOTER -->
 <footer class="footer">
-    <!-- ... your footer content remains exactly the same ... -->
+    <div class="footer-main">
+        <div class="footer-logo">
+            <i class="fas fa-crown"></i> 
+            <span id="footerBrand">AI·SCRAPER</span>
+        </div>
+        <div class="footer-tagline">
+            <span id="footerTagline1">SCRAPER SUPREME</span>
+            <span id="footerTagline2">v4.0 · eternal</span>
+        </div>
+    </div>
+
+    <div class="footer-badges">
+        <span class="footer-badge" id="badge1"><i class="fas fa-shield-halved"></i> zero‑copy</span>
+        <span class="footer-badge" id="badge2"><i class="fas fa-bolt"></i> edge‑ai</span>
+        <span class="footer-badge" id="badge3"><i class="fas fa-gem"></i> dual‑mind</span>
+        <span class="footer-badge" id="badge4"><i class="fas fa-crown"></i> premium</span>
+    </div>
+
+    <div class="footer-links">
+        <div class="footer-column">
+            <h4 id="platformTitle">Platform</h4>
+            <ul>
+                <li><a href="#" id="featuresLink"><i class="fas fa-chevron-right"></i> Features</a></li>
+                <li><a href="#" id="apiLink"><i class="fas fa-chevron-right"></i> API</a></li>
+                <li><a href="#" id="pricingLink"><i class="fas fa-chevron-right"></i> Pricing</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4 id="resourcesTitle">Resources</h4>
+            <ul>
+                <li><a href="#" id="docsLink"><i class="fas fa-chevron-right"></i> Documentation</a></li>
+                <li><a href="#" id="blogLink"><i class="fas fa-chevron-right"></i> Blog</a></li>
+                <li><a href="#" id="communityLink"><i class="fas fa-chevron-right"></i> Community</a></li>
+            </ul>
+        </div>
+        <div class="footer-column">
+            <h4 id="companyTitle">Company</h4>
+            <ul>
+                <li><a href="#" id="aboutLink"><i class="fas fa-chevron-right"></i> About</a></li>
+                <li><a href="#" id="contactLink"><i class="fas fa-chevron-right"></i> Contact</a></li>
+                <li><a href="#" id="careersLink"><i class="fas fa-chevron-right"></i> Careers</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-social">
+        <a href="https://www.linkedin.com/in/ammar-haider-61136b27b/" target="_blank" title="LinkedIn" id="linkedinLink"><i class="fab fa-linkedin-in"></i></a>
+        <a href="https://github.com/Syedammarhaider" target="_blank" title="GitHub" id="githubLink"><i class="fab fa-github"></i></a>
+        <a href="https://www.facebook.com/profile.php?id=100091524961370" target="_blank" title="Facebook" id="facebookLink"><i class="fab fa-facebook-f"></i></a>
+        <a href="#" title="Instagram" id="instagramLink"><i class="fab fa-instagram"></i></a>
+        <a href="#" title="Twitter" id="twitterLink"><i class="fab fa-twitter"></i></a>
+    </div>
+
+    <div class="footer-extra">
+        <a href="#" class="footer-extra-link" id="privacyLink"><i class="fas fa-lock"></i> Privacy Policy</a>
+        <a href="#" class="footer-extra-link" id="termsLink"><i class="fas fa-file-contract"></i> Terms of Service</a>
+        <a href="#" class="footer-extra-link" id="cookieLink"><i class="fas fa-cookie-bite"></i> Cookie Policy</a>
+        <a href="#" class="footer-extra-link" id="sitemapLink"><i class="fas fa-sitemap"></i> Sitemap</a>
+    </div>
+
+    <div class="footer-copyright">
+        <span id="copyright1"><i class="fas fa-copyright"></i> 2025 AMMAR·AI</span>
+        <span id="copyright2"><i class="fas fa-globe"></i> All rights reserved worldwide</span>
+        <span id="copyright3"><i class="fas fa-heart" style="color: #d4af37;"></i> Made with precision</span>
+    </div>
 </footer>
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
-// Global variables
+// Ye variables global hain jo scraped data aur chat history store karte hain
 let scrapedData = null;
 let sessionId = null;
 let groqChatHistory = [];
 let grokChatHistory = [];
 
-// Theme toggle
+// Theme toggle function - light/dark mode switch karta hai
 function toggleTheme() {
     const body = document.body;
     const themeText = document.getElementById('themeText');
     const icon = document.querySelector('.theme-toggle i');
-    if (body.getAttribute('data-theme') === 'light') {
+    if(body.getAttribute('data-theme') === 'light') {
         body.setAttribute('data-theme', 'dark');
         themeText.textContent = 'Light';
         icon.className = 'fas fa-sun';
@@ -135,236 +199,375 @@ function toggleTheme() {
     }
 }
 
-// URL preview
+// URL preview - new tab mein website kholta hai
 function previewUrl() {
-    const url = document.getElementById('urlInput').value.trim();
-    if (!url) return showNotification("URL daalain", "warning");
-    const fullUrl = url.startsWith('http') ? url : 'https://' + url;
+    const url = document.getElementById('urlInput').value;
+    if(!url) { showNotification("Enter URL first", "warning"); return; }
+    let fullUrl = url.startsWith('http') ? url : 'https://' + url;
     window.open(fullUrl, '_blank');
 }
 
-// Notification
+// Notification dikhane ka function
 function showNotification(message, type = "success") {
-    const n = document.createElement('div');
-    n.className = 'export-notification';
-    n.style.background = type === 'success' ? 'var(--success)' :
-                         type === 'warning' ? 'var(--warning)' : 'var(--danger)';
-    n.innerHTML = `<i class="fas fa-${
+    const notification = document.createElement('div');
+    notification.className = 'export-notification';
+    notification.style.background = type === 'success' ? 'var(--success)' : 
+                                   type === 'warning' ? 'var(--warning)' : 
+                                   'var(--danger)';
+    notification.innerHTML = `<i class="fas fa-${
         type === 'success' ? 'check-circle' : 
         type === 'warning' ? 'exclamation-circle' : 'times-circle'
     }"></i> ${message}`;
-    document.body.appendChild(n);
+    document.body.appendChild(notification);
     setTimeout(() => {
-        n.style.animation = 'slideOutRight 0.3s ease-out';
-        setTimeout(() => n.remove(), 300);
+        notification.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
     }, 2500);
 }
 
-// Main scraping function (full data, no limit here)
+// Website scrape karne ka main function - ye data full scrape karta hai
 async function scrapeWebsite() {
     const url = document.getElementById('urlInput').value.trim();
-    if (!url) return showNotification("URL daalain", "warning");
+    if (!url) return showNotification("Enter URL first", "warning");
 
-    const fullUrl = url.startsWith('http') ? url : 'https://' + url;
+    let fullUrl = url.startsWith('http') ? url : 'https://' + url;
 
     document.getElementById('loading').style.display = 'block';
     document.querySelector('.scrape-btn').disabled = true;
 
     try {
-        const fd = new FormData();
-        fd.append('url', fullUrl);
-        fd.append('mode', document.getElementById('scrapeMode').value);
-        fd.append('js', document.getElementById('jsMode').value);
+        const formData = new FormData();
+        formData.append('url', fullUrl);
+        formData.append('mode', document.getElementById('scrapeMode').value);
+        formData.append('js', document.getElementById('jsMode').value);
 
-        const res = await fetch('/scrape', { method: 'POST', body: fd });
+        const response = await fetch('/scrape', { 
+            method: 'POST', 
+            body: formData 
+        });
 
-        if (!res.ok) {
-            const err = await res.text();
-            throw new Error(`Server error ${res.status}: ${err.slice(0,100)}`);
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Scrape failed:', errorText);
+            throw new Error(`Server error: ${response.status}`);
         }
 
-        const data = await res.json();
+        const result = await response.json();
 
-        if (data.success) {
-            scrapedData = data.data;
-            sessionId = data.session_id;
+        if (result.success) {
+            scrapedData = result.data;
+            sessionId = result.session_id;
 
+            // Full data preview dikhata hai (performance ke liye limit nahi lagaya)
             document.getElementById('previewContent').innerHTML = 
-                '<pre>' + JSON.stringify(data.data, null, 2) + '</pre>';
+                '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
 
             document.getElementById('dataCard').style.display = 'block';
             document.getElementById('combinedChatCard').style.display = 'block';
 
-            addMessage('assistant', '✅ Full scrape ho gaya! Ab sawal pooch sakte ho.');
-            showNotification('Scraping successful!', 'success');
+            addMessage('assistant', '✅ Scraped successfully! Ab is data ke bare mein pooch sakte ho.');
+            showNotification('Scraping complete!', 'success');
         } else {
-            showNotification('Error: ' + (data.error || 'Unknown'), 'error');
+            showNotification('Error: ' + (result.error || 'Unknown'), 'error');
         }
-    } catch (err) {
-        showNotification('Scraping fail: ' + err.message, 'error');
-        console.error(err);
+    } catch (error) {
+        console.error('Scrape error:', error);
+        showNotification('Scraping failed: ' + error.message, 'error');
     } finally {
         document.getElementById('loading').style.display = 'none';
         document.querySelector('.scrape-btn').disabled = false;
     }
 }
 
-// Groq chat (scraped data mode) - send limited data
+// Groq (scraped data) mode mein question poochna
 async function askGroq() {
-    const q = document.getElementById('questionInput').value.trim();
-    if (!q) return showNotification("Sawal likhein", "warning");
-    if (!scrapedData) return addMessage('assistant', '⚠️ Pehle scrape karein!');
+    const question = document.getElementById('questionInput').value.trim();
+    if (!question) return showNotification("Enter question first", "warning");
+    if (!scrapedData) return addMessage('assistant', '⚠️ Pehle website scrape karo!');
 
-    addMessage('user', q);
+    addMessage('user', question);
     document.getElementById('questionInput').value = '';
 
-    const tid = 't-' + Date.now();
-    const td = document.createElement('div');
-    td.className = 'message assistant';
-    td.id = tid;
-    td.innerHTML = '<div class="message-content typing">Jawab tayyar ho raha...</div>';
-    document.getElementById('chatContainer').appendChild(td);
+    const typingId = 'typing-' + Date.now();
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message assistant';
+    typingDiv.id = typingId;
+    typingDiv.innerHTML = '<div class="message-content typing">Analyzing...</div>';
+    document.getElementById('chatContainer').appendChild(typingDiv);
 
     try {
-        const fd = new FormData();
-        fd.append('message', q);
+        const formData = new FormData();
+        formData.append('message', question);
 
-        // Limit data sent to AI (prevents 413 error)
-        const limited = {
-            title: scrapedData.title || "",
-            url: scrapedData.url || "",
-            description: scrapedData.description || "",
-            paragraphs: (scrapedData.paragraphs || []).slice(0, 80),
-            headings: scrapedData.headings || {},
-            structured_data: scrapedData.structured_data || {}
-        };
-        fd.append('scraped_data', JSON.stringify(limited));
-        fd.append('history', JSON.stringify(groqChatHistory));
+        // Purana tarika - full data bhej rahe hain (jaise pehle tha)
+        // lekin backend mein hum limit kar denge taake crash na ho
+        formData.append('scraped_data', JSON.stringify(scrapedData));
+        formData.append('history', JSON.stringify(groqChatHistory));
 
-        const res = await fetch('/groq-chat', { method: 'POST', body: fd });
+        const response = await fetch('/groq-chat', { 
+            method: 'POST', 
+            body: formData 
+        });
 
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || `Error ${res.status}`);
+        if (!response.ok) {
+            const err = await response.text();
+            throw new Error(`Server returned ${response.status}: ${err.slice(0,100)}`);
         }
 
-        const result = await res.json();
+        const result = await response.json();
 
-        document.getElementById(tid)?.remove();
+        document.getElementById(typingId)?.remove();
 
         if (result.success) {
             addMessage('assistant', marked.parse(result.response));
-            groqChatHistory.push({ role: 'user', content: q });
+            groqChatHistory.push({ role: 'user', content: question });
             groqChatHistory.push({ role: 'assistant', content: result.response });
         } else {
-            addMessage('assistant', '❌ ' + result.error);
+            addMessage('assistant', '❌ ' + (result.error || 'Unknown error'));
         }
-    } catch (e) {
-        document.getElementById(tid)?.remove();
-        addMessage('assistant', '❌ ' + e.message);
+    } catch (error) {
+        document.getElementById(typingId)?.remove();
+        addMessage('assistant', '❌ Error: ' + error.message);
+        console.error('Groq error:', error);
     }
 }
 
-// Grok Mode (universal) - no real scraped data needed
+// Message add karne ka function (Scraped mode ke liye)
+function addMessage(role, content) {
+    const container = document.getElementById('chatContainer');
+    const div = document.createElement('div');
+    div.className = `message ${role}`;
+    div.innerHTML = `<div class="message-content">${content}</div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+// Message add karne ka function (Grok mode ke liye)
+function addGrokMessage(role, content) {
+    const container = document.getElementById('grokChatContainer');
+    const div = document.createElement('div');
+    div.className = `message ${role}`;
+    div.innerHTML = `<div class="message-content">${content}</div>`;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+// Grok Mode (universal) mein question poochna
 async function askGrokMode() {
     const q = document.getElementById('grokQuestionInput').value.trim();
-    if (!q) return showNotification("Sawal likhein", "warning");
+    if (!q) return showNotification("Enter question first", "warning");
 
     addGrokMessage('user', q);
     document.getElementById('grokQuestionInput').value = '';
 
-    const tid = 'gt-' + Date.now();
+    const tid = 'gt' + Date.now();
     const td = document.createElement('div');
     td.className = 'message assistant';
     td.id = tid;
-    td.innerHTML = '<div class="message-content typing">Soch raha hoon...</div>';
+    td.innerHTML = '<div class="message-content typing">Thinking...</div>';
     document.getElementById('grokChatContainer').appendChild(td);
 
     try {
         const fd = new FormData();
         fd.append('message', q);
-        fd.append('scraped_data', JSON.stringify({})); // dummy
+
+        // Grok Mode mein scraped data ki zarurat nahi, dummy bhej rahe hain
+        fd.append('scraped_data', JSON.stringify({ title: "ignored", url: "ignored" }));
         fd.append('analysis_type', 'comprehensive');
         fd.append('history', JSON.stringify(grokChatHistory));
 
-        const res = await fetch('/grok-mode', { method: 'POST', body: fd });
+        const r = await fetch('/grok-mode', { 
+            method: 'POST', 
+            body: fd 
+        });
 
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || `Error ${res.status}`);
+        if (!r.ok) {
+            const err = await r.text();
+            throw new Error(`Server error ${r.status}: ${err.slice(0,100)}`);
         }
 
-        const result = await res.json();
+        const res = await r.json();
 
         document.getElementById(tid)?.remove();
 
-        if (result.success) {
-            addGrokMessage('assistant', marked.parse(result.response));
+        if (res.success) {
+            addGrokMessage('assistant', marked.parse(res.response));
             grokChatHistory.push({ role: 'user', content: q });
-            grokChatHistory.push({ role: 'assistant', content: result.response });
+            grokChatHistory.push({ role: 'assistant', content: res.response });
         } else {
-            addGrokMessage('assistant', '❌ ' + result.error);
+            addGrokMessage('assistant', '❌ ' + (res.error || 'Unknown'));
         }
     } catch (e) {
         document.getElementById(tid)?.remove();
-        addGrokMessage('assistant', '❌ ' + e.message);
+        addGrokMessage('assistant', '❌ Error: ' + e.message);
+        console.error('Grok Mode error:', e);
     }
 }
 
-// Add message helpers (same as before)
-function addMessage(role, content) {
-    const c = document.getElementById('chatContainer');
-    const d = document.createElement('div');
-    d.className = `message ${role}`;
-    d.innerHTML = `<div class="message-content">${content}</div>`;
-    c.appendChild(d);
-    c.scrollTop = c.scrollHeight;
-}
-
-function addGrokMessage(role, content) {
-    const c = document.getElementById('grokChatContainer');
-    const d = document.createElement('div');
-    d.className = `message ${role}`;
-    d.innerHTML = `<div class="message-content">${content}</div>`;
-    c.appendChild(d);
-    c.scrollTop = c.scrollHeight;
-}
-
-// Clear chats
+// Chat clear functions
 function clearGroqChat() {
     document.getElementById('chatContainer').innerHTML = '';
     groqChatHistory = [];
-    addMessage('assistant', '🧹 Chat clear ho gaya.');
+    addMessage('assistant', '🧹 Groq chat cleared.');
+    showNotification('Groq chat cleared', 'success');
 }
 
 function clearGrokChat() {
     document.getElementById('grokChatContainer').innerHTML = '';
     grokChatHistory = [];
-    addGrokMessage('assistant', '🧹 Grok chat clear ho gaya.');
+    addGrokMessage('assistant', '🧹 Grok Mode chat cleared.');
+    showNotification('Grok chat cleared', 'success');
 }
 
-// Export remains unchanged (your original exportData function)
+// Export function - ye bilkul same rakha gaya hai
 async function exportData(format) {
-    // ... your original exportData code here - no changes needed ...
-    // (paste your original exportData function body here)
+    if(!scrapedData) { showNotification("Scrape a website first", "warning"); return; }
+    
+    try {
+        let content = '';
+        let mimeType = '';
+        let fileExtension = '';
+        let fileName = `scraped_${new Date().toISOString().slice(0,10)}`;
+        
+        if(format === 'json') {
+            content = JSON.stringify(scrapedData, null, 2);
+            mimeType = 'application/json';
+            fileExtension = 'json';
+            fileName += '.json';
+        } else if(format === 'csv') {
+            const headers = ['Field', 'Value', 'Type', 'Length'];
+            const rows = [];
+            rows.push(['Title', scrapedData.title || 'N/A', 'metadata', String(scrapedData.title?.length || 0)]);
+            rows.push(['URL', scrapedData.url || 'N/A', 'metadata', String(scrapedData.url?.length || 0)]);
+            rows.push(['Total Paragraphs', String(scrapedData.paragraphs?.length || 0), 'count', '']);
+            if(scrapedData.paragraphs) {
+                scrapedData.paragraphs.forEach((para, index) => {
+                    rows.push([`Paragraph ${index + 1}`, para.replace(/"/g, '""'), 'content', String(para.length)]);
+                });
+            }
+            content = headers.join(',') + '\n';
+            rows.forEach(row => {
+                content += row.map(cell => `"${cell}"`).join(',') + '\n';
+            });
+            mimeType = 'text/csv';
+            fileExtension = 'csv';
+            fileName += '.csv';
+        } else if(format === 'excel') {
+            const headers = ['Field', 'Value', 'Type', 'Length'];
+            const rows = [];
+            rows.push(['Title', scrapedData.title || 'N/A', 'metadata', String(scrapedData.title?.length || 0)]);
+            rows.push(['URL', scrapedData.url || 'N/A', 'metadata', String(scrapedData.url?.length || 0)]);
+            rows.push(['Total Paragraphs', String(scrapedData.paragraphs?.length || 0), 'count', '']);
+            if(scrapedData.paragraphs) {
+                scrapedData.paragraphs.forEach((para, index) => {
+                    rows.push([`Paragraph ${index + 1}`, para.replace(/"/g, '""'), 'content', String(para.length)]);
+                });
+            }
+            content = headers.join(',') + '\n';
+            rows.forEach(row => {
+                content += row.map(cell => `"${cell}"`).join(',') + '\n';
+            });
+            mimeType = 'application/vnd.ms-excel';
+            fileExtension = 'xlsx';
+            fileName += '.xlsx';
+        } else if(format === 'pdf') {
+            content = `<html><head><title>${scrapedData.title || 'Scraped Data'}</title><style>body{font-family:Arial;padding:20px;}h1{color:#d4af37;}p{margin:10px 0;}</style></head><body>`;
+            content += `<h1>${scrapedData.title || 'Scraped Data'}</h1>`;
+            content += `<p><strong>URL:</strong> ${scrapedData.url || 'N/A'}</p>`;
+            content += `<p><strong>Total Paragraphs:</strong> ${scrapedData.paragraphs?.length || 0}</p>`;
+            content += '<hr>';
+            if(scrapedData.paragraphs) {
+                scrapedData.paragraphs.forEach((para, index) => {
+                    content += `<h3>Paragraph ${index + 1}</h3>`;
+                    content += `<p>${para}</p>`;
+                });
+            }
+            content += `<hr><p><small>Generated by AI SCRAPER · AMMAR</small></p></body></html>`;
+            mimeType = 'application/pdf';
+            fileExtension = 'pdf';
+            fileName += '.pdf';
+        } else if(format === 'markdown') {
+            content = `# ${scrapedData.title || 'Scraped Data'}\n\n`;
+            content += `**URL:** ${scrapedData.url || 'N/A'}\n\n`;
+            content += `**Total Paragraphs:** ${scrapedData.paragraphs?.length || 0}\n\n`;
+            content += '---\n\n';
+            if(scrapedData.paragraphs) {
+                scrapedData.paragraphs.forEach((para, index) => {
+                    content += `## Paragraph ${index + 1}\n\n`;
+                    content += `${para}\n\n`;
+                });
+            }
+            content += `\n---\n*Generated by AI SCRAPER · AMMAR*`;
+            mimeType = 'text/markdown';
+            fileExtension = 'md';
+            fileName += '.md';
+        } else if(format === 'txt') {
+            content = `📌 METADATA\n`;
+            content += `• Title: ${scrapedData.title || 'N/A'}\n`;
+            content += `• URL: ${scrapedData.url || 'N/A'}\n`;
+            content += `• Total Paragraphs: ${scrapedData.paragraphs?.length || 0}\n\n`;
+            content += `📄 CONTENT\n`;
+            if(scrapedData.paragraphs) {
+                scrapedData.paragraphs.forEach((para, index) => {
+                    content += `[${index + 1}] ${para}\n\n`;
+                });
+            }
+            content += `\nGenerated by AI SCRAPER · AMMAR\n`;
+            mimeType = 'text/plain';
+            fileExtension = 'txt';
+            fileName += '.txt';
+        } else {
+            content = JSON.stringify(scrapedData, null, 2);
+            mimeType = 'application/json';
+            fileExtension = 'json';
+            fileName += '.json';
+        }
+        
+        const blob = new Blob([content], { type: mimeType });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        showNotification(`Exported as ${format.toUpperCase()}!`, 'success');
+        
+    } catch(error) {
+        showNotification('Export failed: ' + error.message, 'error');
+    }
 }
 
-// Mode switch
 function switchMode(mode) {
-    // ... your original switchMode code - no changes ...
+    const groqSection = document.getElementById('groqSection');
+    const grokSection = document.getElementById('grokSection');
+    const groqToggle = document.getElementById('groqToggle');
+    const grokToggle = document.getElementById('grokToggle');
+    
+    if(mode === 'groq') {
+        groqSection.classList.add('active');
+        grokSection.classList.remove('active');
+        groqToggle.classList.add('active');
+        grokToggle.classList.remove('active');
+    } else {
+        grokSection.classList.add('active');
+        groqSection.classList.remove('active');
+        grokToggle.classList.add('active');
+        groqToggle.classList.remove('active');
+    }
 }
 
-// Onload
 window.onload = function() {
     document.body.setAttribute('data-theme', 'light');
     setTimeout(() => {
-        if (document.getElementById('combinedChatCard').style.display !== 'block') {
-            addMessage('assistant', '👋 URL daal kar SCRAPE NOW dabayein.');
-            addGrokMessage('assistant', '🚀 Grok Mode tayyar hai! Kuch bhi pooch lo.');
+        if(document.getElementById('combinedChatCard').style.display !== 'block') {
+            addMessage('assistant', '👋 Enter URL and click SCRAPE NOW.');
+            addGrokMessage('assistant', '🚀 Grok Mode ready! Ask anything.');
         }
     }, 300);
 }
 </script>
-
 </body>
 </html>
