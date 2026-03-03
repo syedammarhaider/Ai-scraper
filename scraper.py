@@ -1,4 +1,4 @@
-
+# scraper.py
 import requests, re, time, uuid, csv, os, json, urllib3
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
