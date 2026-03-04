@@ -286,7 +286,7 @@ async def export(request: Request):
         data = body.get("data")
 
         if not fmt or not data:
-            return {"success": False, "error": "Missing format or data"}
+            return {"success": False, "error": "Missing  the format or data"}
 
         if isinstance(data, dict) and data.get("is_compressed"):
             decompressed = decompress_data_safe(data["compressed_data"])
