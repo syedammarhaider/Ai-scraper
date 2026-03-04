@@ -300,7 +300,7 @@ body {
     background: var(--input-bg);
     padding: clamp(16px, 2.5vw, 24px);
     border-radius: clamp(16px, 2.5vw, 24px);
-    max-height: 300px;
+    max-height: 600px;
     overflow: auto;
     font-size: clamp(12px, 1vw, 14px);
     border: 1px solid var(--border-color);
