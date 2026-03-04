@@ -92,14 +92,6 @@ def initialize_grok_clients():
 # Initialize clients at startup - Ye line function call karti hai
 initialize_grok_clients()
 
-# ========== HELPER FUNCTIONS ==========
-# Ye helper function context size limit karne ke liye
-def truncate_for_llm(obj, max_chars=24000):
-    text = json.dumps(obj, ensure_ascii=False, separators=(',', ':'))
-    if len(text) > max_chars:
-        text = text[:max_chars-10] + "... [truncated]"
-    return text
-
 # ========== HOME ==========
 # Ye endpoint root par HTML serve karta hai
 @app.get("/", response_class=HTMLResponse)
@@ -168,33 +160,7 @@ Rules:
 4. Be precise and factual.
 5. For greetings, respond naturally but briefly.
 """
-    
-    # Handle both single page and aggregated crawl data with smart truncation
-    if "pages" in data:  # Aggregated crawl data
-        context_parts = [f"CRAWLED WEBSITE: {data.get('start_url', '')}"]
-        context_parts.append(f"Total Pages Scraped: {data.get('total_stats', {}).get('pages_scraped', 0)}")
-        context_parts.append(f"Total Paragraphs: {data.get('total_stats', {}).get('total_paragraphs', 0)}")
-        context_parts.append("\nSCRAPED CONTENT FROM ALL PAGES:")
-        
-        # Add first few pages with limited content
-        for i, page in enumerate(data.get("pages", [])[:8]):  # Limit to first 8 pages
-            context_parts.append(f"\n--- PAGE {i+1}: {page.get('url', '')} ---")
-            if page.get('title'):
-                context_parts.append(f"Title: {page['title']}")
-            if page.get('description'):
-                context_parts.append(f"Description: {page['description'][:200]}")  # Truncate description
-            if page.get('paragraphs'):
-                # Limit paragraphs per page and truncate long ones
-                paras = page['paragraphs'][:10]  # First 10 paragraphs
-                truncated_paras = [p[:500] + "..." if len(p) > 500 else p for p in paras]
-                context_parts.append("Content:\n" + "\n".join(truncated_paras))
-        
-        context = "\n".join(context_parts) + f"\n\nQUESTION:\n{message}"
-        # Additional truncation if still too long
-        if len(context) > 25000:
-            context = context[:24990] + "... [truncated for size]"
-    else:  # Single page data
-        context = f"SCRAPED DATA (truncated for LLM):\n{truncate_for_llm(data)}\n\nQUESTION:\n{message}"
+    context = f"SCRAPED DATA:\n{json.dumps(data, indent=2)[:8000]}\n\nQUESTION:\n{message}"  # Ye context banati hai
 
     try:  # Ye try
         response = groq_ai.chat_completions_create(  # Ye call
@@ -321,47 +287,20 @@ async def grok_summary(request: Request):
     system_prompt = """You are GROK MODE SUMMARY - Extract key facts instantly and accurately.
 
 Provide a structured summary with:
-1. MAIN TOPIC - What the page/site is about
+1. MAIN TOPIC - What the page is about
 2. KEY POINTS - 3-5 most important facts
 3. STATISTICS - Any numbers/data found
 4. CONCLUSION - Main takeaway
 
-Only use data from scraped content. If info missing, say "Not found"."""  # Ye prompt
+Only use data from the page. If info missing, say "Not found"."""  # Ye prompt
     
-    # Handle both single page and aggregated crawl data with smart truncation
-    if "pages" in data:  # Aggregated crawl data
-        context_parts = [f"CRAWLED WEBSITE: {data.get('start_url', '')}"]
-        context_parts.append(f"Total Pages: {data.get('total_stats', {}).get('pages_scraped', 0)}")
-        context_parts.append(f"Total Paragraphs: {data.get('total_stats', {}).get('total_paragraphs', 0)}")
-        
-        # Collect content from first few pages for summary
-        page_titles = []
-        all_paragraphs = []
-        for page in data.get("pages", [])[:5]:  # First 5 pages
-            if page.get('title'):
-                page_titles.append(page['title'][:80])  # Truncate titles
-            if page.get('paragraphs'):
-                # Add limited paragraphs from each page
-                page_paras = page['paragraphs'][:8]  # First 8 paragraphs
-                truncated_paras = [p[:300] + "..." if len(p) > 300 else p for p in page_paras]
-                all_paragraphs.extend(truncated_paras)
-        
-        if page_titles:
-            context_parts.append(f"\nPage Titles: " + " • ".join(page_titles))
-        if all_paragraphs:
-            # Limit total paragraphs for summary
-            context_parts.append(f"\nContent Sample:\n" + "\n".join(all_paragraphs[:20]))  # Max 20 paragraphs total
-    else:  # Single page data
-        context_parts = [f"URL: {data.get('url', '')[:300]}"]  # Truncate URL
-        if data.get('title'):
-            context_parts.append(f"Title: {data['title'][:180]}")  # Truncate title
-        if data.get('description'):
-            context_parts.append(f"Description: {data['description'][:500]}")  # Truncate description
-        if data.get('paragraphs'):
-            # Limit and truncate paragraphs
-            short_paras = data['paragraphs'][:12]  # First 12 paragraphs
-            truncated_paras = [p[:400] + "..." if len(p) > 400 else p for p in short_paras]
-            context_parts.append("\nContent:\n" + "\n".join(truncated_paras))
+    context_parts = [f"URL: {data.get('url', '')}"]  # Ye parts list
+    if data.get('title'):  # Ye check
+        context_parts.append(f"Title: {data['title']}")  # Ye append
+    if data.get('description'):  # Ye check
+        context_parts.append(f"Description: {data['description']}")  # Ye append
+    if data.get('paragraphs'):  # Ye check
+        context_parts.append("\nContent:\n" + "\n".join(data['paragraphs'][:15]))  # Ye content append
     
     try:  # Ye try
         response = groq_ai.chat_completions_create(  # Ye call
