@@ -360,7 +360,7 @@ ALWAYS prioritize professionalism, accuracy, completeness, and user instruction 
             
             if "choices" not in response:
                 print(f"Response missing 'choices' key: {response}")
-                raise Exception("API response of missing choices")
+                raise Exception("API response missing choices")
             
             if not isinstance(response["choices"], list) or len(response["choices"]) == 0:
                 print(f"Invalid choices format: {response['choices']}")
