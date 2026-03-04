@@ -110,21 +110,39 @@ class UltraScraper:
             # Structured data: tables + lists + Google Sheets - Ye line structured data extract karti hai
             structured_data = self.extract_structured_data(soup, url)  # Ye function call karti hai structured data ke liye
 
-            # Images - Ye block images collect karta hai with limits
-            all_images = [{"url": self.abs_url(img.get("src"), url), "alt": self.clean(img.get("alt"))}
-                          for img in soup.find_all("img") if img.get("src")]
+            # Images - Ye block images collect karta hai with limits and filtering
+            all_images = []
+            for img in soup.find_all("img"):
+                src = img.get("src")
+                if src and not src.startswith("data:image/svg+xml"):  # SVG data URLs ko filter karta hai
+                    all_images.append({
+                        "url": self.abs_url(src, url), 
+                        "alt": self.clean(img.get("alt"))
+                    })
             images = all_images[:MAX_IMAGES_PER_PAGE]  # Ye images ko limit karta hai
             if len(all_images) > MAX_IMAGES_PER_PAGE:
                 print(f"🖼️ Limited images from {len(all_images)} to {len(images)}")
 
-            # Links - Ye block internal aur external links separate karta hai with limits
+            # Links - Ye block internal aur external links separate karta hai with limits and filtering
             domain = urlparse(url).netloc  # Ye line domain extract karti hai
             all_internal_links, all_external_links = [], []  # Ye line lists initialize karti hai
             for a in soup.find_all("a", href=True):  # Ye loop all anchors par iterate karta hai
                 if len(all_internal_links) >= MAX_LINKS_PER_PAGE and len(all_external_links) >= MAX_LINKS_PER_PAGE:
                     break  # Ye limit check kar ke break karta hai
-                link = self.abs_url(a["href"], url)  # Ye line absolute link banati hai
+                href = a["href"]
+                # Invalid links ko filter karta hai
+                if (href.startswith("data:") or href.startswith("javascript:") or 
+                    href.startswith("mailto:") or href.startswith("tel:") or 
+                    href.startswith("#") or not href.strip()):
+                    continue  # Ye invalid links skip karta hai
+                
+                link = self.abs_url(href, url)  # Ye line absolute link banati hai
                 text = self.clean(a.get_text())  # Ye line link text clean karti hai
+                
+                # Empty text links ko skip karta hai
+                if not text or len(text.strip()) < 2:
+                    continue
+                    
                 if urlparse(link).netloc == domain:  # Ye check karti hai internal link hai ya nahi
                     if len(all_internal_links) < MAX_LINKS_PER_PAGE:
                         all_internal_links.append({"url": link, "text": text})  # Ye internal link add karti hai

@@ -323,22 +323,37 @@ async def chat(request: Request):
             print(f"❌ Data processing error: {str(e)}")
             return {"success": False, "error": f"Data processing failed: {str(e)}"}
 
-        system_prompt = """  # Ye system prompt define
-You are an EXACT factual AI assistant.
+        system_prompt = """You are an EXACT factual AI assistant specializing in website content analysis.
+
 Rules:
-1. ONLY answer from provided scraped data.
-2. If answer not found, say: "This information is not available in the scraped website data."
-3. Never guess or use outside knowledge.
-4. Be precise and factual.
-5. For greetings, respond naturally but briefly.
-"""
+1. ONLY answer from provided scraped data - no outside knowledge
+2. For URL requests: Extract and list ONLY real, meaningful URLs (filter out data:, javascript:, mailto:, tel:, # anchors)
+3. For content questions: Be precise and use only the text content from paragraphs, headings, and descriptions
+4. If information not found, say: "This information is not available in the scraped website data."
+5. For greetings, respond naturally but briefly
+6. Always prioritize accuracy over completeness - better to say "not found" than guess
+
+Focus on: Real content URLs, actual text content, contact information, and factual data from the website."""
         
         # Smart context building with size limits - Ye context ko smartly build karta hai
-        data_str = json.dumps(data, indent=2, ensure_ascii=False)
-        if len(data_str) > 15000:  # 15KB se zyada ho to
-            context = f"SCRAPED DATA:\n{data_str[:15000]}...\n\n[Data truncated for processing]\n\nQUESTION:\n{message}"
+        if "urls" in message.lower() or "links" in message.lower():
+            # For URL requests, focus on links data
+            context_parts = []
+            context_parts.append(f"URL: {data.get('url', '')}")
+            if data.get('internal_links'):
+                context_parts.append(f"INTERNAL LINKS: {json.dumps(data['internal_links'], indent=2)}")
+            if data.get('external_links'):
+                context_parts.append(f"EXTERNAL LINKS: {json.dumps(data['external_links'], indent=2)}")
+            if data.get('images'):
+                context_parts.append(f"IMAGE URLS: {[img['url'] for img in data['images']]}")
+            context = "\n\n".join(context_parts) + f"\n\nQUESTION: {message}"
         else:
-            context = f"SCRAPED DATA:\n{data_str}\n\nQUESTION:\n{message}"  # Ye context banati hai
+            # For other questions, use full data with limits
+            data_str = json.dumps(data, indent=2, ensure_ascii=False)
+            if len(data_str) > 15000:  # 15KB se zyada ho to
+                context = f"SCRAPED DATA:\n{data_str[:15000]}...\n\n[Data truncated for processing]\n\nQUESTION:\n{message}"
+            else:
+                context = f"SCRAPED DATA:\n{data_str}\n\nQUESTION:\n{message}"  # Ye context banati hai
 
         try:  # Ye try
             response = groq_ai.chat_completions_create(  # Ye call
