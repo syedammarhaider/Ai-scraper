@@ -22,7 +22,7 @@ http://3.95.32.144/
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="/static/styles.css?v=1.0.2">
+<link rel="stylesheet" href="/static/styles.css?v=1.0.3">
 </head>
 
 <body data-theme="light">
@@ -79,19 +79,8 @@ http://3.95.32.144/
 
 <!-- COMBINED AI CHAT CARD -->
 <div class="card" id="combinedChatCard" style="display:none">
-    <h2><i class="fas fa-robot"></i> AI Assistants <span class="model-badge">Dual Mode</span></h2>
+    <h2><i class="fas fa-robot"></i> AI Assistant <span class="model-badge">Scraped Data Analysis</span></h2>
     
-    <div class="toggle-container">
-        <button class="toggle-btn active" id="groqToggle" onclick="switchMode('groq')">
-            <i class="fas fa-brain"></i> 
-            <span> AI · Scraped</span>
-        </button>
-        <button class="toggle-btn" id="grokToggle" onclick="switchMode('grok')">
-            <i class="fas fa-bolt"></i> 
-            <span>Mode · Universal</span>
-        </button>
-    </div>
-
     <div id="groqSection" class="chat-section active">
         <div class="mode-header">
             <h2><i class="fas fa-microchip"></i> AI · Scraped Data Analysis</h2>
@@ -101,19 +90,6 @@ http://3.95.32.144/
             <input type="text" id="questionInput" placeholder="Ask about scraped data..." onkeypress="if(event.key==='Enter') askGroq()">
             <button class="primary-btn" onclick="askGroq()"><i class="fas fa-paper-plane"></i></button>
             <button class="primary-btn" onclick="clearGroqChat()" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fas fa-trash"></i></button>
-        </div>
-    </div>
-
-    <div id="grokSection" class="chat-section">
-        <div class="mode-header">
-            <h2><i class="fas fa-brain"></i> AI · Universal</h2>
-            <p>Ask any question (not limited to scraped data)</p>
-        </div>
-        <div id="grokChatContainer" class="chat-container"></div>
-        <div class="input-group">
-            <input type="text" id="grokQuestionInput" placeholder="Ask anything..." onkeypress="if(event.key==='Enter') askGrokMode()">
-            <button class="primary-btn" onclick="askGrokMode()"><i class="fas fa-bolt"></i></button>
-            <button class="primary-btn" onclick="clearGrokChat()" style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fas fa-trash"></i></button>
         </div>
     </div>
 </div>
@@ -347,94 +323,24 @@ function addMessage(role, content) {
 }
 
 function addGrokMessage(role, content) {
-    const chatContainer = document.getElementById('grokChatContainer');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message ' + role;
-    
-    // Add download buttons for assistant responses
-    if (role === 'assistant') {
-        const messageId = 'grok-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-        messageDiv.innerHTML = `
-            <div class="message-content">
-                <div class="message-text">${content}</div>
-                <div class="download-buttons">
-                    <button class="download-btn" onclick="downloadGrokResponse('${messageId}', 'text')" title="Download as Text">
-                        <i class="fas fa-file-alt"></i>
-                    </button>
-                    <button class="download-btn" onclick="downloadGrokResponse('${messageId}', 'csv')" title="Download as CSV">
-                        <i class="fas fa-file-csv"></i>
-                    </button>
-                    <button class="download-btn" onclick="downloadGrokResponse('${messageId}', 'json')" title="Download as JSON">
-                        <i class="fas fa-file-code"></i>
-                    </button>
-                    <button class="download-btn" onclick="downloadGrokResponse('${messageId}', 'pdf')" title="Download as PDF">
-                        <i class="fas fa-file-pdf"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-        // Store content for download
-        messageDiv.setAttribute('data-message-id', messageId);
-        messageDiv.setAttribute('data-content', content);
-    } else {
-        messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
-    }
-    
-    chatContainer.appendChild(messageDiv);
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    // This function is no longer needed - Grok mode removed
+    console.log('Grok mode has been removed');
 }
 
 async function askGrokMode() {
-    const q = document.getElementById('grokQuestionInput').value;
-    if(!q) { showNotification("Enter question", "warning"); return; }
-    
-    addGrokMessage('user', q);
-    document.getElementById('grokQuestionInput').value = '';
-    
-    const tid = 'gt' + Date.now();
-    const td = document.createElement('div');
-    td.className = 'message assistant';
-    td.id = tid;
-    td.innerHTML = '<div class="message-content typing"><span></span><span></span><span></span> Reasoning...</div>';
-    document.getElementById('grokChatContainer').appendChild(td);
-    
-    try {
-        const fd = new FormData();
-        fd.append('message', q);
-        fd.append('scraped_data', JSON.stringify(scrapedData || {}));
-        fd.append('analysis_type', 'comprehensive');
-        fd.append('history', JSON.stringify(grokChatHistory));
-        
-        const r = await fetch('/grok-mode', { method: 'POST', body: fd });
-        const res = await r.json();
-        
-        document.getElementById(tid)?.remove();
-        
-        if(res.success) {
-            addGrokMessage('assistant', marked.parse(res.response));
-            grokChatHistory.push({ role: 'user', content: q });
-            grokChatHistory.push({ role: 'assistant', content: res.response });
-        } else {
-            addGrokMessage('assistant', '❌ Error: ' + (res.error || 'Unknown'));
-        }
-    } catch(e) {
-        document.getElementById(tid)?.remove();
-        addGrokMessage('assistant', '❌ Error: ' + e.message);
-    }
+    // This function is no longer needed - Grok mode removed
+    showNotification('Grok mode has been removed. Use AI Scraped Data Analysis instead.', 'warning');
 }
 
+function clearGrokChat() {
+    // This function is no longer needed - Grok mode removed
+    clearGroqChat();
+}
 function clearGroqChat() {
     document.getElementById('chatContainer').innerHTML = '';
     groqChatHistory = [];
     addMessage('assistant', '🧹 Chat cleared.');
-    showNotification('Groq chat cleared', 'success');
-}
-
-function clearGrokChat() {
-    document.getElementById('grokChatContainer').innerHTML = '';
-    grokChatHistory = [];
-    addGrokMessage('assistant', '🧹 Chat cleared.');
-    showNotification('Grok chat cleared', 'success');
+    showNotification('Chat cleared', 'success');
 }
 
 async function exportData(format) {
@@ -689,7 +595,6 @@ window.onload = function() {
     setTimeout(() => {
         if(document.getElementById('combinedChatCard').style.display !== 'block') {
             addMessage('assistant', '👋 Enter URL and click SCRAPE NOW.');
-            addGrokMessage('assistant', '🚀 Grok Mode ready! Ask anything.');
         }
     }, 300);
 }
