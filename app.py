@@ -56,9 +56,24 @@ class GroqDirectClient:
                 timeout=60
             )
             response.raise_for_status()
-            return response.json()
+            
+            # Parse JSON response with error handling
+            try:
+                result = response.json()
+            except json.JSONDecodeError as e:
+                print(f"JSON decode error: {e}")
+                print(f"Response text: {response.text[:500]}")  # Log first 500 chars
+                raise Exception(f"Invalid JSON response from API: {str(e)}")
+            
+            # Validate that result is a dictionary
+            if not isinstance(result, dict):
+                print(f"Invalid response type: {type(result)}")
+                raise Exception(f"API response is not a dictionary: {type(result)}")
+            
+            return result
+            
         except requests.exceptions.Timeout:
-            raise Exception("Request timeout - possibly too large data")
+            raise Exception("Request timeout - data too large or server slow")
         except requests.exceptions.RequestException as e:
             raise Exception(f"Network error: {str(e)}")
         except Exception as e:
@@ -262,7 +277,36 @@ Never be brief when user wants details or lists.
             max_tokens=4096            # increased → allow long lists & detailed answers
         )
 
-        answer = response.get("choices", [{}])[0].get("message", {}).get("content", "No answer").strip()
+        # Carefully validate response structure to avoid 'dict' object has no attribute 'choices' error
+        if not isinstance(response, dict):
+            print(f"Invalid response type: {type(response)}")
+            return {"success": False, "error": "Invalid API response format"}
+        
+        if "choices" not in response:
+            print(f"Response missing 'choices' key: {response}")
+            return {"success": False, "error": "API response missing choices"}
+        
+        if not isinstance(response["choices"], list) or len(response["choices"]) == 0:
+            print(f"Invalid choices format: {response['choices']}")
+            return {"success": False, "error": "No choices in API response"}
+        
+        first_choice = response["choices"][0]
+        if not isinstance(first_choice, dict) or "message" not in first_choice:
+            print(f"Invalid choice format: {first_choice}")
+            return {"success": False, "error": "Invalid choice format in API response"}
+        
+        message = first_choice["message"]
+        if not isinstance(message, dict) or "content" not in message:
+            print(f"Invalid message format: {message}")
+            return {"success": False, "error": "Invalid message format in API response"}
+        
+        answer = message["content"]
+        if not isinstance(answer, str):
+            answer = str(answer)
+        
+        answer = answer.strip()
+        if not answer:
+            answer = "No answer returned from API"
 
         return {"success": True, "response": answer}
 
@@ -341,7 +385,24 @@ Rules:
             max_tokens=8000
         )
 
-        answer = resp.choices[0].message.content.strip() if resp.choices else "No response"
+        # Validate response structure to avoid 'dict' object has no attribute 'choices' error
+        if not isinstance(resp, dict) or "choices" not in resp:
+            return {"success": False, "error": "Invalid API response format"}
+        
+        if not isinstance(resp["choices"], list) or len(resp["choices"]) == 0:
+            return {"success": False, "error": "No choices in API response"}
+        
+        first_choice = resp["choices"][0]
+        if not isinstance(first_choice, dict) or "message" not in first_choice:
+            return {"success": False, "error": "Invalid choice format in API response"}
+        
+        message = first_choice["message"]
+        if not isinstance(message, dict) or "content" not in message:
+            return {"success": False, "error": "Invalid message format in API response"}
+        
+        answer = message["content"].strip() if isinstance(message["content"], str) else str(message["content"]).strip()
+        if not answer:
+            answer = "No response"
 
         return {
             "success": True,
@@ -398,7 +459,24 @@ Use only provided data. Say "Not found" when missing."""
             max_tokens=1200
         )
 
-        summary = resp.choices[0].message.content.strip() if resp.choices else "No summary"
+        # Validate response structure to avoid 'dict' object has no attribute 'choices' error
+        if not isinstance(resp, dict) or "choices" not in resp:
+            return {"success": False, "error": "Invalid API response format"}
+        
+        if not isinstance(resp["choices"], list) or len(resp["choices"]) == 0:
+            return {"success": False, "error": "No choices in API response"}
+        
+        first_choice = resp["choices"][0]
+        if not isinstance(first_choice, dict) or "message" not in first_choice:
+            return {"success": False, "error": "Invalid choice format in API response"}
+        
+        message = first_choice["message"]
+        if not isinstance(message, dict) or "content" not in message:
+            return {"success": False, "error": "Invalid message format in API response"}
+        
+        summary = message["content"].strip() if isinstance(message["content"], str) else str(message["content"]).strip()
+        if not summary:
+            summary = "No summary"
 
         return {
             "success": True,
