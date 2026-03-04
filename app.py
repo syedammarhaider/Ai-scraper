@@ -356,7 +356,7 @@ ALWAYS prioritize professionalism, accuracy, completeness, and user instruction 
             # Carefully validate response structure to avoid 'dict' object has no attribute 'choices' error
             if not isinstance(response, dict):
                 print(f"Invalid response type: {type(response)}")
-                raise Exception("Invalid API response format")
+                raise Exception("Invalid API response of format")
             
             if "choices" not in response:
                 print(f"Response missing 'choices' key: {response}")
