@@ -300,8 +300,8 @@ body {
     background: var(--input-bg);
     padding: clamp(16px, 2.5vw, 24px);
     border-radius: clamp(16px, 2.5vw, 24px);
-    max-height: 800px; /* Increased from 600px for better visibility */
-    overflow: auto;
+    max-height: 1200px !important; /* Force maximum height with !important */
+    overflow: auto !important;
     font-size: clamp(12px, 1vw, 14px);
     border: 1px solid var(--border-color);
     white-space: pre-wrap;
@@ -383,8 +383,8 @@ body {
     background: var(--input-bg);
     padding: clamp(16px, 2.5vw, 24px);
     border-radius: clamp(20px, 3vw, 28px);
-    max-height: 800px; /* Increased from 600px for better chat visibility */
-    overflow-y: auto;
+    max-height: 1200px !important; /* Force maximum height with !important */
+    overflow-y: auto !important;
     border: 1px solid var(--border-color);
     margin-bottom: clamp(16px, 2.5vw, 24px);
     display: flex;
