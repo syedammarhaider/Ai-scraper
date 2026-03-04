@@ -22,7 +22,7 @@ http://3.95.32.144/
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-<link rel="stylesheet" href="/static/styles.css?v=1.0.1">
+<link rel="stylesheet" href="/static/styles.css?v=1.0.2">
 </head>
 
 <body data-theme="light">
@@ -312,7 +312,36 @@ function addMessage(role, content) {
     const chatContainer = document.getElementById('chatContainer');
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message ' + role;
-    messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
+    
+    // Add download buttons for assistant responses
+    if (role === 'assistant') {
+        const messageId = 'msg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                <div class="message-text">${content}</div>
+                <div class="download-buttons">
+                    <button class="download-btn" onclick="downloadResponse('${messageId}', 'text')" title="Download as Text">
+                        <i class="fas fa-file-alt"></i>
+                    </button>
+                    <button class="download-btn" onclick="downloadResponse('${messageId}', 'csv')" title="Download as CSV">
+                        <i class="fas fa-file-csv"></i>
+                    </button>
+                    <button class="download-btn" onclick="downloadResponse('${messageId}', 'json')" title="Download as JSON">
+                        <i class="fas fa-file-code"></i>
+                    </button>
+                    <button class="download-btn" onclick="downloadResponse('${messageId}', 'pdf')" title="Download as PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        // Store content for download
+        messageDiv.setAttribute('data-message-id', messageId);
+        messageDiv.setAttribute('data-content', content);
+    } else {
+        messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
+    }
+    
     chatContainer.appendChild(messageDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
@@ -321,7 +350,36 @@ function addGrokMessage(role, content) {
     const chatContainer = document.getElementById('grokChatContainer');
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message ' + role;
-    messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
+    
+    // Add download buttons for assistant responses
+    if (role === 'assistant') {
+        const messageId = 'grok-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                <div class="message-text">${content}</div>
+                <div class="download-buttons">
+                    <button class="download-btn" onclick="downloadGrokResponse('${messageId}', 'text')" title="Download as Text">
+                        <i class="fas fa-file-alt"></i>
+                    </button>
+                    <button class="download-btn" onclick="downloadGrokResponse('${messageId}', 'csv')" title="Download as CSV">
+                        <i class="fas fa-file-csv"></i>
+                    </button>
+                    <button class="download-btn" onclick="downloadGrokResponse('${messageId}', 'json')" title="Download as JSON">
+                        <i class="fas fa-file-code"></i>
+                    </button>
+                    <button class="download-btn" onclick="downloadGrokResponse('${messageId}', 'pdf')" title="Download as PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        // Store content for download
+        messageDiv.setAttribute('data-message-id', messageId);
+        messageDiv.setAttribute('data-content', content);
+    } else {
+        messageDiv.innerHTML = '<div class="message-content">' + content + '</div>';
+    }
+    
     chatContainer.appendChild(messageDiv);
     chatContainer.scrollTop = chatContainer.scrollHeight;
 }
@@ -499,6 +557,112 @@ async function exportData(format) {
     } catch(error) {
         showNotification('Error: ' + error.message, 'error');
     }
+}
+
+// Download functions for AI responses
+function downloadResponse(messageId, format) {
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    const content = messageElement ? messageElement.getAttribute('data-content') : 'No content found';
+    
+    let filename = 'ai-response-' + new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    let mimeType = 'text/plain';
+    let fileContent = content;
+    
+    if (format === 'json') {
+        fileContent = JSON.stringify({
+            timestamp: new Date().toISOString(),
+            type: 'ai-response',
+            content: content,
+            mode: 'groq-scraped'
+        }, null, 2);
+        mimeType = 'application/json';
+        filename += '.json';
+    } else if (format === 'csv') {
+        fileContent = 'Timestamp,Type,Content\n';
+        fileContent += `"${new Date().toISOString()}","AI Response","${content.replace(/"/g, '""')}"`;
+        mimeType = 'text/csv';
+        filename += '.csv';
+    } else if (format === 'pdf') {
+        fileContent = `<html><head><title>AI Response</title><style>body{font-family:Arial;padding:20px;}h1{color:#d4af37;}</style></head><body>`;
+        fileContent += `<h1>AI Response</h1>`;
+        fileContent += `<p><strong>Time:</strong> ${new Date().toLocaleString()}</p>`;
+        fileContent += `<p><strong>Mode:</strong> Groq Scraped Data Analysis</p>`;
+        fileContent += `<hr>`;
+        fileContent += `<div>${content}</div>`;
+        fileContent += `<hr><p><small>Generated by AI SCRAPER · AMMAR</small></p></body></html>`;
+        mimeType = 'application/pdf';
+        filename += '.pdf';
+    } else {
+        // Text format
+        fileContent = `AI RESPONSE\n`;
+        fileContent += `=============\n\n`;
+        fileContent += `Time: ${new Date().toLocaleString()}\n`;
+        fileContent += `Mode: Groq Scraped Data Analysis\n\n`;
+        fileContent += `Content:\n${content}\n\n`;
+        fileContent += `---\nGenerated by AI SCRAPER · AMMAR`;
+        filename += '.txt';
+    }
+    
+    downloadFile(fileContent, filename, mimeType);
+}
+
+function downloadGrokResponse(messageId, format) {
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    const content = messageElement ? messageElement.getAttribute('data-content') : 'No content found';
+    
+    let filename = 'grok-response-' + new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    let mimeType = 'text/plain';
+    let fileContent = content;
+    
+    if (format === 'json') {
+        fileContent = JSON.stringify({
+            timestamp: new Date().toISOString(),
+            type: 'grok-response',
+            content: content,
+            mode: 'grok-universal'
+        }, null, 2);
+        mimeType = 'application/json';
+        filename += '.json';
+    } else if (format === 'csv') {
+        fileContent = 'Timestamp,Type,Content\n';
+        fileContent += `"${new Date().toISOString()}","Grok Response","${content.replace(/"/g, '""')}"`;
+        mimeType = 'text/csv';
+        filename += '.csv';
+    } else if (format === 'pdf') {
+        fileContent = `<html><head><title>Grok Response</title><style>body{font-family:Arial;padding:20px;}h1{color:#d4af37;}</style></head><body>`;
+        fileContent += `<h1>Grok Response</h1>`;
+        fileContent += `<p><strong>Time:</strong> ${new Date().toLocaleString()}</p>`;
+        fileContent += `<p><strong>Mode:</strong> Grok Universal Knowledge</p>`;
+        fileContent += `<hr>`;
+        fileContent += `<div>${content}</div>`;
+        fileContent += `<hr><p><small>Generated by AI SCRAPER · AMMAR</small></p></body></html>`;
+        mimeType = 'application/pdf';
+        filename += '.pdf';
+    } else {
+        // Text format
+        fileContent = `GROK RESPONSE\n`;
+        fileContent += `==============\n\n`;
+        fileContent += `Time: ${new Date().toLocaleString()}\n`;
+        fileContent += `Mode: Grok Universal Knowledge\n\n`;
+        fileContent += `Content:\n${content}\n\n`;
+        fileContent += `---\nGenerated by AI SCRAPER · AMMAR`;
+        filename += '.txt';
+    }
+    
+    downloadFile(fileContent, filename, mimeType);
+}
+
+function downloadFile(content, filename, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    showNotification(`Downloaded: ${filename}`, 'success');
 }
 
 function switchMode(mode) {
