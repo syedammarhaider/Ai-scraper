@@ -159,7 +159,6 @@ async def api_scrape(req: ScrapeRequest):
         return {
             "success": True,
             "session_id": session_id,
-            "data": data,  # Return full data for frontend compatibility
             "data_preview": {
                 "type": "crawl" if "pages" in data else "single",
                 "page_count": len(data.get("pages", [])) if "pages" in data else 1,

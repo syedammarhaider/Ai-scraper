@@ -239,19 +239,11 @@ async function scrapeWebsite() {
     document.getElementById('loading').style.display = 'block';
     document.querySelector('.scrape-btn').disabled = true;
     try {
-        const requestData = {
-            url: fullUrl,
-            mode: document.getElementById('scrapeMode').value,
-            javascript: document.getElementById('jsMode').value === 'true'
-        };
-        
-        const response = await fetch('/api/scrape', { 
-            method: 'POST', 
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData) 
-        });
+        const formData = new FormData();
+        formData.append('url', fullUrl);
+        formData.append('mode', document.getElementById('scrapeMode').value);
+        formData.append('js', document.getElementById('jsMode').value);
+        const response = await fetch('/scrape', { method: 'POST', body: formData });
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Server error:', errorText);
@@ -259,7 +251,7 @@ async function scrapeWebsite() {
         }
         const result = await response.json();
         if(result.success) {
-            scrapedData = result.data;  // Use full data
+            scrapedData = result.data;
             sessionId = result.session_id;
             document.getElementById('previewContent').innerHTML = '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
             document.getElementById('dataCard').style.display = 'block';
@@ -294,13 +286,11 @@ async function askGroq() {
     
     try {
         const formData = new FormData();
-        formData.append('session_id', sessionId);
         formData.append('message', question);
+        formData.append('scraped_data', JSON.stringify(scrapedData));
+        formData.append('history', JSON.stringify(groqChatHistory));
         
-        const response = await fetch('/api/chat', { 
-            method: 'POST', 
-            body: formData 
-        });
+        const response = await fetch('/groq-chat', { method: 'POST', body: formData });
         const result = await response.json();
         
         document.getElementById(typingId)?.remove();
