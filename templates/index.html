@@ -239,11 +239,19 @@ async function scrapeWebsite() {
     document.getElementById('loading').style.display = 'block';
     document.querySelector('.scrape-btn').disabled = true;
     try {
-        const formData = new FormData();
-        formData.append('url', fullUrl);
-        formData.append('mode', document.getElementById('scrapeMode').value);
-        formData.append('js', document.getElementById('jsMode').value);
-        const response = await fetch('/api/scrape', { method: 'POST', body: formData });
+        const requestData = {
+            url: fullUrl,
+            mode: document.getElementById('scrapeMode').value,
+            javascript: document.getElementById('jsMode').value === 'true'
+        };
+        
+        const response = await fetch('/api/scrape', { 
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData) 
+        });
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Server error:', errorText);
@@ -289,7 +297,10 @@ async function askGroq() {
         formData.append('session_id', sessionId);
         formData.append('message', question);
         
-        const response = await fetch('/api/chat', { method: 'POST', body: formData });
+        const response = await fetch('/api/chat', { 
+            method: 'POST', 
+            body: formData 
+        });
         const result = await response.json();
         
         document.getElementById(typingId)?.remove();
