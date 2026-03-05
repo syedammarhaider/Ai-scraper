@@ -339,3 +339,118 @@ async def export(request: Request):
         path,
         filename=os.path.basename(path)
     )
+
+# ==========================================================
+# GROK MODE - Universal Knowledge Questions
+# ==========================================================
+
+@app.post("/grok-mode")
+async def grok_mode_endpoint(request: Request):
+    
+    try:
+        
+        form = await request.form()
+        
+        message = form.get("message")
+        scraped = form.get("scraped_data")
+        analysis_type = form.get("analysis_type", "comprehensive")
+
+        if not message or not scraped:
+            return {"success": False, "error": "Missing message or scraped data"}
+        
+        if not grok_mode:
+            return {"success": False, "error": "Grok Mode client not initialized"}
+
+        system_prompt = f"""You are Grok Mode - an advanced AI assistant for universal questions.
+Rules:
+1. ONLY answer universal/general knowledge questions
+2. DO NOT use scraped data - ignore any website content provided
+3. Use your comprehensive knowledge for all answers
+4. Be helpful, detailed, and comprehensive
+5. Analysis Type: {analysis_type}
+"""
+
+        full_context = f"USER QUESTION:\n{message}\n\n(Note: Provide comprehensive expert answer.)"
+
+        response = grok_mode.chat_completions_create(
+            model=MODEL_DEEP,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": full_context}
+            ],
+            temperature=0.4,
+            max_tokens=8000
+        )
+        
+        answer = response.get("choices", [{}])[0].get("message", {}).get("content", "")
+        
+        if not answer:
+            answer = "No response generated from Grok Mode."
+
+        return {
+            "success": True,
+            "response": answer.strip(),
+            "mode": "grok_mode",
+            "model": MODEL_DEEP,
+            "analysis_type": analysis_type
+        }
+
+    except Exception as e:
+        return {"success": False, "error": f"Grok Mode failed: {str(e)}"}
+
+# ==========================================================
+# GROK SUMMARY - Quick Summary Generator
+# ==========================================================
+
+@app.post("/grok-summary")
+async def grok_summary(request: Request):
+    
+    form = await request.form()
+    
+    scraped = form.get("scraped_data")
+    
+    if not scraped:
+        return {"success": False, "error": "Missing scraped data"}
+    
+    if not groq_ai:
+        return {"success": False, "error": "Groq AI client not initialized"}
+
+    data = json.loads(scraped)
+    
+    system_prompt = """You are GROK MODE SUMMARY - Extract key facts instantly and accurately.
+Provide structured summary:
+1. MAIN TOPIC
+2. KEY POINTS (3-5)
+3. STATISTICS
+4. CONCLUSION
+Only use data from the page. If info missing, say "Not found".
+"""
+
+    context_parts = [f"URL: {data.get('url', '')}"]
+    
+    if data.get('title'):
+        context_parts.append(f"Title: {data['title']}")
+    
+    if data.get('description'):
+        context_parts.append(f"Description: {data['description']}")
+    
+    if data.get('paragraphs'):
+        context_parts.append("\nContent:\n" + "\n".join(data['paragraphs'][:50]))
+
+    response = groq_ai.chat_completions_create(
+        model=MODEL_DEEP,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": "\n\n".join(context_parts)}
+        ],
+        temperature=0.1,
+        max_tokens=5000
+    )
+    
+    answer = response.get("choices", [{}])[0].get("message", {}).get("content", "No summary generated.")
+    
+    return {
+        "success": True, 
+        "summary": answer.strip(), 
+        "mode": "grok_summary"
+    }
