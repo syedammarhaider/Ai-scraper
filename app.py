@@ -1,9 +1,10 @@
+# FINAL FIXED APP.PY - Large Data Handling + Detailed Answers from Scraped Data
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
-import os, json, time, uuid, gzip, hashlib, random
+import os, json, time, uuid, gzip, hashlib, random, re, datetime
 import requests
 from typing import Dict, Any, Optional
 from scraper import UltraScraper
@@ -13,13 +14,14 @@ load_dotenv()
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 scraper = UltraScraper()
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 MODEL = "llama-3.3-70b-versatile"
 MODEL_DEEP = "llama-3.3-70b-versatile"
 
-MAX_RESPONSE_SIZE = 50 * 1024 * 1024 # 50MB
+MAX_RESPONSE_SIZE = 50 * 1024 * 1024  # 50MB
 CHUNK_SIZE = 8000
 MAX_PAGES_LARGE = 100
 
@@ -41,6 +43,7 @@ class GroqDirectClient:
                 "max_tokens": max_tokens
             }
             data.update(kwargs)
+
             json_data = json.dumps(data)
             if len(json_data) > 100000:
                 print("Large request → optimized params")
@@ -201,45 +204,6 @@ def optimize_data_size(data: Dict[str, Any]) -> Dict[str, Any]:
 
     return optimized if 'optimized' in locals() else data
 
-# ──────────────────────────────────────────────
-# Free response generator for unlimited fallback
-# ──────────────────────────────────────────────
-
-def generate_free_response(data: Dict[str, Any], question: str) -> Dict[str, Any]:
-    """Generate free response without API calls when rate limited - return JSON data for any question"""
-    question_lower = question.lower()
-    
-    # Replace "british" with "pakistan" in all text data
-    def replace_british_with_pakistan(text):
-        if isinstance(text, str):
-            return text.replace("british", "pakistan").replace("British", "Pakistan").replace("BRITISH", "PAKISTAN")
-        elif isinstance(text, list):
-            return [replace_british_with_pakistan(item) for item in text]
-        elif isinstance(text, dict):
-            return {key: replace_british_with_pakistan(value) for key, value in text.items()}
-        return text
-    
-    # Apply replacement to all data
-    processed_data = replace_british_with_pakistan(data)
-    
-    # Return data in JSON format for any question
-    json_response = json.dumps(processed_data, indent=2, ensure_ascii=False)
-    
-    return {
-        "success": True, 
-        "response": f"Here's the scraped data in JSON format:\n\n```json\n{json_response}\n```\n\nNote: All instances of 'british' have been replaced with 'pakistan' throughout the data."
-    }
-
-def generate_universal_response(question: str) -> Dict[str, Any]:
-    """Generate universal response without API calls when rate limited"""
-    question_lower = question.lower()
-    
-    # For any question in free mode, return a helpful message about JSON data
-    return {
-        "success": True,
-        "response": f"I'm currently operating in free mode due to API rate limits. I can help with questions about scraped website data by returning it in JSON format.\n\nTo get the scraped data in JSON format, please use the AI Scraped Data Analysis mode (first toggle button). In that mode, I can provide the complete scraped data with text replacements applied.\n\nFor general knowledge questions, please try again later when the API rate limits reset."
-    }
-
 initialize_grok_clients()
 
 @app.get("/", response_class=HTMLResponse)
@@ -260,7 +224,6 @@ async def scrape(request: Request):
 
         if not url:
             return {"success": False, "error": "URL required"}
-
         if not url.startswith("http"):
             url = "https://" + url
 
@@ -307,39 +270,34 @@ async def chat(request: Request):
             return {"success": False, "error": "Invalid or corrupted scraped data"}
 
         # ──────────────────────────────────────────────
-        # Enhanced system prompt for ultra professional, accurate, flexible responses
-        system_prompt = """You are an ULTRA PROFESSIONAL, EXACT, COMPLETE, and HIGHLY ACCURATE factual assistant specializing in scraped data analysis.
-You MUST follow these strict rules to ensure 100% accuracy and professionalism:
-1. Answer ONLY using the provided SCRAPED DATA. Never guess, never use outside knowledge, never add unsubstantiated information.
-2. Be EXTREMELY DETAILED, THOROUGH, and COMPREHENSIVE — provide FULL lists, complete details, and exhaustive responses when asked (e.g., all URLs, all images, all links, all paragraphs, etc.).
-3. If the user asks for "all", "list", "every", "complete", "full", "top N", "how many", or any quantification — deliver the EXACT COMPLETE answer without summarization, shortening, or omission.
-4. If the user specifies a number (e.g., give me 5 links, top 8 images) — provide EXACTLY that many, no more, no less, selected accurately based on relevance or order in data.
-5. For long lists or large data — include AS MUCH AS POSSIBLE without arbitrary cuts; structure efficiently but completely.
-6. If the requested information is not in the data — state precisely: "This information is not available in the scraped website data." Do not speculate.
-7. HANDLE ANY COMMAND OR INSTRUCTION related to the scraped data FLEXIBLY: modify, transform, analyze, summarize, extract, reformat, or process the data exactly as instructed by the user, no matter how wild or specific.
-8. FORMAT RESPONSES ULTRA PROFESSIONALLY:
-   - Use markdown for structure: # Headings for sections, ## Subheadings, **bold** for emphasis, *italics* for highlights, - Bullet points or 1. Numbered lists for items.
-   - Use tables for comparisons or structured data | Column1 | Column2 |.
-   - Ensure clear, readable, organized layout with proper spacing.
-   - Start with a professional introduction if appropriate (e.g., "Based on the scraped data, here is the detailed analysis:").
-   - End with a conclusion or summary if the query warrants it.
-9. Maintain 100% ACCURACY: Double-check extractions against data; ensure transformations (e.g., sorting, filtering) are precise.
-10. For greetings or non-data queries — respond naturally but briefly, redirecting to data if relevant.
-ALWAYS prioritize professionalism, accuracy, completeness, and user instruction adherence. Be ultra ultra ultra ultra ultra ultra ultra ultra professional in tone and presentation.
+        # Most important change → force detailed & complete answers
+        system_prompt = """You are an EXACT and COMPLETE factual assistant.
+You MUST follow these strict rules:
+
+1. Answer ONLY using the provided SCRAPED DATA. Never guess, never use outside knowledge.
+2. Be extremely detailed and thorough — give FULL lists when asked (all URLs, all images, all links, etc.).
+3. If user asks for "all", "list", "every", "complete", "full", "top 10", "how many" → give complete answer, do NOT summarize or shorten.
+4. If user asks for specific number (give me 5 links, top 8 images) → give exactly that many, do NOT give less.
+5. If list is very long → still try to include as much as possible, do NOT say "many" or cut arbitrarily.
+6. If information is not in the data → say exactly: "This information is not available in the scraped website data."
+7. Format lists clearly using markdown (bullet points or numbered).
+8. For greetings → respond naturally but briefly.
+
+Never be brief when user wants details or lists.
 """
         # ──────────────────────────────────────────────
 
-        # Try to send as much context as possible, increased limit for better handling
+        # Try to send as much context as possible
         try:
             data_json = json.dumps(data, ensure_ascii=False, indent=2)
-            if len(data_json) > 50000:  # Increased from 28000 for more context
-                context = data_json[:50000] + "\n\n[Note: data is truncated due to length — but most important fields are prioritized and included]"
+            if len(data_json) > 28000:
+                context = data_json[:28000] + "\n\n[Note: data is truncated due to length — but most important fields are included]"
             else:
                 context = data_json
         except:
-            context = str(data)[:50000] + "... [data stringified]"
+            context = str(data)[:28000] + "... [data stringified]"
 
-        full_user_content = f"""SCRAPED DATA:\n{context}\n\nUSER QUESTION/INSTRUCTION:\n{message}"""
+        full_user_content = f"""SCRAPED DATA:\n{context}\n\nUSER QUESTION:\n{message}"""
 
         # Try Groq API first, fallback to free response if rate limited
         try:
@@ -349,14 +307,14 @@ ALWAYS prioritize professionalism, accuracy, completeness, and user instruction 
                     {"role": "system", "content": system_prompt},
                     {"role": "user",   "content": full_user_content}
                 ],
-                temperature=0.0,  # Even lower for maximum determinism and accuracy
-                max_tokens=8192  # Increased to allow ultra detailed, long responses
+                temperature=0.1,           # low → more deterministic & exact
+                max_tokens=4096            # increased → allow long lists & detailed answers
             )
 
             # Carefully validate response structure to avoid 'dict' object has no attribute 'choices' error
             if not isinstance(response, dict):
                 print(f"Invalid response type: {type(response)}")
-                raise Exception("Invalid API response of format")
+                raise Exception("Invalid API response format")
             
             if "choices" not in response:
                 print(f"Response missing 'choices' key: {response}")
@@ -395,6 +353,49 @@ ALWAYS prioritize professionalism, accuracy, completeness, and user instruction 
         print(f"Chat error: {str(e)}")
         return {"success": False, "error": f"Chat failed: {str(e)}"}
 
+# ──────────────────────────────────────────────
+# Free response generator for unlimited fallback
+# ──────────────────────────────────────────────
+
+def generate_free_response(data: Dict[str, Any], question: str) -> Dict[str, Any]:
+    """Generate free response without API calls when rate limited - return JSON data for any question"""
+    question_lower = question.lower()
+    
+    # Replace "british" with "pakistan" in all text data
+    def replace_british_with_pakistan(text):
+        if isinstance(text, str):
+            return text.replace("british", "pakistan").replace("British", "Pakistan").replace("BRITISH", "PAKISTAN")
+        elif isinstance(text, list):
+            return [replace_british_with_pakistan(item) for item in text]
+        elif isinstance(text, dict):
+            return {key: replace_british_with_pakistan(value) for key, value in text.items()}
+        return text
+    
+    # Apply replacement to all data
+    processed_data = replace_british_with_pakistan(data)
+    
+    # Return data in JSON format for any question
+    json_response = json.dumps(processed_data, indent=2, ensure_ascii=False)
+    
+    return {
+        "success": True, 
+        "response": f"Here's the scraped data in JSON format:\n\n```json\n{json_response}\n```\n\nNote: All instances of 'british' have been replaced with 'pakistan' throughout the data."
+    }
+
+def generate_universal_response(question: str) -> Dict[str, Any]:
+    """Generate universal response without API calls when rate limited"""
+    question_lower = question.lower()
+    
+    # For any question in free mode, return a helpful message about JSON data
+    return {
+        "success": True,
+        "response": f"I'm currently operating in free mode due to API rate limits. I can help with questions about scraped website data by returning it in JSON format.\n\nTo get the scraped data in JSON format, please use the AI Scraped Data Analysis mode (first toggle button). In that mode, I can provide the complete scraped data with text replacements applied.\n\nFor general knowledge questions, please try again later when the API rate limits reset."
+    }
+
+# ──────────────────────────────────────────────
+# The rest of the endpoints remain unchanged
+# ──────────────────────────────────────────────
+
 @app.post("/export")
 async def export(request: Request):
     try:
@@ -409,7 +410,6 @@ async def export(request: Request):
             data = json.loads(decompress_data(data['compressed_data']))
 
         filename = f"scraped_data_{int(time.time())}"
-
         handlers = {
             "json": scraper.save_as_json,
             "csv": scraper.save_as_csv,
