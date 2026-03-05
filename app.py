@@ -150,16 +150,80 @@ async def chat(request: Request):
         return {"success": False, "error": "Groq AI client not initialized"}  # Ye error
 
     data = json.loads(scraped)  # Ye JSON parse
-    system_prompt = """  # Ye system prompt define
-You are an EXACT factual AI assistant.
+    system_prompt = """You are an EXACT factual AI assistant.
 Rules:
-1. ONLY answer from provided scraped data.
-2. If answer not found, say: "This information is not available in the scraped website data."
-3. Never guess or use outside knowledge.
-4. Be precise and factual.
-5. For greetings, respond naturally but briefly.
-"""
-    context = f"SCRAPED DATA:\n{json.dumps(data, indent=2)[:8000]}\n\nQUESTION:\n{message}"  # Ye context banati hai
+1. READ the scraped data content provided below
+2. ANSWER the user's question directly based ONLY on that content
+3. If information not found, say: "This information is not available in the scraped website data."
+4. NEVER return raw JSON data or structured data - always provide natural language answers
+5. Be precise, factual, and concise
+6. For greetings, respond naturally but briefly
+7. IMPORTANT: Provide ANSWERS, not data dumps"""
+    # Construct readable context instead of raw JSON
+    context_parts = ["SCRAPED DATA ANALYSIS:"]
+    
+    # Handle both single page and crawled data
+    if 'pages' in data:
+        # Multi-page crawl data
+        context_parts.append(f"Website crawled: {data.get('start_url', 'Unknown')}")
+        context_parts.append(f"Total pages scraped: {len(data['pages'])}")
+        context_parts.append("")
+        
+        for i, page in enumerate(data['pages'][:5], 1):  # Limit to first 5 pages
+            context_parts.append(f"PAGE {i}: {page.get('title', 'No title')}")
+            context_parts.append(f"URL: {page.get('url', 'Unknown')}")
+            
+            if page.get('description'):
+                context_parts.append(f"Description: {page['description']}")
+            
+            # Add key headings
+            if page.get('headings'):
+                for level, headings in page['headings'].items():
+                    if headings and len(headings) > 0:
+                        context_parts.append(f"{level.upper()}: {', '.join(headings[:3])}")
+            
+            # Add first few paragraphs
+            if page.get('paragraphs'):
+                context_parts.append("Content:")
+                for para in page['paragraphs'][:3]:
+                    context_parts.append(f"- {para}")
+            
+            context_parts.append("")
+    else:
+        # Single page data
+        context_parts.append(f"Page: {data.get('title', 'No title')}")
+        context_parts.append(f"URL: {data.get('url', 'Unknown')}")
+        
+        if data.get('description'):
+            context_parts.append(f"Description: {data['description']}")
+        
+        # Add headings
+        if data.get('headings'):
+            context_parts.append("Headings:")
+            for level, headings in data['headings'].items():
+                if headings and len(headings) > 0:
+                    context_parts.append(f"{level.upper()}: {', '.join(headings[:3])}")
+        
+        # Add paragraphs
+        if data.get('paragraphs'):
+            context_parts.append("Content:")
+            for para in data['paragraphs'][:5]:
+                context_parts.append(f"- {para}")
+        
+        # Add images if available
+        if data.get('images'):
+            context_parts.append("Images:")
+            for img in data['images'][:3]:
+                context_parts.append(f"- {img.get('alt', 'No alt text')}: {img.get('url', 'No URL')}")
+        
+        # Add links if available
+        if data.get('internal_links'):
+            context_parts.append("Internal Links:")
+            for link in data['internal_links'][:5]:
+                context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
+    
+    context_parts.append(f"\nQUESTION: {message}")
+    context = "\n".join(context_parts)  # Ye context banati hai
 
     try:  # Ye try
         response = groq_ai.chat_completions_create(  # Ye call
