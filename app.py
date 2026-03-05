@@ -9,9 +9,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os, json, time, uuid, math
 import requests
-from sentence_transformers import SentenceTransformer
-import faiss
-import numpy as np
 
 from scraper import UltraScraper  # Custom scraper import
 
@@ -42,13 +39,6 @@ async def generic_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content={"success": False, "error": f"Server error: {str(exc)}"},
     )
-
-# ------------------- RAG SYSTEM -------------------
-# Global RAG variables for professional large data handling
-embedder = SentenceTransformer('all-MiniLM-L6-v2')  # Fast, accurate embedder
-vector_index = None
-full_data_chunks = []  # Store full chunks globally
-chunk_metadata = []  # Store metadata for each chunk
 
 # ------------------- GROQ API CLIENT -------------------
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
