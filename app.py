@@ -1,4 +1,4 @@
-# app.py - Full Website Scraping + Groq/Grok Full-Length AI Responses
+# app.py - Robust Scraper + Groq/Grok AI with huge data support
 # Har line ke upar Roman Urdu comments added hain
 
 from fastapi import FastAPI, Request
@@ -7,20 +7,22 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-import os, json, time, uuid, math
+import os, json, time, uuid
 import requests
 
-from scraper import UltraScraper  # Custom scraper import
+from scraper import UltraScraper  # Custom scraper
 
-# Load environment variables
+# ------------------- ENVIRONMENT -------------------
 load_dotenv()
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+MODEL = "llama-3.3-70b-versatile"
+MODEL_DEEP = "llama-3.3-70b-versatile"
 
-# Initialize FastAPI
+# ------------------- INIT FASTAPI -------------------
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 scraper = UltraScraper()
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,10 +31,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Global exception handler
+# ------------------- GLOBAL ERROR HANDLER -------------------
 @app.exception_handler(Exception)
 async def generic_exception_handler(request: Request, exc: Exception):
     return JSONResponse(
@@ -40,11 +41,7 @@ async def generic_exception_handler(request: Request, exc: Exception):
         content={"success": False, "error": f"Server error: {str(exc)}"},
     )
 
-# ------------------- GROQ API CLIENT -------------------
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-MODEL = "llama-3.3-70b-versatile"
-MODEL_DEEP = "llama-3.3-70b-versatile"
-
+# ------------------- GROQ CLIENT -------------------
 class GroqDirectClient:
     def __init__(self, api_key):
         self.api_key = api_key
@@ -130,8 +127,6 @@ async def scrape(request: Request):
         else:
             data = scraper.scrape_single_page(url, mode)
 
-        print(f"✅ Scraping completed for: {url}")
-
         if "error" in data:
             return {"success": False, "error": data["error"]}
 
@@ -143,22 +138,27 @@ async def scrape(request: Request):
         return {"success": False, "error": f"Scraping failed: {str(e)}"}
 
 # ------------------- UTIL: CHUNK TEXT -------------------
-def split_text_into_chunks(text, chunk_size=2000):
+def split_text_into_chunks(text, max_words=1500):
     """Boht lamba scraped text chunk mein divide karta hai"""
     words = text.split()
     chunks = []
-    current_chunk = []
-    current_len = 0
-    for word in words:
-        current_chunk.append(word)
-        current_len += len(word) + 1
-        if current_len >= chunk_size:
-            chunks.append(" ".join(current_chunk))
-            current_chunk = []
-            current_len = 0
-    if current_chunk:
-        chunks.append(" ".join(current_chunk))
+    for i in range(0, len(words), max_words):
+        chunks.append(" ".join(words[i:i+max_words]))
     return chunks
+
+def groq_request_with_retry(client, model, messages, max_retries=3):
+    """429 rate limit ka retry logic"""
+    for attempt in range(max_retries):
+        try:
+            return client.chat_completions_create(model, messages)
+        except Exception as e:
+            if "429" in str(e):
+                wait_time = 2 ** attempt
+                print(f"429 detected, retrying in {wait_time}s...")
+                time.sleep(wait_time)
+            else:
+                raise e
+    raise Exception("Max retries exceeded due to 429 errors.")
 
 # ------------------- GROQ CHAT -------------------
 @app.post("/groq-chat")
@@ -166,6 +166,7 @@ async def chat(request: Request):
     form = await request.form()
     message = form.get("message")
     scraped = form.get("scraped_data")
+
     if not message or not scraped:
         return {"success": False, "error": "Missing data"}
     if not groq_ai:
@@ -176,7 +177,6 @@ async def chat(request: Request):
     except:
         return {"success": False, "error": "Invalid scraped data JSON"}
 
-    # System prompt
     system_prompt = """You are an EXACT factual AI assistant.
 Rules:
 1. ONLY answer from provided scraped data.
@@ -186,8 +186,15 @@ Rules:
 5. For greetings, respond naturally but briefly.
 """
 
-    context_text = json.dumps(data, indent=2)
-    chunks = split_text_into_chunks(context_text, chunk_size=4000)  # Chunked for large data
+    # Only include relevant fields to reduce tokens
+    context_text = json.dumps({
+        "url": data.get("url", ""),
+        "title": data.get("title", ""),
+        "description": data.get("description", ""),
+        "paragraphs": data.get("paragraphs", [])
+    }, indent=2)
+
+    chunks = split_text_into_chunks(context_text, max_words=1500)
     aggregated_answers = []
 
     for chunk in chunks:
@@ -195,12 +202,7 @@ Rules:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": f"SCRAPED DATA:\n{chunk}\n\nQUESTION:\n{message}"}
         ]
-        response = groq_ai.chat_completions_create(
-            model=MODEL,
-            messages=messages_to_send,
-            temperature=0,
-            max_tokens=4000
-        )
+        response = groq_request_with_retry(groq_ai, MODEL, messages_to_send)
         answer = response.get("choices", [{}])[0].get("message", {}).get("content", "")
         aggregated_answers.append(answer.strip())
 
@@ -237,45 +239,35 @@ async def grok_mode_endpoint(request: Request):
     try:
         form = await request.form()
         message = form.get("message")
-        scraped = form.get("scraped_data")
         analysis_type = form.get("analysis_type", "comprehensive")
-
-        if not message or not scraped:
-            return {"success": False, "error": "Missing message or scraped data"}
+        if not message:
+            return {"success": False, "error": "Missing message"}
         if not grok_mode:
             return {"success": False, "error": "Grok Mode client not initialized"}
 
-        system_prompt = f"""You are Grok Mode - an advanced AI assistant for universal questions.
+        system_prompt = f"""You are Grok Mode - an advanced AI assistant.
 Rules:
 1. ONLY answer universal/general knowledge questions
-2. DO NOT use scraped data - ignore any website content provided
-3. Use your comprehensive knowledge for all answers
-4. Be helpful, detailed, and comprehensive
-5. Analysis Type: {analysis_type}
+2. DO NOT use scraped data
+3. Be helpful, detailed, and comprehensive
+4. Analysis Type: {analysis_type}
 """
-
-        full_context = f"USER QUESTION:\n{message}\n\n(Note: Provide comprehensive expert answer.)"
 
         response = grok_mode.chat_completions_create(
             model=MODEL_DEEP,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": full_context}
+                {"role": "user", "content": f"USER QUESTION:\n{message}"}
             ],
             temperature=0.4,
             max_tokens=8000
         )
+
         answer = response.get("choices", [{}])[0].get("message", {}).get("content", "")
         if not answer:
             answer = "No response generated from Grok Mode."
 
-        return {
-            "success": True,
-            "response": answer.strip(),
-            "mode": "grok_mode",
-            "model": MODEL_DEEP,
-            "analysis_type": analysis_type
-        }
+        return {"success": True, "response": answer.strip(), "mode": "grok_mode", "analysis_type": analysis_type}
 
     except Exception as e:
         return {"success": False, "error": f"Grok Mode failed: {str(e)}"}
@@ -291,7 +283,7 @@ async def grok_summary(request: Request):
         return {"success": False, "error": "Groq AI client not initialized"}
 
     data = json.loads(scraped)
-    system_prompt = """You are GROK MODE SUMMARY - Extract key facts instantly and accurately.
+    system_prompt = """You are GROK MODE SUMMARY - Extract key facts accurately.
 Provide structured summary:
 1. MAIN TOPIC
 2. KEY POINTS (3-5)
