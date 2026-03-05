@@ -243,7 +243,7 @@ async function scrapeWebsite() {
         formData.append('url', fullUrl);
         formData.append('mode', document.getElementById('scrapeMode').value);
         formData.append('js', document.getElementById('jsMode').value);
-        const response = await fetch('/scrape', { method: 'POST', body: formData });
+        const response = await fetch('/api/scrape', { method: 'POST', body: formData });
         if (!response.ok) {
             const errorText = await response.text();
             console.error('Server error:', errorText);
@@ -251,7 +251,7 @@ async function scrapeWebsite() {
         }
         const result = await response.json();
         if(result.success) {
-            scrapedData = result.data;
+            scrapedData = result.data;  // Use full data
             sessionId = result.session_id;
             document.getElementById('previewContent').innerHTML = '<pre>' + JSON.stringify(result.data, null, 2) + '</pre>';
             document.getElementById('dataCard').style.display = 'block';
@@ -286,11 +286,10 @@ async function askGroq() {
     
     try {
         const formData = new FormData();
+        formData.append('session_id', sessionId);
         formData.append('message', question);
-        formData.append('scraped_data', JSON.stringify(scrapedData));
-        formData.append('history', JSON.stringify(groqChatHistory));
         
-        const response = await fetch('/groq-chat', { method: 'POST', body: formData });
+        const response = await fetch('/api/chat', { method: 'POST', body: formData });
         const result = await response.json();
         
         document.getElementById(typingId)?.remove();
