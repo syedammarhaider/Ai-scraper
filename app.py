@@ -83,6 +83,8 @@ Rules:
 4. If answer not found, say: "This information is not available in the scraped website data."
 5. NEVER guess or use outside knowledge
 6. IMPORTANT: Provide ANSWERS, not explanations about what data you have
+7. URL REQUESTS: When asked for URLs/links, extract and list ALL URLs from the Internal Links and External Links sections
+8. Show complete lists with counts as provided in the data
 """
 
     # Construct readable context instead of raw JSON
@@ -118,13 +120,13 @@ Rules:
             if page.get('internal_links'):
                 context_parts.append(f"Internal Links ({len(page['internal_links'])} total):")
                 for link in page['internal_links']:  # Show ALL links, no limit
-                    context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
+                    context_parts.append(f"- {link.get('url', 'No URL')}")
             
             # Add ALL external links (not limited)  
             if page.get('external_links'):
                 context_parts.append(f"External Links ({len(page['external_links'])} total):")
                 for link in page['external_links']:  # Show ALL links, no limit
-                    context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
+                    context_parts.append(f"- {link.get('url', 'No URL')}")
             
             context_parts.append("")
     else:
@@ -158,13 +160,13 @@ Rules:
         if data.get('internal_links'):
             context_parts.append(f"Internal Links ({len(data['internal_links'])} total):")
             for link in data['internal_links']:  # Show ALL links, no limit
-                context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
+                context_parts.append(f"- {link.get('url', 'No URL')}")
         
         # Add ALL external links (not limited)
         if data.get('external_links'):
             context_parts.append(f"External Links ({len(data['external_links'])} total):")
             for link in data['external_links']:  # Show ALL links, no limit
-                context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
+                context_parts.append(f"- {link.get('url', 'No URL')}")
     
     context_parts.append(f"\nQUESTION: {message}")
     context = "\n".join(context_parts)
