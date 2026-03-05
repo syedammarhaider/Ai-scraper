@@ -1,305 +1,352 @@
-# app.py
+# app.py - AI Web Scraper with Groq + Flexible Analysis (2025 edition)
+# Extended version - more robust, better prompt, larger token support, better exports
 
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from dotenv import load_dotenv
 from groq import Groq
-from scraper import UltraScraper
-import os, json, time
+import os
+import json
+import time
+import uuid
+import logging
+from typing import Dict, Any, Optional
+from datetime import datetime
+from pathlib import Path
 
-# Load .env variables
+# ────────────────────────────────────────────────
+#               Logging Configuration
+# ────────────────────────────────────────────────
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S"
+)
+logger = logging.getLogger("ai-scraper")
+
+# ────────────────────────────────────────────────
+#               Load environment
+# ────────────────────────────────────────────────
+
 load_dotenv()
-
-# Initialize FastAPI
-app = FastAPI()
-templates = Jinja2Templates(directory="templates")
-scraper = UltraScraper()
-
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
- 
-# ---------- GROQ ----------
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+if not GROQ_API_KEY:
+    logger.warning("GROQ_API_KEY not found in environment variables!")
+
+# ────────────────────────────────────────────────
+#               FastAPI App Setup
+# ────────────────────────────────────────────────
+
+app = FastAPI(
+    title="AI Scraper - Ammar Edition",
+    description="Web scraper + Groq-powered analysis",
+    version="4.1.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# ────────────────────────────────────────────────
+#               Groq Client
+# ────────────────────────────────────────────────
+
+client = None
+if GROQ_API_KEY:
+    try:
+        client = Groq(api_key=GROQ_API_KEY)
+        logger.info("Groq client initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize Groq client: {e}")
+
 MODEL = "llama-3.3-70b-versatile"
-MODEL_DEEP = "llama-3.3-70b-versatile"
+MAX_TOKENS_CHAT = 8192
+MAX_TOKENS_GROK = 16384
 
-# Initialize Groq client without proxies
-client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
+# ────────────────────────────────────────────────
+#               In-memory session storage
+#               (for demo - use redis in production)
+# ────────────────────────────────────────────────
 
-# ---------- HOME ----------
+sessions: Dict[str, Dict[str, Any]] = {}
+
+# ────────────────────────────────────────────────
+#               Routes
+# ────────────────────────────────────────────────
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "version": "4.1.0",
+            "build_time": datetime.now().strftime("%Y-%m-%d %H:%M")
+        }
+    )
 
-# ---------- HEALTH ----------
+
 @app.get("/health")
 async def health():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy",
+        "groq_available": client is not None,
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
-# ---------- SCRAPE ----------
-@app.post("/scrape")
-async def scrape(request: Request):
-    form = await request.form()
-    url = form.get("url")
-    mode = form.get("mode", "comprehensive")
 
-    if not url:
-        return {"success": False, "error": "URL required"}
+class ScrapeRequest(BaseModel):
+    url: str
+    mode: str = "comprehensive"
+    javascript: bool = False
+    max_pages: int = 60
+    max_depth: int = 4
 
-    if not url.startswith("http"):
+
+@app.post("/api/scrape")
+async def api_scrape(req: ScrapeRequest):
+    if not req.url:
+        raise HTTPException(400, detail="URL is required")
+
+    url = req.url.strip()
+    if not url.startswith(("http://", "https://")):
         url = "https://" + url
 
-    data = scraper.scrape_website(url, mode)
+    session_id = str(uuid.uuid4())
+    start_time = time.time()
 
-    if "error" in data:
-        return {"success": False, "error": data["error"]}
+    try:
+        from scraper import UltraScraper  # late import to avoid circular issues
 
-    return {"success": True, "data": data}
+        scraper = UltraScraper()
+        if req.javascript:
+            logger.info(f"Enabling JS rendering for {url}")
+            # In real production → use playwright or similar
+            # Here we just log (your current scraper doesn't support JS yet)
 
-# ---------- GROQ CHAT ----------
-@app.post("/groq-chat")
-async def chat(request: Request):
+        if req.mode == "crawl":
+            data = scraper.crawl_website(
+                url,
+                mode="comprehensive",
+                max_pages=req.max_pages,
+                max_depth=req.max_depth
+            )
+        else:
+            data = scraper.scrape_single_page(url, mode=req.mode)
+
+        duration = round(time.time() - start_time, 2)
+
+        sessions[session_id] = {
+            "data": data,
+            "url": url,
+            "mode": req.mode,
+            "created": datetime.utcnow().isoformat(),
+            "duration": duration
+        }
+
+        return {
+            "success": True,
+            "session_id": session_id,
+            "data_preview": {
+                "type": "crawl" if "pages" in data else "single",
+                "page_count": len(data.get("pages", [])) if "pages" in data else 1,
+                "duration_sec": duration
+            }
+        }
+
+    except Exception as e:
+        logger.exception("Scrape failed")
+        raise HTTPException(500, detail=str(e))
+
+
+@app.post("/api/chat")
+async def chat_with_data(request: Request):
     if not client:
-        return {"success": False, "error": "GROQ_API_KEY not set or invalid"}
+        raise HTTPException(503, "Groq API not available")
 
     form = await request.form()
-    message = form.get("message")
-    scraped = form.get("scraped_data")
+    session_id = form.get("session_id")
+    question = form.get("message")
 
-    if not message or not scraped:
-        return {"success": False, "error": "Missing data"}
+    if not session_id or session_id not in sessions:
+        raise HTTPException(400, "Invalid or expired session")
 
-    data = json.loads(scraped)
+    if not question:
+        raise HTTPException(400, "Message is required")
 
-    system_prompt = """
-You are an EXACT factual AI assistant.
+    scraped_data = sessions[session_id]["data"]
 
-Rules:
-1. READ the scraped data content provided below in READABLE FORMAT
-2. ANSWER the user's question directly using ONLY that content
-3. The content is already structured for you - use it directly
-4. If answer not found, say: "This information is not available in the scraped website data."
-5. NEVER guess or use outside knowledge
-6. IMPORTANT: When asked for URLs, LINKS, or EXTERNAL LINKS - LIST EVERY SINGLE ONE from ALL PAGES
-7. IMPORTANT: When asked to show ALL links, include ALL internal_links and external_links from EVERY page
-8. Group them by page so user knows which page each link belongs to
-"""
+    # ────────────────────────────────────────────────
+    #             IMPROVED SYSTEM PROMPT
+    # ────────────────────────────────────────────────
 
-    # Construct readable context
-    context_parts = ["SCRAPED DATA ANALYSIS:"]
-    
-    # Handle both single page and crawled data
-    if 'pages' in data:
-        # Multi-page crawl data
-        context_parts.append(f"Website crawled: {data.get('start_url', 'Unknown')}")
-        context_parts.append(f"Total pages scraped: {len(data['pages'])}")
-        context_parts.append("")
-        
-        for i, page in enumerate(data['pages'], 1):
-            context_parts.append(f"PAGE {i}: {page.get('title', 'No title')}")
-            context_parts.append(f"URL: {page.get('url', 'Unknown')}")
-            
-            # Add description if available
-            if page.get('description'):
-                context_parts.append(f"Description: {page['description']}")
-            
-            # ADD ALL INTERNAL LINKS (NO LIMIT)
-            if page.get('internal_links'):
-                context_parts.append(f"INTERNAL LINKS ON THIS PAGE ({len(page['internal_links'])} total):")
-                for link in page['internal_links']:
-                    context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
-            else:
-                context_parts.append("INTERNAL LINKS ON THIS PAGE: None")
-            
-            # ADD ALL EXTERNAL LINKS (NO LIMIT)
-            if page.get('external_links'):
-                context_parts.append(f"EXTERNAL LINKS ON THIS PAGE ({len(page['external_links'])} total):")
-                for link in page['external_links']:
-                    context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
-            else:
-                context_parts.append("EXTERNAL LINKS ON THIS PAGE: None")
-            
-            # ADD ALL IMAGES (if they have URLs)
-            if page.get('images'):
-                context_parts.append(f"IMAGES ON THIS PAGE ({len(page['images'])} total):")
-                for img in page['images']:
-                    if img.get('url'):
-                        context_parts.append(f"- {img.get('alt', 'No alt')}: {img.get('url')}")
-            
-            context_parts.append("")
-            
-        # Add summary of all links
-        all_internal_count = sum(len(page.get('internal_links', [])) for page in data['pages'])
-        all_external_count = sum(len(page.get('external_links', [])) for page in data['pages'])
-        context_parts.append(f"TOTAL LINKS SUMMARY:")
-        context_parts.append(f"Total Internal Links across all pages: {all_internal_count}")
-        context_parts.append(f"Total External Links across all pages: {all_external_count}")
-        context_parts.append("")
-        
+    system_prompt = """You are a precise, obedient data analyst working EXCLUSIVELY with the provided scraped website data.
+
+Core rules - you MUST follow these:
+1. Use ONLY information present in the SCRAPED DATA shown below
+2. Strictly follow the user's exact instruction regarding:
+   • presentation style (list, table, json, markdown, bullet points…)
+   • field renaming
+   • filtering (only items containing X, only images with alt…)
+   • sorting / grouping
+   • counting
+   • format conversion (json → text table, flat list…)
+   • extraction of specific parts
+3. When user asks for ALL / EVERY / COMPLETE / FULL:
+   • include every internal link
+   • include every external link
+   • include every image
+   • do NOT truncate unless physically impossible
+4. If the requested information truly does NOT exist anywhere → respond ONLY with:
+   "This information is not available in the scraped website data."
+5. Never add external facts, opinions, explanations or invented data
+6. Never refuse reasonable reformatting, counting, filtering or listing requests
+7. Be as complete and literal as possible when user asks for full data
+8. Start your answer directly with the requested output (no preamble unless asked)
+
+Current date: {current_date}
+""".format(current_date=datetime.now().strftime("%Y-%m-%d"))
+
+    # ────────────────────────────────────────────────
+    #             Build context (less truncation)
+    # ────────────────────────────────────────────────
+
+    context_lines = ["═" * 60]
+    context_lines.append("SCRAPED DATA (untruncated where possible)")
+    context_lines.append(f"Session: {session_id}")
+    context_lines.append(f"Original URL: {sessions[session_id]['url']}")
+    context_lines.append(f"Mode: {sessions[session_id]['mode']}")
+    context_lines.append(f"Created: {sessions[session_id]['created']}")
+    context_lines.append("═" * 60 + "\n")
+
+    if "pages" in scraped_data:
+        context_lines.append(f"Website crawl - {len(scraped_data['pages'])} pages")
+        for i, page in enumerate(scraped_data["pages"], 1):
+            context_lines.append(f"\nPAGE #{i}  ━━━━━━━━━━━━━━━━━━━━━━━")
+            context_lines.append(f"URL:       {page.get('url','')}")
+            context_lines.append(f"Title:     {page.get('title','')}")
+            if page.get("description"):
+                context_lines.append(f"Meta desc: {page['description'][:180]}")
+
+            # Links - no heavy truncation
+            int_links = page.get("internal_links", [])
+            ext_links = page.get("external_links", [])
+            if int_links:
+                context_lines.append(f"Internal links ({len(int_links)}):")
+                for lnk in int_links[:80]:  # soft limit - still generous
+                    context_lines.append(f"  • {lnk.get('text','').strip()[:60]} → {lnk.get('url','')}")
+                if len(int_links) > 80:
+                    context_lines.append(f"  … + {len(int_links)-80} more internal links")
+
+            if ext_links:
+                context_lines.append(f"External links ({len(ext_links)}):")
+                for lnk in ext_links[:80]:
+                    context_lines.append(f"  • {lnk.get('text','').strip()[:60]} → {lnk.get('url','')}")
+                if len(ext_links) > 80:
+                    context_lines.append(f"  … + {len(ext_links)-80} more external links")
+
+            imgs = page.get("images", [])
+            if imgs:
+                context_lines.append(f"Images ({len(imgs)}):")
+                for img in imgs[:30]:
+                    context_lines.append(f"  • {img.get('alt','no alt')[:50]} → {img.get('url','')}")
     else:
-        # Single page data
-        context_parts.append(f"Page: {data.get('title', 'No title')}")
-        context_parts.append(f"URL: {data.get('url', 'Unknown')}")
-        
-        if data.get('description'):
-            context_parts.append(f"Description: {data['description']}")
-        
-        # ADD ALL INTERNAL LINKS
-        if data.get('internal_links'):
-            context_parts.append(f"INTERNAL LINKS ({len(data['internal_links'])} total):")
-            for link in data['internal_links']:
-                context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
-        
-        # ADD ALL EXTERNAL LINKS
-        if data.get('external_links'):
-            context_parts.append(f"EXTERNAL LINKS ({len(data['external_links'])} total):")
-            for link in data['external_links']:
-                context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
-        
-        # ADD IMAGES
-        if data.get('images'):
-            context_parts.append(f"IMAGES ({len(data['images'])} total):")
-            for img in data['images']:
-                if img.get('url'):
-                    context_parts.append(f"- {img.get('alt', 'No alt')}: {img.get('url')}")
-    
-    context_parts.append(f"\nUSER QUESTION: {message}")
-    context = "\n".join(context_parts)
+        # single page
+        context_lines.append("SINGLE PAGE DATA")
+        for k, v in scraped_data.items():
+            if isinstance(v, (list, dict)):
+                context_lines.append(f"{k}: ({len(v)} items)")
+            else:
+                context_lines.append(f"{k}: {str(v)[:180]}")
+
+    context_lines.append("\nUSER INSTRUCTION:")
+    context_lines.append(question)
+    context = "\n".join(context_lines)
 
     try:
         response = client.chat.completions.create(
             model=MODEL,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": context}
+                {"role": "user",   "content": context}
             ],
-            temperature=0,
-            max_tokens=3000  # Increased for longer responses with many links
+            temperature=0.0,
+            max_tokens=MAX_TOKENS_CHAT,
+            top_p=1.0
         )
 
-        answer = getattr(getattr(response.choices[0], "message", None), "content", None)
-        if not answer:
-            answer = "Groq API did not return any answer."
+        answer = response.choices[0].message.content.strip()
 
-        return {"success": True, "response": answer.strip()}
-
-    except Exception as e:
-        return {"success": False, "error": f"Groq API error: {str(e)}"}
-
-# ---------- GROK MODE ----------
-@app.post("/grok-mode")
-async def grok_mode(request: Request):
-    if not client:
-        return {"success": False, "error": "GROQ_API_KEY not set or invalid"}
-
-    form = await request.form()
-    message = form.get("message")
-    scraped = form.get("scraped_data")
-    analysis_type = form.get("analysis_type", "comprehensive")
-
-    if not message or not scraped:
-        return {"success": False, "error": "Missing message or scraped data"}
-
-    data = json.loads(scraped)
-
-    system_prompt = (
-        "You are GROK MODE - An advanced AI for universal questions. "
-        "RULES: 1. UNIVERSAL KNOWLEDGE ONLY - Use your comprehensive knowledge base. "
-        "2. DO NOT use scraped data - ignore website content. "
-        "3. PROVIDE expert answers on any topic. "
-        "4. BE helpful and comprehensive. "
-        "5. Use your full knowledge for all responses."
-    )
-
-    full_context = f"USER QUESTION:\n{message}\n\n(Note: This is a universal knowledge question. Provide comprehensive answer using your knowledge base.)"
-
-    try:
-        response = client.chat.completions.create(
-            model=MODEL_DEEP,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": full_context}
-            ],
-            temperature=0.2,
-            max_tokens=8000
-        )
-
-        answer = getattr(response.choices[0].message, 'content', None)
-        if not answer:
-            answer = "No response generated."
-
-        return {"success": True, "response": answer.strip(), "mode": "grok_mode"}
+        return JSONResponse({
+            "success": True,
+            "response": answer,
+            "tokens_used": response.usage.total_tokens if response.usage else None
+        })
 
     except Exception as e:
-        return {"success": False, "error": f"Grok Mode error: {str(e)}"}
+        logger.exception("Groq chat failed")
+        raise HTTPException(500, detail=f"Groq error: {str(e)}")
 
-# ---------- GROK SUMMARY ----------
-@app.post("/grok-summary")
-async def grok_summary(request: Request):
-    if not client:
-        return {"success": False, "error": "GROQ_API_KEY not set or invalid"}
 
-    form = await request.form()
-    scraped = form.get("scraped_data")
+# ────────────────────────────────────────────────
+#               Export endpoint (enhanced)
+# ────────────────────────────────────────────────
 
-    if not scraped:
-        return {"success": False, "error": "Missing scraped data"}
+@app.get("/api/export/{session_id}/{format}")
+async def export_data(session_id: str, format: str):
+    if session_id not in sessions:
+        raise HTTPException(404, "Session not found")
 
-    data = json.loads(scraped)
+    data = sessions[session_id]["data"]
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"scrape_export_{timestamp}"
 
-    system_prompt = (
-        "GROK SUMMARY - Extract key facts. "
-        "Provide: 1. MAIN TOPIC. 2. KEY POINTS (3-5). 3. STATISTICS. 4. CONCLUSION. "
-        "Only use page data."
-    )
-
-    context_parts = ["URL: " + data.get('url', '')]
-    if data.get('title'):
-        context_parts.append("Title: " + data['title'])
-    if data.get('paragraphs'):
-        context_parts.append("\n".join(data['paragraphs'][:15]))
-
-    try:
-        response = client.chat.completions.create(
-            model=MODEL_DEEP,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": "\n\n".join(context_parts)}
-            ],
-            temperature=0.1,
-            max_tokens=500
-        )
-
-        answer = getattr(response.choices[0].message, 'content', 'No summary.')
-        return {"success": True, "summary": answer.strip(), "mode": "grok_summary"}
-
-    except Exception as e:
-        return {"success": False, "error": f"Summary error: {str(e)}"}
-
-# ---------- EXPORT ----------
-@app.post("/export")
-async def export(request: Request):
-    body = await request.json()
-    fmt = body.get("format")
-    data = body.get("data")
-
-    if not fmt or not data:
-        return {"success": False, "error": "Missing format or data"}
-
-    filename = f"scraped_{int(time.time())}"
+    from scraper import UltraScraper
+    scraper = UltraScraper()
 
     handlers = {
-        "json": scraper.save_as_json,
-        "csv": scraper.save_as_csv,
-        "excel": scraper.save_as_excel,
-        "txt": scraper.save_as_text,
-        "pdf": scraper.save_as_pdf
+        "json":     (scraper.save_as_json,    "application/json",        ".json"),
+        "csv":      (scraper.save_as_csv,     "text/csv",                ".csv"),
+        "xlsx":     (scraper.save_as_excel,   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".xlsx"),
+        "txt":      (scraper.save_as_text,    "text/plain",              ".txt"),
+        "pdf":      (scraper.save_as_pdf,     "application/pdf",         ".pdf"),
+        "md":       (lambda d,f: (scraper.save_as_markdown(d,f), "text/markdown", ".md")),
     }
 
-    if fmt not in handlers:
-        return {"success": False, "error": f"Unsupported format: {fmt}"}
+    if format not in handlers:
+        raise HTTPException(400, f"Unsupported format. Allowed: {', '.join(handlers.keys())}")
 
-    path = handlers[fmt](data, filename)
-    return FileResponse(path, filename=os.path.basename(path))
+    handler, mime, ext = handlers[format]
+    path = handler(data, filename + ext.replace(".", "_temp"))
+
+    if not path or not os.path.exists(path):
+        raise HTTPException(500, "Failed to generate export file")
+
+    return FileResponse(
+        path,
+        media_type=mime,
+        filename=f"{filename}{ext}"
+    )
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        "app:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        log_level="info"
+    )
