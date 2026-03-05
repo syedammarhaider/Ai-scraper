@@ -1,4 +1,4 @@
-# app.py
+# app.py - Fixed version with enhanced URL extraction
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, FileResponse
