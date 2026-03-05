@@ -16,6 +16,8 @@ import os
 import json
 import uuid
 import requests
+import time
+import random
 
 from scraper import UltraScraper
 
@@ -85,30 +87,55 @@ class GroqDirectClient:
             "Content-Type": "application/json"
         }
 
-    def chat_completions_create(self, model, messages, temperature=0, max_tokens=16000):
+    def chat_completions_create(self, model, messages, temperature=0, max_tokens=16000, max_retries=3):
 
-        try:
+        for attempt in range(max_retries):
+            
+            try:
 
-            payload = {
-                "model": model,
-                "messages": messages,
-                "temperature": temperature,
-                "max_tokens": max_tokens
-            }
+                payload = {
+                    "model": model,
+                    "messages": messages,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens
+                }
 
-            response = requests.post(
-                f"{self.base_url}/chat/completions",
-                headers=self.headers,
-                json=payload,
-                timeout=60
-            )
+                # Add random delay to avoid rate limiting
+                if attempt > 0:
+                    delay = min(2 ** attempt + random.uniform(0, 1), 10)  # Exponential backoff with jitter
+                    print(f"⏳ Rate limit hit, retrying in {delay:.1f} seconds... (Attempt {attempt + 1}/{max_retries})")
+                    time.sleep(delay)
 
-            response.raise_for_status()
+                response = requests.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=self.headers,
+                    json=payload,
+                    timeout=60
+                )
 
-            return response.json()
+                # Handle 429 rate limit errors
+                if response.status_code == 429:
+                    if attempt < max_retries - 1:
+                        retry_after = int(response.headers.get('Retry-After', 2))
+                        print(f"⚠️ Rate limited (429). Waiting {retry_after} seconds...")
+                        time.sleep(retry_after)
+                        continue
+                    else:
+                        raise Exception(f"Rate limit exceeded after {max_retries} attempts")
 
-        except Exception as e:
-            raise Exception(f"Groq API error: {str(e)}")
+                response.raise_for_status()
+
+                return response.json()
+
+            except requests.exceptions.RequestException as e:
+                if attempt < max_retries - 1:
+                    print(f"⚠️ Request failed: {e}. Retrying... (Attempt {attempt + 1}/{max_retries})")
+                    time.sleep(1)
+                    continue
+                else:
+                    raise Exception(f"Groq API error after {max_retries} attempts: {str(e)}")
+
+        raise Exception(f"Failed after {max_retries} attempts")
 
 
 # ==========================================================
@@ -244,14 +271,28 @@ def split_text_into_chunks(text, chunk_size=4000):
 # GROQ QUESTION ANSWER SYSTEM
 # ==========================================================
 
+# Rate limiting: Track last request time per IP
+last_request_time = {}
+
 @app.post("/groq-chat")
 async def chat(request: Request):
-
+    
+    # Simple rate limiting
+    client_ip = request.client.host
+    current_time = time.time()
+    
+    if client_ip in last_request_time:
+        time_diff = current_time - last_request_time[client_ip]
+        if time_diff < 2:  # Minimum 2 seconds between requests
+            return {"success": False, "error": "Please wait 2 seconds before asking another question"}
+    
+    last_request_time[client_ip] = current_time
+    
     form = await request.form()
-
+    
     message = form.get("message")
     scraped = form.get("scraped_data")
-
+    
     if not message or not scraped:
         return {"success": False, "error": "Missing input data"}
 
