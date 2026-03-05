@@ -1,4 +1,4 @@
-# app.py - Fixed version with enhanced URL extraction
+# app.py
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, FileResponse
@@ -74,100 +74,17 @@ async def chat(request: Request):
     data = json.loads(scraped)
 
     system_prompt = """
-You are an EXACT factual AI assistant.
+You are an EXACT factual AI.
 
 Rules:
-1. READ the scraped data content provided below in READABLE FORMAT
-2. ANSWER the user's question directly using ONLY that content
-3. The content is already structured for you - use it directly
-4. If answer not found, say: "This information is not available in the scraped website data."
-5. NEVER guess or use outside knowledge
-6. IMPORTANT: Provide ANSWERS, not explanations about what data you have
+1. ONLY answer from provided scraped data.
+2. If answer not found, say:
+"This information is not available in the scraped website data."
+3. Never guess.
+4. Never use outside knowledge.
 """
 
-    # Construct readable context instead of raw JSON
-    context_parts = ["SCRAPED DATA ANALYSIS:"]
-    
-    # Handle both single page and crawled data
-    if 'pages' in data:
-        # Multi-page crawl data
-        context_parts.append(f"Website crawled: {data.get('start_url', 'Unknown')}")
-        context_parts.append(f"Total pages scraped: {len(data['pages'])}")
-        context_parts.append("")
-        
-        for i, page in enumerate(data['pages'], 1):  # Show ALL pages, no limit
-            context_parts.append(f"PAGE {i}: {page.get('title', 'No title')}")
-            context_parts.append(f"URL: {page.get('url', 'Unknown')}")
-            
-            if page.get('description'):
-                context_parts.append(f"Description: {page['description']}")
-            
-            # Add key headings
-            if page.get('headings'):
-                for level, headings in page['headings'].items():
-                    if headings and len(headings) > 0:
-                        context_parts.append(f"{level.upper()}: {', '.join(headings[:5])}")
-            
-            # Add more paragraphs (not just 5)
-            if page.get('paragraphs'):
-                context_parts.append("Content:")
-                for para in page['paragraphs'][:85]:  # Show more paragraphs
-                    context_parts.append(f"- {para}")
-            
-            # Add ALL internal links (not limited)
-            if page.get('internal_links'):
-                context_parts.append(f"Internal Links ({len(page['internal_links'])} total):")
-                for link in page['internal_links']:  # Show ALL links, no limit
-                    context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
-            
-            # Add ALL external links (not limited)  
-            if page.get('external_links'):
-                context_parts.append(f"External Links ({len(page['external_links'])} total):")
-                for link in page['external_links']:  # Show ALL links, no limit
-                    context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
-            
-            context_parts.append("")
-    else:
-        # Single page data
-        context_parts.append(f"Page: {data.get('title', 'No title')}")
-        context_parts.append(f"URL: {data.get('url', 'Unknown')}")
-        
-        if data.get('description'):
-            context_parts.append(f"Description: {data['description']}")
-        
-        # Add headings
-        if data.get('headings'):
-            context_parts.append("Headings:")
-            for level, headings in data['headings'].items():
-                if headings and len(headings) > 0:
-                    context_parts.append(f"{level.upper()}: {', '.join(headings[:5])}")
-        
-        # Add more paragraphs
-        if data.get('paragraphs'):
-            context_parts.append("Content:")
-            for para in data['paragraphs'][:80]:  # Show more paragraphs
-                context_parts.append(f"- {para}")
-        
-        # Add images if available
-        if data.get('images'):
-            context_parts.append("Images:")
-            for img in data['images'][:5]:
-                context_parts.append(f"- {img.get('alt', 'No alt text')}: {img.get('url', 'No URL')}")
-        
-        # Add ALL internal links (not limited)
-        if data.get('internal_links'):
-            context_parts.append(f"Internal Links ({len(data['internal_links'])} total):")
-            for link in data['internal_links']:  # Show ALL links, no limit
-                context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
-        
-        # Add ALL external links (not limited)
-        if data.get('external_links'):
-            context_parts.append(f"External Links ({len(data['external_links'])} total):")
-            for link in data['external_links']:  # Show ALL links, no limit
-                context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
-    
-    context_parts.append(f"\nQUESTION: {message}")
-    context = "\n".join(context_parts)
+    context = f"SCRAPED DATA:\n{json.dumps(data, indent=2)[:15000]}\n\nQUESTION:\n{message}"
 
     try:
         response = client.chat.completions.create(
