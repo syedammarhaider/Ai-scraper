@@ -95,7 +95,7 @@ Rules:
         context_parts.append(f"Total pages scraped: {len(data['pages'])}")
         context_parts.append("")
         
-        for i, page in enumerate(data['pages'][:10], 1):  # Show more pages
+        for i, page in enumerate(data['pages'], 1):  # Show ALL pages, no limit
             context_parts.append(f"PAGE {i}: {page.get('title', 'No title')}")
             context_parts.append(f"URL: {page.get('url', 'Unknown')}")
             
@@ -108,16 +108,22 @@ Rules:
                     if headings and len(headings) > 0:
                         context_parts.append(f"{level.upper()}: {', '.join(headings[:5])}")
             
-            # Add first few paragraphs
+            # Add more paragraphs (not just 5)
             if page.get('paragraphs'):
                 context_parts.append("Content:")
-                for para in page['paragraphs'][:5]:
+                for para in page['paragraphs'][:85]:  # Show more paragraphs
                     context_parts.append(f"- {para}")
             
-            # Add internal links
+            # Add ALL internal links (not limited)
             if page.get('internal_links'):
-                context_parts.append("Internal Links:")
-                for link in page['internal_links'][:10]:
+                context_parts.append(f"Internal Links ({len(page['internal_links'])} total):")
+                for link in page['internal_links']:  # Show ALL links, no limit
+                    context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
+            
+            # Add ALL external links (not limited)  
+            if page.get('external_links'):
+                context_parts.append(f"External Links ({len(page['external_links'])} total):")
+                for link in page['external_links']:  # Show ALL links, no limit
                     context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
             
             context_parts.append("")
@@ -136,10 +142,10 @@ Rules:
                 if headings and len(headings) > 0:
                     context_parts.append(f"{level.upper()}: {', '.join(headings[:5])}")
         
-        # Add paragraphs
+        # Add more paragraphs
         if data.get('paragraphs'):
             context_parts.append("Content:")
-            for para in data['paragraphs'][:10]:
+            for para in data['paragraphs'][:80]:  # Show more paragraphs
                 context_parts.append(f"- {para}")
         
         # Add images if available
@@ -148,16 +154,16 @@ Rules:
             for img in data['images'][:5]:
                 context_parts.append(f"- {img.get('alt', 'No alt text')}: {img.get('url', 'No URL')}")
         
-        # Add links if available
+        # Add ALL internal links (not limited)
         if data.get('internal_links'):
-            context_parts.append("Internal Links:")
-            for link in data['internal_links'][:10]:
+            context_parts.append(f"Internal Links ({len(data['internal_links'])} total):")
+            for link in data['internal_links']:  # Show ALL links, no limit
                 context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
         
-        # Add external links if available
+        # Add ALL external links (not limited)
         if data.get('external_links'):
-            context_parts.append("External Links:")
-            for link in data['external_links'][:10]:
+            context_parts.append(f"External Links ({len(data['external_links'])} total):")
+            for link in data['external_links']:  # Show ALL links, no limit
                 context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
     
     context_parts.append(f"\nQUESTION: {message}")
