@@ -82,12 +82,12 @@ Rules:
 3. The content is already structured for you - use it directly
 4. If answer not found, say: "This information is not available in the scraped website data."
 5. NEVER guess or use outside knowledge
-6. IMPORTANT: Provide ANSWERS, not explanations about what data you have
-7. URL REQUESTS: When asked for URLs/links, extract and list ALL URLs from the Internal Links and External Links sections
-8. Show complete lists with counts as provided in the data
+6. IMPORTANT: When asked for URLs, LINKS, or EXTERNAL LINKS - LIST EVERY SINGLE ONE from ALL PAGES
+7. IMPORTANT: When asked to show ALL links, include ALL internal_links and external_links from EVERY page
+8. Group them by page so user knows which page each link belongs to
 """
 
-    # Construct readable context instead of raw JSON
+    # Construct readable context
     context_parts = ["SCRAPED DATA ANALYSIS:"]
     
     # Handle both single page and crawled data
@@ -97,38 +97,47 @@ Rules:
         context_parts.append(f"Total pages scraped: {len(data['pages'])}")
         context_parts.append("")
         
-        for i, page in enumerate(data['pages'], 1):  # Show ALL pages, no limit
+        for i, page in enumerate(data['pages'], 1):
             context_parts.append(f"PAGE {i}: {page.get('title', 'No title')}")
             context_parts.append(f"URL: {page.get('url', 'Unknown')}")
             
+            # Add description if available
             if page.get('description'):
                 context_parts.append(f"Description: {page['description']}")
             
-            # Add key headings
-            if page.get('headings'):
-                for level, headings in page['headings'].items():
-                    if headings and len(headings) > 0:
-                        context_parts.append(f"{level.upper()}: {', '.join(headings[:5])}")
-            
-            # Add more paragraphs (not just 5)
-            if page.get('paragraphs'):
-                context_parts.append("Content:")
-                for para in page['paragraphs'][:85]:  # Show more paragraphs
-                    context_parts.append(f"- {para}")
-            
-            # Add ALL internal links (not limited)
+            # ADD ALL INTERNAL LINKS (NO LIMIT)
             if page.get('internal_links'):
-                context_parts.append(f"Internal Links ({len(page['internal_links'])} total):")
-                for link in page['internal_links']:  # Show ALL links, no limit
-                    context_parts.append(f"- {link.get('url', 'No URL')}")
+                context_parts.append(f"INTERNAL LINKS ON THIS PAGE ({len(page['internal_links'])} total):")
+                for link in page['internal_links']:
+                    context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
+            else:
+                context_parts.append("INTERNAL LINKS ON THIS PAGE: None")
             
-            # Add ALL external links (not limited)  
+            # ADD ALL EXTERNAL LINKS (NO LIMIT)
             if page.get('external_links'):
-                context_parts.append(f"External Links ({len(page['external_links'])} total):")
-                for link in page['external_links']:  # Show ALL links, no limit
-                    context_parts.append(f"- {link.get('url', 'No URL')}")
+                context_parts.append(f"EXTERNAL LINKS ON THIS PAGE ({len(page['external_links'])} total):")
+                for link in page['external_links']:
+                    context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
+            else:
+                context_parts.append("EXTERNAL LINKS ON THIS PAGE: None")
+            
+            # ADD ALL IMAGES (if they have URLs)
+            if page.get('images'):
+                context_parts.append(f"IMAGES ON THIS PAGE ({len(page['images'])} total):")
+                for img in page['images']:
+                    if img.get('url'):
+                        context_parts.append(f"- {img.get('alt', 'No alt')}: {img.get('url')}")
             
             context_parts.append("")
+            
+        # Add summary of all links
+        all_internal_count = sum(len(page.get('internal_links', [])) for page in data['pages'])
+        all_external_count = sum(len(page.get('external_links', [])) for page in data['pages'])
+        context_parts.append(f"TOTAL LINKS SUMMARY:")
+        context_parts.append(f"Total Internal Links across all pages: {all_internal_count}")
+        context_parts.append(f"Total External Links across all pages: {all_external_count}")
+        context_parts.append("")
+        
     else:
         # Single page data
         context_parts.append(f"Page: {data.get('title', 'No title')}")
@@ -137,38 +146,26 @@ Rules:
         if data.get('description'):
             context_parts.append(f"Description: {data['description']}")
         
-        # Add headings
-        if data.get('headings'):
-            context_parts.append("Headings:")
-            for level, headings in data['headings'].items():
-                if headings and len(headings) > 0:
-                    context_parts.append(f"{level.upper()}: {', '.join(headings[:5])}")
-        
-        # Add more paragraphs
-        if data.get('paragraphs'):
-            context_parts.append("Content:")
-            for para in data['paragraphs'][:80]:  # Show more paragraphs
-                context_parts.append(f"- {para}")
-        
-        # Add images if available
-        if data.get('images'):
-            context_parts.append("Images:")
-            for img in data['images'][:5]:
-                context_parts.append(f"- {img.get('alt', 'No alt text')}: {img.get('url', 'No URL')}")
-        
-        # Add ALL internal links (not limited)
+        # ADD ALL INTERNAL LINKS
         if data.get('internal_links'):
-            context_parts.append(f"Internal Links ({len(data['internal_links'])} total):")
-            for link in data['internal_links']:  # Show ALL links, no limit
-                context_parts.append(f"- {link.get('url', 'No URL')}")
+            context_parts.append(f"INTERNAL LINKS ({len(data['internal_links'])} total):")
+            for link in data['internal_links']:
+                context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
         
-        # Add ALL external links (not limited)
+        # ADD ALL EXTERNAL LINKS
         if data.get('external_links'):
-            context_parts.append(f"External Links ({len(data['external_links'])} total):")
-            for link in data['external_links']:  # Show ALL links, no limit
-                context_parts.append(f"- {link.get('url', 'No URL')}")
+            context_parts.append(f"EXTERNAL LINKS ({len(data['external_links'])} total):")
+            for link in data['external_links']:
+                context_parts.append(f"- {link.get('text', 'No text')}: {link.get('url', 'No URL')}")
+        
+        # ADD IMAGES
+        if data.get('images'):
+            context_parts.append(f"IMAGES ({len(data['images'])} total):")
+            for img in data['images']:
+                if img.get('url'):
+                    context_parts.append(f"- {img.get('alt', 'No alt')}: {img.get('url')}")
     
-    context_parts.append(f"\nQUESTION: {message}")
+    context_parts.append(f"\nUSER QUESTION: {message}")
     context = "\n".join(context_parts)
 
     try:
@@ -179,7 +176,7 @@ Rules:
                 {"role": "user", "content": context}
             ],
             temperature=0,
-            max_tokens=1500
+            max_tokens=3000  # Increased for longer responses with many links
         )
 
         answer = getattr(getattr(response.choices[0], "message", None), "content", None)
@@ -223,10 +220,10 @@ async def grok_mode(request: Request):
             model=MODEL_DEEP,
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": full_context}  # Removed character limit for unlimited answers
+                {"role": "user", "content": full_context}
             ],
             temperature=0.2,
-            max_tokens=8000  # Increased from 2000 to 8000 for much longer answers
+            max_tokens=8000
         )
 
         answer = getattr(response.choices[0].message, 'content', None)
