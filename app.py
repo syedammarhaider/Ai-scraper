@@ -1,5 +1,5 @@
-# app.py - Robust Scraper + Groq/Grok AI with huge data support
-# Har line ke upar Roman Urdu comments added hain
+# app.py - Professional AI Scraper Q&A System
+# Roman Urdu comments added har line ke upar
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 import os, json, time, uuid
 import requests
 
-from scraper import UltraScraper  # Custom scraper
+from scraper import UltraScraper  # Custom scraper import
 
 # ------------------- ENVIRONMENT -------------------
 load_dotenv()
@@ -23,6 +23,7 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 scraper = UltraScraper()
 
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,6 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount static folder
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ------------------- GLOBAL ERROR HANDLER -------------------
@@ -120,8 +122,6 @@ async def scrape(request: Request):
         if not url.startswith("http"):
             url = "https://" + url
 
-        print(f"🔍 Scraping URL: {url}, Mode: {mode}")
-
         if mode == "comprehensive":
             data = scraper.crawl_website(url, mode)
         else:
@@ -134,12 +134,11 @@ async def scrape(request: Request):
         return {"success": True, "data": data}
 
     except Exception as e:
-        print(f"❌ Scraping error: {str(e)}")
         return {"success": False, "error": f"Scraping failed: {str(e)}"}
 
-# ------------------- UTIL: CHUNK TEXT -------------------
+# ------------------- UTILITIES -------------------
 def split_text_into_chunks(text, max_words=1500):
-    """Boht lamba scraped text chunk mein divide karta hai"""
+    """Boht lamba scraped text ko manageable chunks mein divide karta hai"""
     words = text.split()
     chunks = []
     for i in range(0, len(words), max_words):
@@ -147,60 +146,71 @@ def split_text_into_chunks(text, max_words=1500):
     return chunks
 
 def groq_request_with_retry(client, model, messages, max_retries=3):
-    """429 rate limit ka retry logic"""
+    """429 error ke liye retry logic with exponential backoff"""
     for attempt in range(max_retries):
         try:
             return client.chat_completions_create(model, messages)
         except Exception as e:
             if "429" in str(e):
                 wait_time = 2 ** attempt
-                print(f"429 detected, retrying in {wait_time}s...")
+                print(f"429 error detected, retrying in {wait_time}s...")
                 time.sleep(wait_time)
             else:
                 raise e
     raise Exception("Max retries exceeded due to 429 errors.")
 
-# ------------------- GROQ CHAT -------------------
+# ------------------- PROFESSIONAL SCRAPED Q&A -------------------
 @app.post("/groq-chat")
 async def chat(request: Request):
+    """
+    Ye endpoint scraped JSON data ko read karta hai
+    aur kisi bhi question ka professional answer deta hai
+    sirf aur sirf scraped data se.
+    """
     form = await request.form()
     message = form.get("message")
     scraped = form.get("scraped_data")
 
     if not message or not scraped:
-        return {"success": False, "error": "Missing data"}
+        return {"success": False, "error": "Missing question or scraped data"}
     if not groq_ai:
         return {"success": False, "error": "Groq AI client not initialized"}
 
     try:
         data = json.loads(scraped)
     except:
-        return {"success": False, "error": "Invalid scraped data JSON"}
+        return {"success": False, "error": "Invalid scraped JSON"}
 
-    system_prompt = """You are an EXACT factual AI assistant.
+    # System prompt for professional Q&A
+    system_prompt = """You are a professional AI assistant trained to answer any question
+only using the provided scraped JSON data.
 Rules:
-1. ONLY answer from provided scraped data.
-2. If answer not found, say: "This information is not available in the scraped website data."
-3. Never guess or use outside knowledge.
-4. Be precise and factual.
-5. For greetings, respond naturally but briefly.
+1. Use only data from JSON, nothing outside.
+2. Never say "information not available" if data exists.
+3. Provide precise, structured, factual answers.
+4. Preserve links, URLs, lists, and keys if present.
+5. Be concise and professional.
 """
 
-    # Only include relevant fields to reduce tokens
-    context_text = json.dumps({
+    # Include only relevant fields to reduce token usage
+    relevant_data = {
         "url": data.get("url", ""),
         "title": data.get("title", ""),
         "description": data.get("description", ""),
-        "paragraphs": data.get("paragraphs", [])
-    }, indent=2)
+        "paragraphs": data.get("paragraphs", []),
+        "links": data.get("links", []),
+        "urls": data.get("urls", [])
+    }
 
+    context_text = json.dumps(relevant_data, indent=2)
     chunks = split_text_into_chunks(context_text, max_words=1500)
     aggregated_answers = []
 
+    # Process each chunk with retry
     for chunk in chunks:
         messages_to_send = [
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"SCRAPED DATA:\n{chunk}\n\nQUESTION:\n{message}"}
+            {"role": "user", "content": f"SCRAPED JSON DATA:\n{chunk}\n\nQUESTION:\n{message}"}
         ]
         response = groq_request_with_retry(groq_ai, MODEL, messages_to_send)
         answer = response.get("choices", [{}])[0].get("message", {}).get("content", "")
@@ -245,11 +255,11 @@ async def grok_mode_endpoint(request: Request):
         if not grok_mode:
             return {"success": False, "error": "Grok Mode client not initialized"}
 
-        system_prompt = f"""You are Grok Mode - an advanced AI assistant.
+        system_prompt = f"""You are Grok Mode - advanced AI for universal questions.
 Rules:
-1. ONLY answer universal/general knowledge questions
-2. DO NOT use scraped data
-3. Be helpful, detailed, and comprehensive
+1. Use general knowledge only.
+2. Ignore scraped data.
+3. Be helpful, detailed, comprehensive.
 4. Analysis Type: {analysis_type}
 """
 
@@ -289,7 +299,7 @@ Provide structured summary:
 2. KEY POINTS (3-5)
 3. STATISTICS
 4. CONCLUSION
-Only use data from the page. If info missing, say "Not found".
+Use only data from JSON. If info missing, say "Not found".
 """
 
     context_parts = [f"URL: {data.get('url', '')}"]
@@ -299,6 +309,10 @@ Only use data from the page. If info missing, say "Not found".
         context_parts.append(f"Description: {data['description']}")
     if data.get('paragraphs'):
         context_parts.append("\nContent:\n" + "\n".join(data['paragraphs'][:50]))
+    if data.get('links'):
+        context_parts.append("\nLinks:\n" + "\n".join(data['links']))
+    if data.get('urls'):
+        context_parts.append("\nURLs:\n" + "\n".join(data['urls']))
 
     response = groq_ai.chat_completions_create(
         model=MODEL_DEEP,
