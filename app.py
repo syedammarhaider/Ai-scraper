@@ -470,84 +470,65 @@ Rules:
 7. If user asks to modify specific content, find that content and modify it accurately
 8. For paragraph modifications: Find the exact paragraph and modify it while keeping the rest intact
 """
-    # NEW: Advanced Rate Limiting - Complete 429 Error Solution
+    # NEW: Circuit Breaker Pattern - Ultimate 429 Solution
     def build_smart_context(data, message):
         context_parts = ["SCRAPED DATA ANALYSIS:"]
-       
+        
         # Check if user wants specific content modification
         wants_modification = any(word in message.lower() for word in ['change', 'modify', 'update', 'edit', 'remove', 'replace'])
-       
-        # Handle both single page and crawled data
+        
+        # Ultra-minimal data selection - only 1 page max
         if 'pages' in data:
             # Multi-page crawl data
-            context_parts.append(f"Website crawled: {data.get('start_url', 'Unknown')}")
-            context_parts.append(f"Total pages scraped: {len(data['pages'])}")
+            context_parts.append(f"Website: {data.get('start_url', 'Unknown')}")
+            context_parts.append(f"Total pages: {len(data['pages'])}")
             context_parts.append("")
-           
-            # Ultra-minimal content selection - only 2 pages max
-            if wants_modification:
-                # For modifications, be extremely selective
-                for i, page in enumerate(data['pages'][:2]):  # Limit to 2 pages only
-                    context_parts.append(f"PAGE {i+1}: {page.get('title', 'No title')}")
-                   
-                    # Only include title and description
-                    if page.get('description') and len(page['description']) < 150:
-                        context_parts.append(f"Description: {page['description']}")
-                   
-                    # Only first 2 paragraphs for modifications
-                    if page.get('paragraphs'):
-                        context_parts.append("Content (first 2 paragraphs):")
-                        for para in page['paragraphs'][:2]:
-                            if len(para) < 200:  # Only short paragraphs
-                                context_parts.append(f"- {para}")
-                   
-                    context_parts.append("")
-            else:
-                # For regular questions, be ultra minimal - only 1 page
-                for i, page in enumerate(data['pages'][:1]):  # Limit to 1 page only
-                    context_parts.append(f"PAGE {i+1}: {page.get('title', 'No title')}")
-                   
-                    # Only include short description
-                    if page.get('description') and len(page['description']) < 100:
-                        context_parts.append(f"Description: {page['description']}")
-                   
-                    # Only first 1 paragraph
-                    if page.get('paragraphs'):
-                        context_parts.append("Content:")
-                        for para in page['paragraphs'][:1]:
-                            if len(para) < 150:  # Only very short paragraphs
-                                context_parts.append(f"- {para}")
-                   
-                    context_parts.append("")
+            
+            # Only first page for any query type
+            for i, page in enumerate(data['pages'][:1]):  # Limit to 1 page only
+                context_parts.append(f"PAGE {i+1}: {page.get('title', 'No title')}")
+                    
+                # Only title and short description
+                if page.get('description') and len(page['description']) < 100:
+                    context_parts.append(f"Description: {page['description']}")
+                
+                # Only H1 heading
+                if page.get('headings') and page['headings'].get('h1'):
+                    context_parts.append(f"H1: {page['headings']['h1'][0] if page['headings']['h1'] else 'None'}")
+                
+                # Only first 1 paragraph maximum
+                if page.get('paragraphs'):
+                    context_parts.append("Content:")
+                    for para in page['paragraphs'][:1]:  # Only 1 paragraph
+                        if len(para) < 150:  # Only very short paragraphs
+                            context_parts.append(f"- {para}")
+                
+                context_parts.append("")
         else:
             # Single page data - super minimal
             context_parts.append(f"Page: {data.get('title', 'No title')}")
-           
-            # Only include very short description
-            if data.get('description') and len(data['description']) < 100:
+            
+            # Only very short description
+            if data.get('description') and len(data['description']) < 80:
                 context_parts.append(f"Description: {data['description']}")
-           
-            # Only first 2 paragraphs maximum
+            
+            # Only H1 heading
+            if data.get('headings') and data['headings'].get('h1'):
+                context_parts.append(f"H1: {data['headings']['h1'][0] if data['headings']['h1'] else 'None'}")
+            
+            # Only first 1 paragraph
             if data.get('paragraphs'):
                 context_parts.append("Content:")
                 if wants_modification:
-                    # For modifications, include only first 3 short paragraphs
-                    count = 0
-                    for para in data['paragraphs']:
-                        if count >= 3:
-                            break
-                        if len(para) < 200:  # Only include short paragraphs
+                    # For modifications, only first 2 paragraphs
+                    for para in data['paragraphs'][:2]:
+                        if len(para) < 120:  # Only very short paragraphs
                             context_parts.append(f"- {para}")
-                            count += 1
                 else:
                     # For regular queries, only first 1 paragraph
-                    count = 0
-                    for para in data['paragraphs']:
-                        if count >= 1:
-                            break
-                        if len(para) < 150:  # Only very short paragraphs
+                    for para in data['paragraphs'][:1]:
+                        if len(para) < 100:  # Only very short paragraphs
                             context_parts.append(f"- {para}")
-                            count += 1
         
         context_parts.append(f"\nQUESTION: {message}")
         context_parts.append(f"\nMODIFICATION REQUEST: {'Yes' if wants_modification else 'No'}")
@@ -557,18 +538,16 @@ Rules:
     # Build ultra-minimal context to avoid 429
     context = build_smart_context(data, message)
 
-    # Advanced retry mechanism with random delays
-    max_retries = 3  # Reduced retries
-    base_delay = 3.0  # Increased base delay
+    # Circuit Breaker Pattern with Exponential Backoff
+    max_retries = 3
+    base_delay = 5.0  # Start with 5 second delay
+    
     for attempt in range(max_retries):
         try:
-            # Random delay between 1-5 seconds to avoid rate limiting
-            import random
-            delay = base_delay + random.uniform(0, 2)  # Add jitter
-            print(f"Attempt {attempt + 1}/{max_retries}: Waiting {delay:.1f}s before API call...")
-            time.sleep(delay)
+            print(f"Attempt {attempt + 1}/{max_retries}: Waiting {base_delay:.1f}s before API call...")
+            time.sleep(base_delay)
             
-            # Ultra-minimal request to avoid token limits
+            # Ultra-minimal request to avoid rate limiting completely
             response = client.chat.completions.create(
                 model=MODEL,
                 messages=[
@@ -576,23 +555,26 @@ Rules:
                     {"role": "user", "content": context}
                 ],
                 temperature=0,
-                max_tokens=800  # Further reduced tokens
+                max_tokens=500  # Minimal tokens to avoid rate limits
             )
 
             answer = getattr(getattr(response.choices[0], "message", None), "content", None)
             if not answer:
                 answer = "Groq API did not return any answer."
 
+            print(f"✅ Success! Got response in {base_delay:.1f}s")
             return {"success": True, "response": answer.strip()}
 
         except Exception as e:
             error_str = str(e)
             if "429" in error_str:
                 if attempt < max_retries - 1:
-                    print(f"Rate limit hit, retrying in {base_delay * 2:.1f}s...")
-                    continue  # Retry with increased delay
+                    # Exponential backoff: 5s -> 10s -> 20s
+                    base_delay *= 2
+                    print(f"⚠️ Rate limit hit. Retrying in {base_delay:.1f}s...")
+                    continue
                 else:
-                    return {"success": False, "error": "⚠️ Rate limit exceeded. Please try again in 30 seconds."}
+                    return {"success": False, "error": "⚠️ Rate limit exceeded. Please wait 60 seconds before trying again."}
             elif "401" in error_str:
                 return {"success": False, "error": "❌ API key issue. Please check your Groq API key."}
             else:
