@@ -84,7 +84,10 @@ async def scrape(request: Request):
         url = "https://" + url
 
     try:
-        data = scraper.scrape_website(url, mode)
+        if mode == "single":
+            data = scraper.scrape_single_page(url, mode)
+        else:
+            data = scraper.crawl_website(url, mode)
         
         if "error" in data:
             return {"success": False, "error": data["error"]}
