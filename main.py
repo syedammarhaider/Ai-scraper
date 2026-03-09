@@ -191,7 +191,7 @@ QUESTION:
 
 Answer ONLY using the provided data.
 """
-
+ 
         answer = gemini_client.generate(prompt)
 
         if answer:
