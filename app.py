@@ -1,328 +1,214 @@
-# ==========================================================
 # app.py
-# Optimized AI Scraper + Groq AI System (FAST VERSION)
-# ==========================================================
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-
 from dotenv import load_dotenv
-
-import os
-import json
-import uuid
-import requests
-import time
-
+from groq import Groq
 from scraper import UltraScraper
+import os, json, time
 
-# ==========================================================
-# ENV LOAD
-# ==========================================================
-
+# Load .env variables
 load_dotenv()
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
-MODEL = "llama-3.3-70b-versatile"
-
-# ==========================================================
-# APP INIT
-# ==========================================================
-
+# Initialize FastAPI
 app = FastAPI()
-
 templates = Jinja2Templates(directory="templates")
-
 scraper = UltraScraper()
 
-# ==========================================================
-# CORS
-# ==========================================================
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# ==========================================================
-# STATIC
-# ==========================================================
-
+# Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
+ 
+# ---------- GROQ ----------
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+MODEL = "llama-3.3-70b-versatile"
+MODEL_DEEP = "llama-3.3-70b-versatile"
 
-# ==========================================================
-# ERROR HANDLER
-# ==========================================================
+# Initialize Groq client without proxies
+client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
-@app.exception_handler(Exception)
-async def error_handler(request: Request, exc: Exception):
-
-    return JSONResponse(
-        status_code=500,
-        content={
-            "success": False,
-            "error": str(exc)
-        }
-    )
-
-# ==========================================================
-# GROQ CLIENT
-# ==========================================================
-
-class GroqClient:
-
-    def __init__(self, api_key):
-
-        self.url = "https://api.groq.com/openai/v1/chat/completions"
-
-        self.headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
-
-    def ask(self, messages, temperature=0.2):
-
-        payload = {
-            "model": MODEL,
-            "messages": messages,
-            "temperature": temperature,
-            "max_tokens": 2000
-        }
-
-        response = requests.post(
-            self.url,
-            headers=self.headers,
-            json=payload,
-            timeout=60
-        )
-
-        if response.status_code != 200:
-            raise Exception(f"Groq API Error {response.status_code}")
-
-        return response.json()
-
-
-groq_ai = GroqClient(GROQ_API_KEY)
-
-# ==========================================================
-# HOME
-# ==========================================================
-
+# ---------- HOME ----------
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
-    return templates.TemplateResponse(
-        "index.html",
-        {"request": request}
-    )
-
-# ==========================================================
-# HEALTH
-# ==========================================================
-
+# ---------- HEALTH ----------
 @app.get("/health")
 async def health():
+    return {"status": "healthy"}
 
-    return {"status": "ok"}
-
-# ==========================================================
-# SCRAPE
-# ==========================================================
-
+# ---------- SCRAPE ----------
 @app.post("/scrape")
 async def scrape(request: Request):
+    form = await request.form()
+    url = form.get("url")
+    mode = form.get("mode", "comprehensive")
 
-    try:
+    if not url:
+        return {"success": False, "error": "URL required"}
 
-        form = await request.form()
+    if not url.startswith("http"):
+        url = "https://" + url
 
-        url = form.get("url")
+    data = scraper.scrape_website(url, mode)
 
-        if not url:
-            return {"success": False, "error": "URL required"}
+    if "error" in data:
+        return {"success": False, "error": data["error"]}
 
-        if not url.startswith("http"):
-            url = "https://" + url
+    return {"success": True, "data": data}
 
-        data = scraper.crawl_website(url)
-
-        data["session_id"] = str(uuid.uuid4())
-
-        return {
-            "success": True,
-            "data": data
-        }
-
-    except Exception as e:
-
-        return {
-            "success": False,
-            "error": str(e)
-        }
-
-# ==========================================================
-# CONTEXT BUILDER (FAST)
-# ==========================================================
-
-def build_context(data):
-
-    parts = []
-
-    if data.get("title"):
-        parts.append("TITLE:\n" + data["title"])
-
-    if data.get("description"):
-        parts.append("DESCRIPTION:\n" + data["description"])
-
-    if data.get("headings"):
-        parts.append(
-            "HEADINGS:\n" +
-            "\n".join(data["headings"][:20])
-        )
-
-    if data.get("paragraphs"):
-        parts.append(
-            "CONTENT:\n" +
-            "\n".join(data["paragraphs"][:30])
-        )
-
-    return "\n\n".join(parts)
-
-# ==========================================================
-# AI QUESTION ANSWER
-# ==========================================================
-
+# ---------- GROQ CHAT ----------
 @app.post("/groq-chat")
 async def chat(request: Request):
+    if not client:
+        return {"success": False, "error": "GROQ_API_KEY not set or invalid"}
 
     form = await request.form()
-
-    question = form.get("message")
+    message = form.get("message")
     scraped = form.get("scraped_data")
 
-    if not question or not scraped:
-        return {"success": False, "error": "Missing input"}
+    if not message or not scraped:
+        return {"success": False, "error": "Missing data"}
 
-    try:
-
-        data = json.loads(scraped)
-
-    except:
-
-        return {"success": False, "error": "Invalid JSON"}
-
-    context = build_context(data)
+    data = json.loads(scraped)
 
     system_prompt = """
-You are a factual AI assistant.
+You are an EXACT factual AI.
 
 Rules:
-Only answer using provided website data.
-If answer missing say:
-"Information not found in scraped website."
+1. ONLY answer from provided scraped data.
+2. If answer not found, say:
+"This information is not available in the scraped website data."
+3. Never guess.
+4. Never use outside knowledge.
 """
 
-    messages = [
-
-        {"role": "system", "content": system_prompt},
-
-        {
-            "role": "user",
-            "content": f"""
-WEBSITE DATA:
-
-{context}
-
-QUESTION:
-{question}
-"""
-        }
-    ]
+    context = f"SCRAPED DATA:\n{json.dumps(data, indent=2)[:15000]}\n\nQUESTION:\n{message}"
 
     try:
+        response = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": context}
+            ],
+            temperature=0,
+            max_tokens=1500
+        )
 
-        response = groq_ai.ask(messages)
+        answer = getattr(getattr(response.choices[0], "message", None), "content", None)
+        if not answer:
+            answer = "Groq API did not return any answer."
 
-        answer = response["choices"][0]["message"]["content"]
-
-        return {
-            "success": True,
-            "response": answer
-        }
+        return {"success": True, "response": answer.strip()}
 
     except Exception as e:
+        return {"success": False, "error": f"Groq API error: {str(e)}"}
 
-        return {
-            "success": False,
-            "error": str(e)
-        }
-
-# ==========================================================
-# GROK MODE
-# ==========================================================
-
+# ---------- GROK MODE ----------
 @app.post("/grok-mode")
 async def grok_mode(request: Request):
+    if not client:
+        return {"success": False, "error": "GROQ_API_KEY not set or invalid"}
 
     form = await request.form()
-
     message = form.get("message")
+    scraped = form.get("scraped_data")
+    analysis_type = form.get("analysis_type", "comprehensive")
 
-    if not message:
-        return {"success": False, "error": "Question required"}
+    if not message or not scraped:
+        return {"success": False, "error": "Missing message or scraped data"}
 
-    messages = [
+    data = json.loads(scraped)
 
-        {
-            "role": "system",
-            "content": "You are an expert AI assistant."
-        },
+    system_prompt = (
+        "You are GROK MODE - An advanced AI for universal questions. "
+        "RULES: 1. UNIVERSAL KNOWLEDGE ONLY - Use your comprehensive knowledge base. "
+        "2. DO NOT use scraped data - ignore website content. "
+        "3. PROVIDE expert answers on any topic. "
+        "4. BE helpful and comprehensive. "
+        "5. Use your full knowledge for all responses."
+    )
 
-        {
-            "role": "user",
-            "content": message
-        }
-    ]
+    full_context = f"USER QUESTION:\n{message}\n\n(Note: This is a universal knowledge question. Provide comprehensive answer using your knowledge base.)"
 
     try:
+        response = client.chat.completions.create(
+            model=MODEL_DEEP,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": full_context}  # Removed character limit for unlimited answers
+            ],
+            temperature=0.2,
+            max_tokens=8000  # Increased from 2000 to 8000 for much longer answers
+        )
 
-        response = groq_ai.ask(messages, temperature=0.4)
+        answer = getattr(response.choices[0].message, 'content', None)
+        if not answer:
+            answer = "No response generated."
 
-        answer = response["choices"][0]["message"]["content"]
-
-        return {
-            "success": True,
-            "response": answer
-        }
+        return {"success": True, "response": answer.strip(), "mode": "grok_mode"}
 
     except Exception as e:
+        return {"success": False, "error": f"Grok Mode error: {str(e)}"}
 
-        return {
-            "success": False,
-            "error": str(e)
-        }
+# ---------- GROK SUMMARY ----------
+@app.post("/grok-summary")
+async def grok_summary(request: Request):
+    if not client:
+        return {"success": False, "error": "GROQ_API_KEY not set or invalid"}
 
-# ==========================================================
-# EXPORT
-# ==========================================================
+    form = await request.form()
+    scraped = form.get("scraped_data")
 
+    if not scraped:
+        return {"success": False, "error": "Missing scraped data"}
+
+    data = json.loads(scraped)
+
+    system_prompt = (
+        "GROK SUMMARY - Extract key facts. "
+        "Provide: 1. MAIN TOPIC. 2. KEY POINTS (3-5). 3. STATISTICS. 4. CONCLUSION. "
+        "Only use page data."
+    )
+
+    context_parts = ["URL: " + data.get('url', '')]
+    if data.get('title'):
+        context_parts.append("Title: " + data['title'])
+    if data.get('paragraphs'):
+        context_parts.append("\n".join(data['paragraphs'][:15]))
+
+    try:
+        response = client.chat.completions.create(
+            model=MODEL_DEEP,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": "\n\n".join(context_parts)}
+            ],
+            temperature=0.1,
+            max_tokens=500
+        )
+
+        answer = getattr(response.choices[0].message, 'content', 'No summary.')
+        return {"success": True, "summary": answer.strip(), "mode": "grok_summary"}
+
+    except Exception as e:
+        return {"success": False, "error": f"Summary error: {str(e)}"}
+
+# ---------- EXPORT ----------
 @app.post("/export")
 async def export(request: Request):
-
     body = await request.json()
-
     fmt = body.get("format")
     data = body.get("data")
 
-    handlers = {
+    if not fmt or not data:
+        return {"success": False, "error": "Missing format or data"}
 
+    filename = f"scraped_{int(time.time())}"
+
+    handlers = {
         "json": scraper.save_as_json,
         "csv": scraper.save_as_csv,
         "excel": scraper.save_as_excel,
@@ -331,11 +217,7 @@ async def export(request: Request):
     }
 
     if fmt not in handlers:
-        return {"success": False, "error": "Invalid format"}
+        return {"success": False, "error": f"Unsupported format: {fmt}"}
 
-    path = handlers[fmt](data, "scraped_data")
-
-    return FileResponse(
-        path,
-        filename=os.path.basename(path)
-    )
+    path = handlers[fmt](data, filename)
+    return FileResponse(path, filename=os.path.basename(path))
