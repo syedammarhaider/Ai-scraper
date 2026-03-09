@@ -1,7 +1,6 @@
 # ==========================================================
 # app.py
-# Full Website Scraping + Groq/Grok AI Question Answer System
-# Roman Urdu comments har important section ke upar diye gaye hain
+# Optimized AI Scraper + Groq AI System (FAST VERSION)
 # ==========================================================
 
 from fastapi import FastAPI, Request
@@ -17,31 +16,31 @@ import json
 import uuid
 import requests
 import time
-import random
 
 from scraper import UltraScraper
 
 # ==========================================================
-# ENVIRONMENT VARIABLES LOAD KARNA
+# ENV LOAD
 # ==========================================================
 
 load_dotenv()
+
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 MODEL = "llama-3.3-70b-versatile"
-MODEL_DEEP = "llama-3.3-70b-versatile"
 
 # ==========================================================
-# FASTAPI APP INITIALIZE
+# APP INIT
 # ==========================================================
 
 app = FastAPI()
 
 templates = Jinja2Templates(directory="templates")
+
 scraper = UltraScraper()
 
 # ==========================================================
-# CORS CONFIGURATION
+# CORS
 # ==========================================================
 
 app.add_middleware(
@@ -53,126 +52,67 @@ app.add_middleware(
 )
 
 # ==========================================================
-# STATIC FILES SERVE KARNA
+# STATIC
 # ==========================================================
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ==========================================================
-# GLOBAL ERROR HANDLER
+# ERROR HANDLER
 # ==========================================================
 
 @app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception):
+async def error_handler(request: Request, exc: Exception):
+
     return JSONResponse(
         status_code=500,
         content={
             "success": False,
-            "error": f"Server error: {str(exc)}"
+            "error": str(exc)
         }
     )
 
 # ==========================================================
-# GROQ API CLIENT
+# GROQ CLIENT
 # ==========================================================
 
-class GroqDirectClient:
+class GroqClient:
 
     def __init__(self, api_key):
-        self.api_key = api_key
-        self.base_url = "https://api.groq.com/openai/v1"
+
+        self.url = "https://api.groq.com/openai/v1/chat/completions"
 
         self.headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
 
-    def chat_completions_create(self, model, messages, temperature=0, max_tokens=16000, max_retries=3):
+    def ask(self, messages, temperature=0.2):
 
-        for attempt in range(max_retries):
-            
-            try:
+        payload = {
+            "model": MODEL,
+            "messages": messages,
+            "temperature": temperature,
+            "max_tokens": 2000
+        }
 
-                payload = {
-                    "model": model,
-                    "messages": messages,
-                    "temperature": temperature,
-                    "max_tokens": max_tokens
-                }
+        response = requests.post(
+            self.url,
+            headers=self.headers,
+            json=payload,
+            timeout=60
+        )
 
-                # Add random delay to avoid rate limiting
-                if attempt > 0:
-                    delay = min(2 ** attempt + random.uniform(0, 1), 10)  # Exponential backoff with jitter
-                    print(f"⏳ Rate limit hit, retrying in {delay:.1f} seconds... (Attempt {attempt + 1}/{max_retries})")
-                    time.sleep(delay)
+        if response.status_code != 200:
+            raise Exception(f"Groq API Error {response.status_code}")
 
-                response = requests.post(
-                    f"{self.base_url}/chat/completions",
-                    headers=self.headers,
-                    json=payload,
-                    timeout=60
-                )
+        return response.json()
 
-                # Handle 429 rate limit errors
-                if response.status_code == 429:
-                    if attempt < max_retries - 1:
-                        retry_after = int(response.headers.get('Retry-After', 2))
-                        print(f"⚠️ Rate limited (429). Waiting {retry_after} seconds...")
-                        time.sleep(retry_after)
-                        continue
-                    else:
-                        raise Exception(f"Rate limit exceeded after {max_retries} attempts")
 
-                response.raise_for_status()
-
-                return response.json()
-
-            except requests.exceptions.RequestException as e:
-                if attempt < max_retries - 1:
-                    print(f"⚠️ Request failed: {e}. Retrying... (Attempt {attempt + 1}/{max_retries})")
-                    time.sleep(1)
-                    continue
-                else:
-                    raise Exception(f"Groq API error after {max_retries} attempts: {str(e)}")
-
-        raise Exception(f"Failed after {max_retries} attempts")
-
+groq_ai = GroqClient(GROQ_API_KEY)
 
 # ==========================================================
-# GROQ CLIENT INITIALIZATION
-# ==========================================================
-
-groq_ai = None
-grok_mode = None
-
-
-def initialize_grok_clients():
-
-    global groq_ai, grok_mode
-
-    try:
-
-        groq_ai = GroqDirectClient(GROQ_API_KEY)
-        grok_mode = GroqDirectClient(GROQ_API_KEY)
-
-        print("✅ Groq clients initialized successfully")
-
-        return True
-
-    except Exception as e:
-
-        print("❌ Groq initialization failed:", e)
-
-        groq_ai = None
-        grok_mode = None
-
-        return False
-
-
-initialize_grok_clients()
-
-# ==========================================================
-# HOME PAGE
+# HOME
 # ==========================================================
 
 @app.get("/", response_class=HTMLResponse)
@@ -184,18 +124,16 @@ async def home(request: Request):
     )
 
 # ==========================================================
-# HEALTH CHECK ENDPOINT
+# HEALTH
 # ==========================================================
 
 @app.get("/health")
 async def health():
 
-    return {
-        "status": "healthy"
-    }
+    return {"status": "ok"}
 
 # ==========================================================
-# WEBSITE SCRAPER ENDPOINT
+# SCRAPE
 # ==========================================================
 
 @app.post("/scrape")
@@ -206,7 +144,6 @@ async def scrape(request: Request):
         form = await request.form()
 
         url = form.get("url")
-        mode = form.get("mode", "comprehensive")
 
         if not url:
             return {"success": False, "error": "URL required"}
@@ -214,15 +151,7 @@ async def scrape(request: Request):
         if not url.startswith("http"):
             url = "https://" + url
 
-        print(f"🔎 Scraping: {url}")
-
-        if mode == "comprehensive":
-            data = scraper.crawl_website(url, mode)
-        else:
-            data = scraper.scrape_single_page(url, mode)
-
-        if "error" in data:
-            return {"success": False, "error": data["error"]}
+        data = scraper.crawl_website(url)
 
         data["session_id"] = str(uuid.uuid4())
 
@@ -239,115 +168,149 @@ async def scrape(request: Request):
         }
 
 # ==========================================================
-# TEXT CHUNKING FUNCTION
-# Large scraped JSON ko chunks mein divide karta hai
+# CONTEXT BUILDER (FAST)
 # ==========================================================
 
-def split_text_into_chunks(text, chunk_size=4000):
+def build_context(data):
 
-    words = text.split()
+    parts = []
 
-    chunks = []
-    current_chunk = []
-    current_length = 0
+    if data.get("title"):
+        parts.append("TITLE:\n" + data["title"])
 
-    for word in words:
+    if data.get("description"):
+        parts.append("DESCRIPTION:\n" + data["description"])
 
-        current_chunk.append(word)
-        current_length += len(word) + 1
+    if data.get("headings"):
+        parts.append(
+            "HEADINGS:\n" +
+            "\n".join(data["headings"][:20])
+        )
 
-        if current_length >= chunk_size:
+    if data.get("paragraphs"):
+        parts.append(
+            "CONTENT:\n" +
+            "\n".join(data["paragraphs"][:30])
+        )
 
-            chunks.append(" ".join(current_chunk))
-            current_chunk = []
-            current_length = 0
-
-    if current_chunk:
-        chunks.append(" ".join(current_chunk))
-
-    return chunks
+    return "\n\n".join(parts)
 
 # ==========================================================
-# GROQ QUESTION ANSWER SYSTEM
+# AI QUESTION ANSWER
 # ==========================================================
-
-# Rate limiting: Track last request time per IP
-last_request_time = {}
 
 @app.post("/groq-chat")
 async def chat(request: Request):
-    
-    # Simple rate limiting
-    client_ip = request.client.host
-    current_time = time.time()
-    
-    if client_ip in last_request_time:
-        time_diff = current_time - last_request_time[client_ip]
-        if time_diff < 2:  # Minimum 2 seconds between requests
-            return {"success": False, "error": "Please wait 2 seconds before asking another question"}
-    
-    last_request_time[client_ip] = current_time
-    
-    form = await request.form()
-    
-    message = form.get("message")
-    scraped = form.get("scraped_data")
-    
-    if not message or not scraped:
-        return {"success": False, "error": "Missing input data"}
 
-    if not groq_ai:
-        return {"success": False, "error": "Groq client not initialized"}
+    form = await request.form()
+
+    question = form.get("message")
+    scraped = form.get("scraped_data")
+
+    if not question or not scraped:
+        return {"success": False, "error": "Missing input"}
 
     try:
+
         data = json.loads(scraped)
+
     except:
+
         return {"success": False, "error": "Invalid JSON"}
+
+    context = build_context(data)
 
     system_prompt = """
 You are a factual AI assistant.
 
 Rules:
-1. Only answer using scraped data.
-2. If answer not present say:
-"This information is not available in the scraped website data."
-3. Never guess.
-4. Be precise.
+Only answer using provided website data.
+If answer missing say:
+"Information not found in scraped website."
 """
 
-    context_text = json.dumps(data, indent=2)
+    messages = [
 
-    chunks = split_text_into_chunks(context_text)
+        {"role": "system", "content": system_prompt},
 
-    answers = []
+        {
+            "role": "user",
+            "content": f"""
+WEBSITE DATA:
 
-    for chunk in chunks:
+{context}
 
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"SCRAPED DATA:\n{chunk}\n\nQUESTION:\n{message}"}
-        ]
+QUESTION:
+{question}
+"""
+        }
+    ]
 
-        response = groq_ai.chat_completions_create(
-            model=MODEL,
-            messages=messages,
-            temperature=0,
-            max_tokens=4000
-        )
+    try:
 
-        answer = response.get("choices", [{}])[0].get("message", {}).get("content", "")
+        response = groq_ai.ask(messages)
 
-        answers.append(answer.strip())
+        answer = response["choices"][0]["message"]["content"]
 
-    final_answer = "\n\n".join(answers)
+        return {
+            "success": True,
+            "response": answer
+        }
 
-    return {
-        "success": True,
-        "response": final_answer
-    }
+    except Exception as e:
+
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 # ==========================================================
-# DATA EXPORT SYSTEM
+# GROK MODE
+# ==========================================================
+
+@app.post("/grok-mode")
+async def grok_mode(request: Request):
+
+    form = await request.form()
+
+    message = form.get("message")
+
+    if not message:
+        return {"success": False, "error": "Question required"}
+
+    messages = [
+
+        {
+            "role": "system",
+            "content": "You are an expert AI assistant."
+        },
+
+        {
+            "role": "user",
+            "content": message
+        }
+    ]
+
+    try:
+
+        response = groq_ai.ask(messages, temperature=0.4)
+
+        answer = response["choices"][0]["message"]["content"]
+
+        return {
+            "success": True,
+            "response": answer
+        }
+
+    except Exception as e:
+
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
+# ==========================================================
+# EXPORT
 # ==========================================================
 
 @app.post("/export")
@@ -358,12 +321,8 @@ async def export(request: Request):
     fmt = body.get("format")
     data = body.get("data")
 
-    if not fmt or not data:
-        return {"success": False, "error": "Missing format or data"}
-
-    filename = "scraped_data"
-
     handlers = {
+
         "json": scraper.save_as_json,
         "csv": scraper.save_as_csv,
         "excel": scraper.save_as_excel,
@@ -372,126 +331,11 @@ async def export(request: Request):
     }
 
     if fmt not in handlers:
-        return {"success": False, "error": "Unsupported format"}
+        return {"success": False, "error": "Invalid format"}
 
-    path = handlers[fmt](data, filename)
+    path = handlers[fmt](data, "scraped_data")
 
     return FileResponse(
         path,
         filename=os.path.basename(path)
     )
-
-# ==========================================================
-# GROK MODE - Universal Knowledge Questions
-# ==========================================================
-
-@app.post("/grok-mode")
-async def grok_mode_endpoint(request: Request):
-    
-    try:
-        
-        form = await request.form()
-        
-        message = form.get("message")
-        scraped = form.get("scraped_data")
-        analysis_type = form.get("analysis_type", "comprehensive")
-
-        if not message or not scraped:
-            return {"success": False, "error": "Missing message or scraped data"}
-        
-        if not grok_mode:
-            return {"success": False, "error": "Grok Mode client not initialized"}
-
-        system_prompt = f"""You are Grok Mode - an advanced AI assistant for universal questions.
-Rules:
-1. ONLY answer universal/general knowledge questions
-2. DO NOT use scraped data - ignore any website content provided
-3. Use your comprehensive knowledge for all answers
-4. Be helpful, detailed, and comprehensive
-5. Analysis Type: {analysis_type}
-"""
-
-        full_context = f"USER QUESTION:\n{message}\n\n(Note: Provide comprehensive expert answer.)"
-
-        response = grok_mode.chat_completions_create(
-            model=MODEL_DEEP,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": full_context}
-            ],
-            temperature=0.4,
-            max_tokens=8000
-        )
-        
-        answer = response.get("choices", [{}])[0].get("message", {}).get("content", "")
-        
-        if not answer:
-            answer = "No response generated from Grok Mode."
-
-        return {
-            "success": True,
-            "response": answer.strip(),
-            "mode": "grok_mode",
-            "model": MODEL_DEEP,
-            "analysis_type": analysis_type
-        }
-
-    except Exception as e:
-        return {"success": False, "error": f"Grok Mode failed: {str(e)}"}
-
-# ==========================================================
-# GROK SUMMARY - Quick Summary Generator
-# ==========================================================
-
-@app.post("/grok-summary")
-async def grok_summary(request: Request):
-    
-    form = await request.form()
-    
-    scraped = form.get("scraped_data")
-    
-    if not scraped:
-        return {"success": False, "error": "Missing scraped data"}
-    
-    if not groq_ai:
-        return {"success": False, "error": "Groq AI client not initialized"}
-
-    data = json.loads(scraped)
-    
-    system_prompt = """You are GROK MODE SUMMARY - Extract key facts instantly and accurately.
-Provide structured summary:
-1. MAIN TOPIC
-2. KEY POINTS (3-5)
-3. STATISTICS
-4. CONCLUSION
-Only use data from the page. If info missing, say "Not found".
-"""
-
-    context_parts = [f"URL: {data.get('url', '')}"]
-    
-    if data.get('title'):
-        context_parts.append(f"Title: {data['title']}")
-    
-    if data.get('description'):
-        context_parts.append(f"Description: {data['description']}")
-    
-    if data.get('paragraphs'):
-        context_parts.append("\nContent:\n" + "\n".join(data['paragraphs'][:50]))
-
-    response = groq_ai.chat_completions_create(
-        model=MODEL_DEEP,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": "\n\n".join(context_parts)}
-        ],
-        temperature=0.1,
-        max_tokens=5000
-    )
-    
-    answer = response.get("choices", [{}])[0].get("message", {}).get("content", "No summary generated.")
-    
-    return {
-        "success": True, 
-        "summary": answer.strip(), 
-        "mode": "grok_summary"
-    }
