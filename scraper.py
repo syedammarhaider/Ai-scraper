@@ -131,7 +131,7 @@ async def grok_mode(request: Request):
         "5. Use your full knowledge for all responses."
     )
 
-    full_context = f"USER QUESTION:\n{message}\n\n(Note: This is a universal knowledge question. Provide comprehensive answer using your knowledge base.)"
+    full_context = f"USER QUESTION:\n{message}\n\n(Note: This is a universal knowledge question. Provide  the comprehensive answer using your knowledge base.)"
 
     try:
         response = client.chat.completions.create(
