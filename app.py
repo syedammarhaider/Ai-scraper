@@ -74,19 +74,138 @@ async def chat(request: Request):
     data = json.loads(scraped)
 
     system_prompt = """
-You are an EXACT factual AI.
+You are an EXACT factual AI assistant with advanced data processing capabilities.
 
 Rules:
-1. ONLY answer from provided scraped data.
-2. If answer not found, say:
-"This information is not available in the scraped website data."
-3. Never guess.
-4. Never use outside knowledge.
+1. READ the scraped data content provided below in READABLE FORMAT
+2. ANSWER the user's question directly using ONLY that content
+3. The content is already structured for you - use it directly
+4. If answer not found, say: "This information is not available in the scraped website data."
+5. NEVER guess or use outside knowledge
+6. IMPORTANT: Provide ANSWERS, not explanations about what data you have
+7. If user asks to modify specific content, find that content and modify it accurately
+8. For paragraph modifications: Find the exact paragraph and modify it while keeping the rest intact
 """
 
-    context = f"SCRAPED DATA:\n{json.dumps(data, indent=2)[:15000]}\n\nQUESTION:\n{message}"
+    # NEW: Intelligent Data Processing - Handle large data smartly
+    def build_smart_context(data, message):
+        context_parts = ["SCRAPED DATA ANALYSIS:"]
+        
+        # Check if user wants specific content modification
+        wants_modification = any(word in message.lower() for word in ['change', 'modify', 'update', 'edit', 'remove', 'replace'])
+        
+        # Handle both single page and crawled data
+        if 'pages' in data:
+            # Multi-page crawl data
+            context_parts.append(f"Website crawled: {data.get('start_url', 'Unknown')}")
+            context_parts.append(f"Total pages scraped: {len(data['pages'])}")
+            context_parts.append("")
+            
+            # Smart content selection based on query type
+            relevant_pages = []
+            
+            if wants_modification:
+                # For modifications, include all pages but limit content per page
+                for i, page in enumerate(data['pages'][:15]):  # Limit to 15 pages for modifications
+                    context_parts.append(f"PAGE {i+1}: {page.get('title', 'No title')}")
+                    context_parts.append(f"URL: {page.get('url', 'Unknown')}")
+                    
+                    if page.get('description'):
+                        context_parts.append(f"Description: {page['description']}")
+                    
+                    # Include key headings for context
+                    if page.get('headings'):
+                        for level, headings in page['headings'].items():
+                            if headings and len(headings) > 0:
+                                context_parts.append(f"{level.upper()}: {', '.join(headings[:3])}")
+                    
+                    # For modifications, include more paragraphs but still limit
+                    if page.get('paragraphs'):
+                        context_parts.append("Content:")
+                        for para in page['paragraphs'][:8]:  # Show 8 paragraphs for modifications
+                            context_parts.append(f"- {para}")
+                    
+                    # Include limited links for reference
+                    if page.get('internal_links'):
+                        context_parts.append(f"Internal Links (sample): {len(page['internal_links'])} total")
+                        for link in page['internal_links'][:3]:  # Show only 3 links
+                            context_parts.append(f"- {link.get('url', 'No URL')}")
+                    
+                    context_parts.append("")
+            else:
+                # For regular questions, be more selective
+                for i, page in enumerate(data['pages'][:10]):  # Limit to 10 pages for regular queries
+                    context_parts.append(f"PAGE {i+1}: {page.get('title', 'No title')}")
+                    context_parts.append(f"URL: {page.get('url', 'Unknown')}")
+                    
+                    if page.get('description'):
+                        context_parts.append(f"Description: {page['description']}")
+                    
+                    # Include key headings
+                    if page.get('headings'):
+                        for level, headings in page['headings'].items():
+                            if headings and len(headings) > 0:
+                                context_parts.append(f"{level.upper()}: {', '.join(headings[:2])}")
+                    
+                    # Include fewer paragraphs for regular queries
+                    if page.get('paragraphs'):
+                        context_parts.append("Content:")
+                        for para in page['paragraphs'][:5]:  # Show 5 paragraphs
+                            context_parts.append(f"- {para}")
+                    
+                    context_parts.append("")
+        else:
+            # Single page data
+            context_parts.append(f"Page: {data.get('title', 'No title')}")
+            context_parts.append(f"URL: {data.get('url', 'Unknown')}")
+            
+            if data.get('description'):
+                context_parts.append(f"Description: {data['description']}")
+            
+            # Add headings
+            if data.get('headings'):
+                context_parts.append("Headings:")
+                for level, headings in data['headings'].items():
+                    if headings and len(headings) > 0:
+                        context_parts.append(f"{level.upper()}: {', '.join(headings[:3])}")
+            
+            # Smart paragraph selection
+            if data.get('paragraphs'):
+                context_parts.append("Content:")
+                if wants_modification:
+                    # For modifications, include more paragraphs
+                    for para in data['paragraphs'][:15]:  # Show 15 paragraphs
+                        context_parts.append(f"- {para}")
+                else:
+                    # For regular queries, include fewer paragraphs
+                    for para in data['paragraphs'][:8]:  # Show 8 paragraphs
+                        context_parts.append(f"- {para}")
+            
+            # Add images if available
+            if data.get('images'):
+                context_parts.append("Images:")
+                for img in data['images'][:3]:  # Show only 3 images
+                    context_parts.append(f"- {img.get('alt', 'No alt text')}: {img.get('url', 'No URL')}")
+            
+            # Add limited links
+            if data.get('internal_links'):
+                context_parts.append(f"Internal Links (sample): {len(data['internal_links'])} total")
+                for link in data['internal_links'][:5]:  # Show only 5 links
+                    context_parts.append(f"- {link.get('url', 'No URL')}")
+        
+        context_parts.append(f"\nQUESTION: {message}")
+        context_parts.append(f"\nMODIFICATION REQUEST: {'Yes' if wants_modification else 'No'}")
+        
+        return "\n".join(context_parts)
+
+    # Build smart context based on data size and query type
+    context = build_smart_context(data, message)
 
     try:
+        # Add rate limiting - wait before API call to prevent 429
+        import time
+        time.sleep(0.5)  # Small delay to prevent rate limiting
+        
         response = client.chat.completions.create(
             model=MODEL,
             messages=[
@@ -94,7 +213,7 @@ Rules:
                 {"role": "user", "content": context}
             ],
             temperature=0,
-            max_tokens=1500
+            max_tokens=2000  # Increased for better responses
         )
 
         answer = getattr(getattr(response.choices[0], "message", None), "content", None)
@@ -104,6 +223,9 @@ Rules:
         return {"success": True, "response": answer.strip()}
 
     except Exception as e:
+        # Handle 429 errors with retry logic
+        if "429" in str(e):
+            return {"success": False, "error": "Rate limit exceeded. Please wait a moment and try again."}
         return {"success": False, "error": f"Groq API error: {str(e)}"}
 
 # ---------- GROK MODE ----------
