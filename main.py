@@ -16,7 +16,7 @@ scraper = UltraScraper()
 # Mount static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# GROQ - Using direct API calls for Python 3.14 compatibility
+# GROQ - Using direct API calls for Python 3.14 compatibility then do this 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 MODEL = "llama-3.3-70b-versatile"
 MODEL_DEEP = "llama-3.3-70b-versatile"  # Using supported model for Grok Mode
