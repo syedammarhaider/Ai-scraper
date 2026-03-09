@@ -215,137 +215,47 @@ class LocalFallbackAI:
 
 
 # Initialize components
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Multiple models for fallback - try different ones if one is rate limited
-MODELS = [
-    "llama-3.3-70b-versatile",      # Primary
-    "llama-3.1-70b-versatile",     # Fallback 1
-    "llama-3.1-8b-instant",        # Fallback 2 - faster & different endpoint
-    "mixtral-8x7b-32768",          # Fallback 3
-    "llama3-70b-8192",             # Fallback 4
-]
-MODEL_INDEX = 0  # Start with first model
-
-def get_current_model():
-    return MODELS[MODEL_INDEX]
-
-def get_next_model():
-    """Get next available model when current one is rate limited"""
-    global MODEL_INDEX
-    MODEL_INDEX = (MODEL_INDEX + 1) % len(MODELS)
-    print(f"🔄 Switching to model: {get_current_model()}")
-    return get_current_model()
-
-# Rate limiter - 15 requests per minute (conservative for free tier)
-rate_limiter = RateLimiter(requests_per_minute=15)
-
-# Response cache
-response_cache = ResponseCache(max_size=100)
-
-# Request queue
-request_queue = RequestQueue()
-
-# Local fallback AI
-local_ai = LocalFallbackAI()
-
-# ========== GROQ CLIENT WITH EXPONENTIAL BACKOFF ==========
+# ========== GEMINI CLIENT ==========
 import requests
 
-class GroqClient:
-    """Robust Groq client with exponential backoff, rate limiting, and multi-model fallback"""
-    
+class GeminiClient:
     def __init__(self, api_key):
         self.api_key = api_key
-        self.base_url = "https://api.groq.com/openai/v1"
-        self.headers = {
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        }
-        self.max_retries = 4  # Maximum retry attempts
-        self.base_delay = 2   # Base delay in seconds
-    
-    def chat_completions_create(self, model, messages, temperature=0, max_tokens=1500):
-        """Create chat completion with exponential backoff and retry logic"""
-        
-        # Acquire rate limit token
-        while not rate_limiter.acquire():
-            wait = rate_limiter.wait_time()
-            print(f"⏳ Rate limit reached, waiting {wait:.1f}s...")
-            time.sleep(wait)
-        
-        last_error = None
-        
-        # Try each model with exponential backoff
-        for attempt in range(self.max_retries):
-            try:
-                # Try current model
-                current_model = get_current_model()
-                print(f"📡 Trying model: {current_model} (attempt {attempt + 1})")
-                
-                data = {
-                    "model": current_model,
-                    "messages": messages,
-                    "temperature": temperature,
-                    "max_tokens": max_tokens
+        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent"
+
+    def generate(self, prompt):
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": prompt}
+                    ]
                 }
-                
-                response = requests.post(
-                    f"{self.base_url}/chat/completions",
-                    headers=self.headers,
-                    json=data,
-                    timeout=60
-                )
-                
-                # Handle rate limiting (429)
-                if response.status_code == 429:
-                    # Try to get retry-after from headers
-                    retry_after = response.headers.get('Retry-After')
-                    if retry_after:
-                        wait_time = int(retry_after)
-                    else:
-                        # Exponential backoff
-                        wait_time = self.base_delay * (2 ** attempt)
-                    
-                    print(f"⚠️ 429 Rate limited! Waiting {wait_time}s before retry...")
-                    time.sleep(wait_time)
-                    
-                    # Try next model
-                    get_next_model()
-                    continue
-                
-                # Handle other errors
-                response.raise_for_status()
-                return response.json()
-                
-            except requests.exceptions.RequestException as e:
-                last_error = str(e)
-                print(f"⚠️ Request error (attempt {attempt + 1}): {last_error}")
-                
-                # Exponential backoff on any error
-                wait_time = self.base_delay * (2 ** attempt)
-                print(f"⏳ Waiting {wait_time}s before retry...")
-                time.sleep(wait_time)
-                
-                # Try next model on rate limit
-                if "429" in last_error or "rate limit" in last_error.lower():
-                    get_next_model()
-        
-        # All retries failed, raise exception
-        raise Exception(f"Groq API error after {self.max_retries} retries: {last_error}")
+            ]
+        }
 
+        headers = {
+            "Content-Type": "application/json",
+            "x-goog-api-key": self.api_key
+        }
 
-# Initialize Groq client
-groq_client = None
-if GROQ_API_KEY:
+        response = requests.post(self.url, headers=headers, json=payload, timeout=60)
+
+        response.raise_for_status()
+        data = response.json()
+
+        return data["candidates"][0]["content"]["parts"][0]["text"]
+
+# Initialize Gemini client
+gemini_client = None
+if GEMINI_API_KEY:
     try:
-        groq_client = GroqClient(GROQ_API_KEY)
-        print("✅ Groq client initialized successfully")
-        print(f"📋 Available models: {MODELS}")
+        gemini_client = GeminiClient(GEMINI_API_KEY)
+        print("✅ Gemini client initialized")
     except Exception as e:
-        print(f"⚠️ Groq initialization warning: {e}")
-        groq_client = None
-
+        print(f"Gemini init error: {e}")
 
 # ========== ROUTES ==========
 
@@ -395,7 +305,9 @@ async def scrape(request: Request):
 
 @app.post("/groq-chat")
 async def chat(request: Request):
-    """Main chat endpoint with 429 fix - exponential backoff + multi-model fallback"""
+    if not gemini_client:
+        return {"success": False, "error": "GEMINI_API_KEY not set or invalid"}
+    
     form = await request.form()
     message = form.get("message")
     scraped = form.get("scraped_data")
@@ -403,68 +315,110 @@ async def chat(request: Request):
     if not message or not scraped:
         return {"success": False, "error": "Missing data"}
     
-    try:
-        data = json.loads(scraped)
-    except:
-        return {"success": False, "error": "Invalid scraped data format"}
+    data = json.loads(scraped)
     
-    # Create data hash for caching
-    data_str = json.dumps(data, sort_keys=True)[:1000]
-    data_hash = hashlib.md5(data_str.encode()).hexdigest()
-    
-    # Check cache first
-    cached_response = response_cache.get(data_hash, message)
-    if cached_response:
-        print("📦 Returning cached response")
-        return {"success": True, "response": cached_response, "cached": True}
-    
-    # Try Groq API first with retries
-    if groq_client:
-        system_prompt = """You are an EXACT factual AI assistant for analyzing scraped website data.
+    system_prompt = """
+You are an EXACT factual AI assistant with advanced data processing capabilities.
 
-RULES:
-1. ONLY answer from the provided scraped data
-2. If answer not found in data, say: "This information is not available in the scraped website data."
-3. Never guess or use outside knowledge
-4. Be precise and factual
-5. For greetings, respond naturally but briefly
-6. If asked about specific content, find and quote the exact relevant text"""
-
-        context = _build_context(data, message)
+Rules:
+1. READ the scraped data content provided below in READABLE FORMAT
+2. ANSWER the user's question directly using ONLY that content
+3. The content is already structured for you - use it directly
+4. If answer not found, say: "This information is not available in the scraped website data."
+5. NEVER guess or use outside knowledge
+6. IMPORTANT: Provide ANSWERS, not explanations about what data you have
+7. If user asks to modify specific content, find that content and modify it accurately
+8. For paragraph modifications: Find the exact paragraph and modify it while keeping the rest intact
+"""
+    # NEW: Circuit Breaker Pattern - Ultimate 429 Solution
+    def build_smart_context(data, message):
+        context_parts = ["SCRAPED DATA ANALYSIS:"]
         
-        try:
-            response = groq_client.chat_completions_create(
-                model=get_current_model(),
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": context}
-                ],
-                temperature=0,
-                max_tokens=1500
-            )
+        # Check if user wants specific content modification
+        wants_modification = any(word in message.lower() for word in ['change', 'modify', 'update', 'edit', 'remove', 'replace'])
+        
+        # Ultra-minimal data selection - only 1 page max
+        if 'pages' in data:
+            # Multi-page crawl data
+            context_parts.append(f"Website: {data.get('start_url', 'Unknown')}")
+            context_parts.append(f"Total pages: {len(data['pages'])}")
+            context_parts.append("")
             
-            answer = response.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
-            
-            if answer:
-                # Cache the response
-                response_cache.set(data_hash, message, answer)
-                return {"success": True, "response": answer, "model": get_current_model()}
+            # Only first page for any query type
+            for i, page in enumerate(data['pages'][:1]):  # Limit to 1 page only
+                context_parts.append(f"PAGE {i+1}: {page.get('title', 'No title')}")
+                    
+                # Only title and short description
+                if page.get('description') and len(page['description']) < 100:
+                    context_parts.append(f"Description: {page['description']}")
                 
-        except Exception as e:
-            error_str = str(e)
-            print(f"⚠️ Groq API error: {error_str}")
+                # Only H1 heading
+                if page.get('headings') and page['headings'].get('h1'):
+                    context_parts.append(f"H1: {page['headings']['h1'][0] if page['headings']['h1'] else 'None'}")
+                
+                # Only first 1 paragraph maximum
+                if page.get('paragraphs'):
+                    context_parts.append("Content:")
+                    for para in page['paragraphs'][:1]:  # Only 1 paragraph
+                        if len(para) < 150:  # Only very short paragraphs
+                            context_parts.append(f"- {para}")
+                
+                context_parts.append("")
+        else:
+            # Single page data - super minimal
+            context_parts.append(f"Page: {data.get('title', 'No title')}")
             
-            if "429" in error_str or "rate limit" in error_str.lower():
-                print("🔄 Falling back to local AI due to rate limit (all models exhausted)...")
-            else:
-                print("⚠️ Using local fallback...")
-    
-    # Use local fallback AI
-    print("🤖 Using local AI fallback")
-    local_response = local_ai.generate_response(data, message)
-    response_cache.set(data_hash, message, local_response)
-    
-    return {"success": True, "response": local_response, "mode": "local_fallback"}
+            # Only very short description
+            if data.get('description') and len(data['description']) < 80:
+                context_parts.append(f"Description: {data['description']}")
+            
+            # Only H1 heading
+            if data.get('headings') and data['headings'].get('h1'):
+                context_parts.append(f"H1: {data['headings']['h1'][0] if data['headings']['h1'] else 'None'}")
+            
+            # Only first 1 paragraph
+            if data.get('paragraphs'):
+                context_parts.append("Content:")
+                if wants_modification:
+                    # For modifications, only first 2 paragraphs
+                    for para in data['paragraphs'][:2]:
+                        if len(para) < 120:  # Only very short paragraphs
+                            context_parts.append(f"- {para}")
+                else:
+                    # For regular queries, only first 1 paragraph
+                    for para in data['paragraphs'][:1]:
+                        if len(para) < 100:  # Only very short paragraphs
+                            context_parts.append(f"- {para}")
+        
+        context_parts.append(f"\nQUESTION: {message}")
+        context_parts.append(f"\nMODIFICATION REQUEST: {'Yes' if wants_modification else 'No'}")
+        
+        return "\n".join(context_parts)
+
+    # Build ultra-minimal context to avoid 429
+    context = build_smart_context(data, message)
+
+    try:
+        prompt = f"""
+You are an AI assistant analyzing scraped website data.
+
+DATA:
+{context}
+
+QUESTION:
+{message}
+
+Answer ONLY using the provided data.
+"""
+
+        answer = gemini_client.generate(prompt)
+
+        if answer:
+            return {"success": True, "response": answer, "model": "gemini-3-flash-preview"}
+
+    except Exception as e:
+        print(f"Gemini error: {str(e)}")
+        return {"success": False, "error": f"Gemini API error: {str(e)}"}
 
 def _build_context(data, message):
     """Build minimal context to avoid rate limits"""
@@ -502,106 +456,81 @@ def _build_context(data, message):
 
 
 @app.post("/grok-mode")
-async def grok_mode_endpoint(request: Request):
-    """Grok Mode - Universal questions without using scraped data"""
-    try:
-        form = await request.form()
-        message = form.get("message")
-        analysis_type = form.get("analysis_type", "comprehensive")
-        
-        if not message:
-            return {"success": False, "error": "Missing message"}
-        
-        # Try Groq API first with retries
-        if groq_client:
-            system_prompt = f"""You are Grok Mode - an advanced AI assistant for universal knowledge.
-
-RULES:
-1. Answer using your comprehensive knowledge
-2. Be helpful, detailed and thorough
-3. Analysis Type: {analysis_type}
-
-Provide expert answers on any topic."""
-            
-            try:
-                response = groq_client.chat_completions_create(
-                    model=get_current_model(),
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": message}
-                    ],
-                    temperature=0.4,
-                    max_tokens=4000
-                )
-                
-                answer = response.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
-                
-                if answer:
-                    return {"success": True, "response": answer, "mode": "grok_mode", "model": get_current_model()}
-                    
-            except Exception as e:
-                print(f"⚠️ Grok Mode error: {str(e)}")
-        
-        # Fallback - simple response
-        return {
-            "success": True, 
-            "response": f"I understand you're asking about: {message}. The Groq API is currently experiencing high demand or rate limits. Please try again in a few moments, or try with a smaller question. I can help with any topic once the API becomes available again!",
-            "mode": "local_fallback"
-        }
+async def grok_mode(request: Request):
+    if not gemini_client:
+        return {"success": False, "error": "GEMINI_API_KEY not set or invalid"}
     
+    form = await request.form()
+    message = form.get("message")
+    
+    if not message:
+        return {"success": False, "error": "Missing message"}
+
+    try:
+        prompt = f"""
+You are an expert AI assistant.
+
+User Question:
+{message}
+
+Give a detailed helpful answer.
+"""
+
+        answer = gemini_client.generate(prompt)
+
+        return {
+            "success": True,
+            "response": answer,
+            "mode": "gemini"
+        }
+
     except Exception as e:
-        return {"success": False, "error": str(e)}
+        return {"success": False, "error": f"Grok Mode error: {str(e)}"}
 
 
 @app.post("/grok-summary")
 async def grok_summary(request: Request):
-    """Quick summary endpoint"""
+    if not gemini_client:
+        return {"success": False, "error": "GEMINI_API_KEY not set or invalid"}
+    
     form = await request.form()
     scraped = form.get("scraped_data")
     
     if not scraped:
         return {"success": False, "error": "Missing scraped data"}
     
-    try:
-        data = json.loads(scraped)
-    except:
-        return {"success": False, "error": "Invalid data format"}
+    data = json.loads(scraped)
     
-    # Try Groq first with retries
-    if groq_client:
-        system_prompt = """Create a quick summary with:
-1. MAIN TOPIC - What the page is about
-2. KEY POINTS - 3-5 important facts
-3. CONCLUSION - Main takeaway
+    context_parts = []
+    if data.get('title'):
+        context_parts.append(f"Title: {data['title']}")
+    if data.get('description'):
+        context_parts.append(f"Description: {data['description']}")
+    if data.get('paragraphs'):
+        context_parts.append("\n".join(data['paragraphs'][:15]))
 
-Be brief and accurate."""
-        
-        context_parts = []
-        if data.get('title'):
-            context_parts.append(f"Title: {data['title']}")
-        if data.get('description'):
-            context_parts.append(f"Description: {data['description']}")
-        if data.get('paragraphs'):
-            context_parts.append("\n".join(data['paragraphs'][:10]))
-        
-        try:
-            response = groq_client.chat_completions_create(
-                model=get_current_model(),
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": "\n\n".join(context_parts)}
-                ],
-                temperature=0.1,
-                max_tokens=500
-            )
-            
-            answer = response.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
-            
-            if answer:
-                return {"success": True, "summary": answer, "model": get_current_model()}
-                
-        except Exception as e:
-            print(f"⚠️ Summary error: {str(e)}")
+    try:
+        prompt = f"""
+Create a summary of this website data.
+
+{context_parts}
+
+Give:
+1. MAIN TOPIC
+2. KEY POINTS
+3. CONCLUSION
+"""
+
+        answer = gemini_client.generate(prompt)
+
+        return {
+            "success": True,
+            "summary": answer,
+            "model": "gemini-3-flash-preview"
+        }
+
+    except Exception as e:
+        return {"success": False, "error": f"Summary error: {str(e)}"}
     
     # Local fallback summary
     title = data.get('title', 'Unknown')
