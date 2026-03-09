@@ -3,9 +3,18 @@ git add .; git commit -m "Auto update"; git push origin main
 
 
 
+
+
 ssh -i ai-key.pem ec2-user@3.95.32.144
-$ cd ~/Ai-scraper
-$ python app.py
+cd ~/Ai-scraper
+sudo systemctl restart ai-scraper
+
+
+python app.py
+
+git reset --hard HEAD~1
+
+
 http://3.95.32.144
 http://3.95.32.144/
 
