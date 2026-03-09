@@ -28,6 +28,14 @@ cd /home/ubuntu/Ai-scraper || {
     exit 1
 }
 
+# Reset to previous commit (as requested)
+echo "🔄 Resetting to previous commit..."
+git reset --hard HEAD~1 || echo "⚠️ Git reset failed"
+
+# Pull latest changes
+echo "📥 Pulling latest changes..."
+git pull origin main || echo "⚠️ Git pull failed"
+
 # Check if app.py exists
 if [ ! -f "app.py" ]; then
     echo "❌ app.py not found"
@@ -70,6 +78,10 @@ sleep 5
 if kill -0 $APP_PID 2>/dev/null; then
     echo "✅ Application is running successfully (PID: $APP_PID)"
     echo "🌐 Server should be available at: http://3.95.32.144/"
+    
+    # Restart ai-scraper service
+    echo "🔄 Restarting ai-scraper service..."
+    sudo systemctl restart ai-scraper || echo "⚠️ systemctl restart failed (service might not exist)"
     
     # Health check
     echo "🔍 Performing health check..."
