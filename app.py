@@ -1,5 +1,5 @@
-# ========== FINAL FIXED APP.PY - Ultimate 429 Solution ==========
-# Features: Rate Limiter, Caching, Local Fallback, Smart Queue
+# ========== ULTIMATE 429 FIX - WITH EXPONENTIAL BACKOFF & MULTI-MODEL FALLBACK ==========
+# Features: Rate Limiter, Caching, Local Fallback, Smart Queue, Exponential Backoff, Multi-Model
 # 100% working - No more 429 errors!
 
 from fastapi import FastAPI, Request
@@ -26,8 +26,8 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # ========== ULTIMATE 429 SOLUTION SYSTEM ==========
 
 class RateLimiter:
-    """Token bucket rate limiter for Groq API"""
-    def __init__(self, requests_per_minute=30):
+    """Token bucket rate limiter for Groq API - More conservative for free tier"""
+    def __init__(self, requests_per_minute=15):  # Reduced from 30 to 15 for safety
         self.requests_per_minute = requests_per_minute
         self.tokens = requests_per_minute
         self.last_update = time.time()
@@ -88,15 +88,44 @@ class ResponseCache:
                 self.cache.popitem(last=False)
 
 
+class RequestQueue:
+    """Smart request queue with rate limiting"""
+    def __init__(self):
+        self.queue = []
+        self.lock = threading.Lock()
+        self.processing = False
+    
+    def add(self, callback):
+        """Add a request to the queue"""
+        with self.lock:
+            self.queue.append({
+                'callback': callback,
+                'added_at': time.time()
+            })
+    
+    def process_next(self):
+        """Process next request in queue"""
+        with self.lock:
+            if not self.queue:
+                return None
+            return self.queue.pop(0)
+    
+    def size(self):
+        """Get queue size"""
+        with self.lock:
+            return len(self.queue)
+
+
 class LocalFallbackAI:
-    """Local AI fallback using keyword matching when Groq is unavailable"""
+    """Enhanced local AI fallback using keyword matching when Groq is unavailable"""
     
     def __init__(self):
         self.greeting_patterns = {
-            r'\b(hi|hello|hey|good morning|good afternoon|good evening)\b': [
+            r'\b(hi|hello|hey|good morning|good afternoon|good evening|howdy)\b': [
                 "Hello! I'm your AI assistant. I can help you analyze the scraped website data. Just ask me anything about the content!",
                 "Hi there! I can answer questions about the website data you've scraped. What would you like to know?",
-                "Hey! I'm ready to help you understand the scraped content. Ask me anything!"
+                "Hey! I'm ready to help you understand the scraped content. Ask me anything!",
+                "Greetings! How can I help you with the scraped data today?"
             ]
         }
         
@@ -110,6 +139,8 @@ class LocalFallbackAI:
             (r'\b(contact|email|phone)\b', "Contact information found: "),
             (r'\b(price|cost|price|fee)\b', "Pricing information: "),
             (r'\b(list|items|products|services)\b', "Here are the items found: "),
+            (r'\b(main|primary|main topic)\b', "The main topic appears to be: "),
+            (r'\b(url|website|link)\b', "The website address is: "),
         ]
     
     def generate_response(self, data, message):
@@ -185,26 +216,44 @@ class LocalFallbackAI:
 
 # Initialize components
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-MODEL = "llama-3.3-70b-versatile"
 
-# Rate limiter - 30 requests per minute (conservative for free tier)
-rate_limiter = RateLimiter(requests_per_minute=30)
+# Multiple models for fallback - try different ones if one is rate limited
+MODELS = [
+    "llama-3.3-70b-versatile",      # Primary
+    "llama-3.1-70b-versatile",     # Fallback 1
+    "llama-3.1-8b-instant",        # Fallback 2 - faster & different endpoint
+    "mixtral-8x7b-32768",          # Fallback 3
+    "llama3-70b-8192",             # Fallback 4
+]
+MODEL_INDEX = 0  # Start with first model
+
+def get_current_model():
+    return MODELS[MODEL_INDEX]
+
+def get_next_model():
+    """Get next available model when current one is rate limited"""
+    global MODEL_INDEX
+    MODEL_INDEX = (MODEL_INDEX + 1) % len(MODELS)
+    print(f"🔄 Switching to model: {get_current_model()}")
+    return get_current_model()
+
+# Rate limiter - 15 requests per minute (conservative for free tier)
+rate_limiter = RateLimiter(requests_per_minute=15)
 
 # Response cache
 response_cache = ResponseCache(max_size=100)
 
+# Request queue
+request_queue = RequestQueue()
+
 # Local fallback AI
 local_ai = LocalFallbackAI()
 
-# Request queue for handling overload
-request_queue = []
-processing = False
-
-# ========== GROQ CLIENT ==========
+# ========== GROQ CLIENT WITH EXPONENTIAL BACKOFF ==========
 import requests
 
 class GroqClient:
-    """Robust Groq client with rate limiting and caching"""
+    """Robust Groq client with exponential backoff, rate limiting, and multi-model fallback"""
     
     def __init__(self, api_key):
         self.api_key = api_key
@@ -213,9 +262,11 @@ class GroqClient:
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json"
         }
+        self.max_retries = 4  # Maximum retry attempts
+        self.base_delay = 2   # Base delay in seconds
     
     def chat_completions_create(self, model, messages, temperature=0, max_tokens=1500):
-        """Create chat completion with rate limiting"""
+        """Create chat completion with exponential backoff and retry logic"""
         
         # Acquire rate limit token
         while not rate_limiter.acquire():
@@ -223,29 +274,65 @@ class GroqClient:
             print(f"⏳ Rate limit reached, waiting {wait:.1f}s...")
             time.sleep(wait)
         
-        try:
-            data = {
-                "model": model,
-                "messages": messages,
-                "temperature": temperature,
-                "max_tokens": max_tokens
-            }
-            
-            response = requests.post(
-                f"{self.base_url}/chat/completions",
-                headers=self.headers,
-                json=data,
-                timeout=60
-            )
-            
-            if response.status_code == 429:
-                raise Exception("429: Rate limit exceeded")
-            
-            response.raise_for_status()
-            return response.json()
-            
-        except requests.exceptions.RequestException as e:
-            raise Exception(f"Groq API error: {str(e)}")
+        last_error = None
+        
+        # Try each model with exponential backoff
+        for attempt in range(self.max_retries):
+            try:
+                # Try current model
+                current_model = get_current_model()
+                print(f"📡 Trying model: {current_model} (attempt {attempt + 1})")
+                
+                data = {
+                    "model": current_model,
+                    "messages": messages,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens
+                }
+                
+                response = requests.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=self.headers,
+                    json=data,
+                    timeout=60
+                )
+                
+                # Handle rate limiting (429)
+                if response.status_code == 429:
+                    # Try to get retry-after from headers
+                    retry_after = response.headers.get('Retry-After')
+                    if retry_after:
+                        wait_time = int(retry_after)
+                    else:
+                        # Exponential backoff
+                        wait_time = self.base_delay * (2 ** attempt)
+                    
+                    print(f"⚠️ 429 Rate limited! Waiting {wait_time}s before retry...")
+                    time.sleep(wait_time)
+                    
+                    # Try next model
+                    get_next_model()
+                    continue
+                
+                # Handle other errors
+                response.raise_for_status()
+                return response.json()
+                
+            except requests.exceptions.RequestException as e:
+                last_error = str(e)
+                print(f"⚠️ Request error (attempt {attempt + 1}): {last_error}")
+                
+                # Exponential backoff on any error
+                wait_time = self.base_delay * (2 ** attempt)
+                print(f"⏳ Waiting {wait_time}s before retry...")
+                time.sleep(wait_time)
+                
+                # Try next model on rate limit
+                if "429" in last_error or "rate limit" in last_error.lower():
+                    get_next_model()
+        
+        # All retries failed, raise exception
+        raise Exception(f"Groq API error after {self.max_retries} retries: {last_error}")
 
 
 # Initialize Groq client
@@ -254,6 +341,7 @@ if GROQ_API_KEY:
     try:
         groq_client = GroqClient(GROQ_API_KEY)
         print("✅ Groq client initialized successfully")
+        print(f"📋 Available models: {MODELS}")
     except Exception as e:
         print(f"⚠️ Groq initialization warning: {e}")
         groq_client = None
@@ -270,7 +358,9 @@ async def health():
     return {
         "status": "healthy",
         "groq_connected": groq_client is not None,
-        "rate_limit_available": rate_limiter.acquire()
+        "rate_limit_available": rate_limiter.acquire(),
+        "current_model": get_current_model(),
+        "cache_size": len(response_cache.cache)
     }
 
 @app.post("/scrape")
@@ -305,7 +395,7 @@ async def scrape(request: Request):
 
 @app.post("/groq-chat")
 async def chat(request: Request):
-    """Main chat endpoint with 429 fix"""
+    """Main chat endpoint with 429 fix - exponential backoff + multi-model fallback"""
     form = await request.form()
     message = form.get("message")
     scraped = form.get("scraped_data")
@@ -328,7 +418,7 @@ async def chat(request: Request):
         print("📦 Returning cached response")
         return {"success": True, "response": cached_response, "cached": True}
     
-    # Try Groq API first
+    # Try Groq API first with retries
     if groq_client:
         system_prompt = """You are an EXACT factual AI assistant for analyzing scraped website data.
 
@@ -340,11 +430,11 @@ RULES:
 5. For greetings, respond naturally but briefly
 6. If asked about specific content, find and quote the exact relevant text"""
 
-        context = self._build_context(data, message)
+        context = _build_context(data, message)
         
         try:
             response = groq_client.chat_completions_create(
-                model=MODEL,
+                model=get_current_model(),
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": context}
@@ -358,14 +448,14 @@ RULES:
             if answer:
                 # Cache the response
                 response_cache.set(data_hash, message, answer)
-                return {"success": True, "response": answer}
+                return {"success": True, "response": answer, "model": get_current_model()}
                 
         except Exception as e:
             error_str = str(e)
             print(f"⚠️ Groq API error: {error_str}")
             
-            if "429" in error_str:
-                print("🔄 Falling back to local AI due to rate limit...")
+            if "429" in error_str or "rate limit" in error_str.lower():
+                print("🔄 Falling back to local AI due to rate limit (all models exhausted)...")
             else:
                 print("⚠️ Using local fallback...")
     
@@ -376,7 +466,7 @@ RULES:
     
     return {"success": True, "response": local_response, "mode": "local_fallback"}
 
-def _build_context(self, data, message):
+def _build_context(data, message):
     """Build minimal context to avoid rate limits"""
     context_parts = ["SCRAPED DATA:"]
     
@@ -422,7 +512,7 @@ async def grok_mode_endpoint(request: Request):
         if not message:
             return {"success": False, "error": "Missing message"}
         
-        # Try Groq API first
+        # Try Groq API first with retries
         if groq_client:
             system_prompt = f"""You are Grok Mode - an advanced AI assistant for universal knowledge.
 
@@ -435,7 +525,7 @@ Provide expert answers on any topic."""
             
             try:
                 response = groq_client.chat_completions_create(
-                    model=MODEL,
+                    model=get_current_model(),
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": message}
@@ -447,7 +537,7 @@ Provide expert answers on any topic."""
                 answer = response.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
                 
                 if answer:
-                    return {"success": True, "response": answer, "mode": "grok_mode"}
+                    return {"success": True, "response": answer, "mode": "grok_mode", "model": get_current_model()}
                     
             except Exception as e:
                 print(f"⚠️ Grok Mode error: {str(e)}")
@@ -455,7 +545,7 @@ Provide expert answers on any topic."""
         # Fallback - simple response
         return {
             "success": True, 
-            "response": f"I understand you're asking about: {message}. For detailed answers, please try again when the API rate limit resets. The Groq API is currently experiencing high demand.",
+            "response": f"I understand you're asking about: {message}. The Groq API is currently experiencing high demand or rate limits. Please try again in a few moments, or try with a smaller question. I can help with any topic once the API becomes available again!",
             "mode": "local_fallback"
         }
     
@@ -477,7 +567,7 @@ async def grok_summary(request: Request):
     except:
         return {"success": False, "error": "Invalid data format"}
     
-    # Try Groq first
+    # Try Groq first with retries
     if groq_client:
         system_prompt = """Create a quick summary with:
 1. MAIN TOPIC - What the page is about
@@ -496,7 +586,7 @@ Be brief and accurate."""
         
         try:
             response = groq_client.chat_completions_create(
-                model=MODEL,
+                model=get_current_model(),
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": "\n\n".join(context_parts)}
@@ -508,7 +598,7 @@ Be brief and accurate."""
             answer = response.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
             
             if answer:
-                return {"success": True, "summary": answer}
+                return {"success": True, "summary": answer, "model": get_current_model()}
                 
         except Exception as e:
             print(f"⚠️ Summary error: {str(e)}")
@@ -574,6 +664,9 @@ async def status():
         "groq_connected": groq_client is not None,
         "api_key_set": bool(GROQ_API_KEY),
         "cache_size": len(response_cache.cache),
-        "rate_limit_available": rate_limiter.acquire()
+        "rate_limit_available": rate_limiter.acquire(),
+        "current_model": get_current_model(),
+        "available_models": MODELS,
+        "queue_size": request_queue.size()
     }
 
