@@ -1,321 +1,337 @@
-# ========== GEMINI AI SCRAPER - NO MORE 429 ERRORS ==========
-# Features: Gemini API, Smart Context, Rate Limiting, 100% Working
-
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, FileResponse
-from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
+import asyncio
+import sys
+import os
+from typing import Any, Optional
 from dotenv import load_dotenv
-from scraper import UltraScraper
-import os, json, time, uuid, hashlib
-import requests
 
+# ------------------- Windows Event Loop Fix ------------------- #
+if sys.platform.startswith("win"):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+# ------------------- Env ------------------- #
 load_dotenv()
+PORT = int(os.environ.get("PORT", 8000))
+
+# ------------------- FastAPI Core ------------------- #
+from fastapi import FastAPI, Request, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+# ------------------- Rate Limiting ------------------- #
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
+# ------------------- Gemini Client ------------------- #
+import google.generativeai as genai
+
+API_KEY = os.getenv("GEMINI_API_KEY")
+if not API_KEY:
+    raise ValueError("You must set the GEMINI_API_KEY environment variable.")
+
+# Create client
+client = genai.GenerativeModel(model_name="gemini-3-flash-preview")
+
+async def call_gemini(prompt: str) -> str:
+    """Call Gemini API with exact prompts for accurate responses"""
+    loop = asyncio.get_event_loop()
+
+    def sync_call():
+        response = client.generate_content(prompt)
+        return response.text
+
+    return await loop.run_in_executor(None, sync_call)
+
+# ------------------- App Init ------------------- #
+limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Initialize scraper
-scraper = UltraScraper()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://13.60.154.214/", "http://3.95.32.144/"],  # Live server IPs
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# ========== GEMINI CLIENT ==========
-class GeminiClient:
-    def __init__(self, api_key):
-        self.api_key = api_key
-        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent"
+# ------------------- Schemas ------------------- #
+class ScrapeRequest(BaseModel):
+    url: str
 
-    def generate(self, prompt):
-        payload = {
-            "contents": [
-                {
-                    "parts": [
-                        {"text": prompt}
-                    ]
-                }
-            ]
-        }
+class FormatRequest(BaseModel):
+    data: Any
+    format_type: Optional[str] = None
 
-        headers = {
-            "Content-Type": "application/json",
-            "x-goog-api-key": self.api_key
-        }
+class ChatRequest(BaseModel):
+    message: str
+    scraped_data: Optional[str] = None
 
-        response = requests.post(self.url, headers=headers, json=payload, timeout=60)
+# ------------------- Scraper Module ------------------- #
+import httpx
+from bs4 import BeautifulSoup
+from urllib.parse import urljoin, urlparse
 
-        response.raise_for_status()
-        data = response.json()
+async def scrape_single_page(url: str) -> dict:
+    """Scrape a single page with exact data extraction"""
+    async with httpx.AsyncClient(timeout=30, follow_redirects=True) as client:
+        try:
+            response = await client.get(url)
+            response.raise_for_status()
+        except Exception as e:
+            return {"url": url, "error": f"Failed to fetch: {str(e)}"}
 
-        return data["candidates"][0]["content"]["parts"][0]["text"]
+    soup = BeautifulSoup(response.text, "html.parser")
 
-# Initialize Gemini client
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-gemini_client = None
-if GEMINI_API_KEY:
-    try:
-        gemini_client = GeminiClient(GEMINI_API_KEY)
-        print("✅ Gemini client initialized")
-    except Exception as e:
-        print(f"Gemini init error: {e}")
+    # Remove unwanted tags
+    for tag in soup(["script", "style", "noscript", "iframe", "svg"]):
+        tag.decompose()
 
-# ========== ROUTES ==========
-
-@app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
-@app.get("/health")
-async def health():
-    return {
-        "status": "healthy",
-        "gemini_client": "initialized" if gemini_client else "not_initialized"
+    # Extract exact data
+    data = {
+        "url": url,
+        "title": "",
+        "meta_description": "",
+        "headings": {"h1": [], "h2": [], "h3": [], "h4": [], "h5": [], "h6": []},
+        "paragraphs": [],
+        "links": [],
+        "lists": [],
+        "images": [],
+        "tables": []
     }
 
-@app.post("/scrape")
-async def scrape(request: Request):
-    form = await request.form()
-    url = form.get("url")
-    mode = form.get("mode", "comprehensive")
+    # Title
+    if soup.title:
+        data["title"] = soup.title.get_text(strip=True)
 
-    if not url:
-        return {"success": False, "error": "URL required"}
+    # Meta description
+    meta = soup.find("meta", attrs={"name": "description"})
+    if meta and meta.get("content"):
+        data["meta_description"] = meta["content"]
 
-    if not url.startswith("http"):
-        url = "https://" + url
+    # Headings by level
+    for level in ["h1", "h2", "h3", "h4", "h5", "h6"]:
+        for tag in soup.find_all(level):
+            text = tag.get_text(strip=True)
+            if text:
+                data["headings"][level].append(text)
 
+    # Paragraphs (clean and complete)
+    for p in soup.find_all("p"):
+        text = p.get_text(strip=True)
+        if text and len(text) > 10:  # Only meaningful paragraphs
+            data["paragraphs"].append(text)
+
+    # Links
+    for a in soup.find_all("a", href=True):
+        href = a.get("href", "")
+        text = a.get_text(strip=True)
+        if href and text:
+            data["links"].append({
+                "url": urljoin(url, href),
+                "text": text
+            })
+
+    # Lists
+    for ul in soup.find_all(["ul", "ol"]):
+        items = []
+        for li in ul.find_all("li"):
+            text = li.get_text(strip=True)
+            if text:
+                items.append(text)
+        if items:
+            data["lists"].append(items)
+
+    # Images
+    for img in soup.find_all("img"):
+        src = img.get("src", "")
+        alt = img.get("alt", "")
+        if src:
+            data["images"].append({
+                "url": urljoin(url, src),
+                "alt": alt
+            })
+
+    # Tables
+    for table in soup.find_all("table"):
+        table_data = []
+        for row in table.find_all("tr"):
+            row_data = []
+            for cell in row.find_all(["td", "th"]):
+                text = cell.get_text(strip=True)
+                row_data.append(text)
+            if row_data:
+                table_data.append(row_data)
+        if table_data:
+            data["tables"].append(table_data)
+
+    # Remove empty fields
+    for key in data:
+        if isinstance(data[key], list) and not data[key]:
+            data[key] = []
+
+    return data
+
+async def scrape_full_website(url: str, max_pages: int = 50) -> dict:
+    """Scrape entire website with internal link discovery"""
     try:
-        if mode == "single":
-            data = scraper.scrape_single_page(url, mode)
+        # Get base page
+        base_data = await scrape_single_page(url)
+        if "error" in base_data:
+            return base_data
+
+        # Extract internal links
+        internal_links = set()
+        base_domain = urlparse(url).netloc
+        
+        for link_info in base_data.get("links", []):
+            link_url = link_info["url"]
+            if urlparse(link_url).netloc == base_domain:
+                # Avoid self-links and fragments
+                clean_link = link_url.split("#")[0]
+                if clean_link != url and clean_link not in internal_links:
+                    internal_links.add(clean_link)
+
+        # Limit pages to prevent overload
+        links_to_scrape = list(internal_links)[:max_pages-1]  # -1 for base page
+        
+        # Scrape each internal page
+        pages = [base_data]
+        for link in links_to_scrape:
+            try:
+                page_data = await scrape_single_page(link)
+                if "error" not in page_data:
+                    pages.append(page_data)
+            except Exception as e:
+                print(f"Error scraping {link}: {e}")
+                continue
+
+        return {
+            "start_url": url,
+            "total_pages": len(pages),
+            "pages": pages,
+            "scraped_at": str(asyncio.get_event_loop().time())
+        }
+
+    except Exception as e:
+        return {"error": f"Failed to scrape website: {str(e)}"}
+
+# ------------------- Endpoints ------------------- #
+@app.post("/scrape")
+@limiter.limit("5/minute")
+async def scrape_endpoint(request: Request, payload: ScrapeRequest):
+    """Scrape website - single page or full site"""
+    try:
+        # Detect if it's a full site scrape or single page
+        if any(domain in payload.url.lower() for domain in ['.com', '.org', '.net', '.pk']):
+            # Try full site scrape first
+            result = await scrape_full_website(payload.url, max_pages=20)
         else:
-            data = scraper.crawl_website(url, mode)
+            # Single page scrape
+            result = await scrape_single_page(payload.url)
         
-        if "error" in data:
-            return {"success": False, "error": data["error"]}
-        
-        return {"success": True, "data": data}
+        return {"success": True, "data": result}
     
     except Exception as e:
-        print(f"❌ Scraping error: {str(e)}")
-        return {"success": False, "error": f"Scraping failed: {str(e)}"}
+        return {"success": False, "error": str(e)}
 
-@app.post("/groq-chat")
-async def chat(request: Request):
-    if not gemini_client:
-        return {"success": False, "error": "GEMINI_API_KEY not set or invalid"}
+@app.post("/chat")
+@limiter.limit("10/minute")
+async def chat_endpoint(request: Request, payload: ChatRequest):
+    """AI chat with exact scraped data analysis"""
+    if not payload.message:
+        return {"success": False, "error": "Message is required"}
     
-    form = await request.form()
-    message = form.get("message")
-    scraped = form.get("scraped_data")
-    
-    if not message or not scraped:
-        return {"success": False, "error": "Missing data"}
-    
-    data = json.loads(scraped)
-    
-    def build_smart_context(data, message):
-        context_parts = ["SCRAPED DATA ANALYSIS:"]
-        
-        # Check if user wants specific content modification
-        wants_modification = any(word in message.lower() for word in ['change', 'modify', 'update', 'edit', 'remove', 'replace'])
-        
-        # Ultra-minimal data selection - only 1 page max
-        if 'pages' in data:
-            # Multi-page crawl data
-            context_parts.append(f"Website: {data.get('start_url', 'Unknown')}")
-            context_parts.append(f"Total pages: {len(data['pages'])}")
-            context_parts.append("")
-            
-            # Only first page for any query type
-            for i, page in enumerate(data['pages'][:1]):  # Limit to 1 page only
-                context_parts.append(f"PAGE {i+1}: {page.get('title', 'No title')}")
-                    
-                # Only title and short description
-                if page.get('description') and len(page['description']) < 100:
-                    context_parts.append(f"Description: {page['description']}")
-                
-                # Only H1 heading
-                if page.get('headings') and page['headings'].get('h1'):
-                    context_parts.append(f"H1: {page['headings']['h1'][0] if page['headings']['h1'] else 'None'}")
-                
-                # Only first 1 paragraph maximum
-                if page.get('paragraphs'):
-                    context_parts.append("Content:")
-                    for para in page['paragraphs'][:1]:  # Only 1 paragraph
-                        if len(para) < 150:  # Only very short paragraphs
-                            context_parts.append(f"- {para}")
-                
-                context_parts.append("")
-        else:
-            # Single page data - super minimal
-            context_parts.append(f"Page: {data.get('title', 'No title')}")
-            
-            # Only very short description
-            if data.get('description') and len(data['description']) < 80:
-                context_parts.append(f"Description: {data['description']}")
-            
-            # Only H1 heading
-            if data.get('headings') and data['headings'].get('h1'):
-                context_parts.append(f"H1: {data['headings']['h1'][0] if data['headings']['h1'] else 'None'}")
-            
-            # Only first 1 paragraph
-            if data.get('paragraphs'):
-                context_parts.append("Content:")
-                if wants_modification:
-                    # For modifications, only first 2 paragraphs
-                    for para in data['paragraphs'][:2]:
-                        if len(para) < 120:  # Only very short paragraphs
-                            context_parts.append(f"- {para}")
-                else:
-                    # For regular queries, only first 1 paragraph
-                    for para in data['paragraphs'][:1]:
-                        if len(para) < 100:  # Only very short paragraphs
-                            context_parts.append(f"- {para}")
-        
-        context_parts.append(f"\nQUESTION: {message}")
-        context_parts.append(f"\nMODIFICATION REQUEST: {'Yes' if wants_modification else 'No'}")
-        
-        return "\n".join(context_parts)
-
-    # Build ultra-minimal context to avoid 429
-    context = build_smart_context(data, message)
-
     try:
-        prompt = f"""
-You are an AI assistant analyzing scraped website data.
+        # If scraped data provided, analyze it
+        if payload.scraped_data:
+            prompt = f"""You are an EXACT data analyst. Analyze the following scraped website data and answer the user's question PRECISELY.
 
-DATA:
-{context}
+SCRAPED DATA:
+{payload.scraped_data}
+
+USER QUESTION:
+{payload.message}
+
+RULES:
+1. ONLY use the provided scraped data
+2. Give EXACT answers from the data
+3. If information not found, say: "This information is not available in the scraped data"
+4. Be precise and factual
+5. Do not guess or add external knowledge
+6. For modification requests, find the exact content and modify it accurately
+
+Answer:"""
+        else:
+            # General knowledge question
+            prompt = f"""You are an expert AI assistant. Provide a detailed and accurate answer to this question.
 
 QUESTION:
-{message}
+{payload.message}
 
-Answer ONLY using the provided data.
-"""
- 
-        answer = gemini_client.generate(prompt)
+Give a comprehensive and helpful answer."""
 
-        if answer:
-            return {"success": True, "response": answer, "model": "gemini-3-flash-preview"}
-
+        response = await call_gemini(prompt)
+        return {"success": True, "response": response}
+    
     except Exception as e:
-        print(f"Gemini error: {str(e)}")
-        return {"success": False, "error": f"Gemini API error: {str(e)}"}
+        return {"success": False, "error": f"AI analysis failed: {str(e)}"}
 
-@app.post("/grok-mode")
-async def grok_mode(request: Request):
-    if not gemini_client:
-        return {"success": False, "error": "GEMINI_API_KEY not set or invalid"}
-    
-    form = await request.form()
-    message = form.get("message")
-    
-    if not message:
-        return {"success": False, "error": "Missing message"}
-
+@app.post("/format")
+@limiter.limit("3/minute")
+async def format_endpoint(request: Request, req: FormatRequest):
+    """Format scraped data into different formats"""
     try:
-        prompt = f"""
-You are an expert AI assistant.
+        if req.format_type and req.format_type.strip():
+            user_prompt = f"""Convert the following scraped data into {req.format_type} format. Be EXACT and complete.
 
-User Question:
-{message}
+DATA:
+{req.data}
 
-Give a detailed helpful answer.
-"""
+Requirements:
+- Create proper {req.format_type} structure
+- Include all available fields
+- Ensure data integrity
+- Make it ready for import/use"""
+        else:
+            user_prompt = f"""Convert this scraped data into Shopify-compatible CSV format with EXACT columns.
 
-        answer = gemini_client.generate(prompt)
+DATA:
+{req.data}
 
-        return {
-            "success": True,
-            "response": answer,
-            "mode": "gemini"
-        }
+Required CSV columns:
+- Title (product name)
+- Description 
+- Price (if available)
+- SKU (if available)
+- Stock (if available)
+- Image URL (if available)
 
+Create a proper CSV that can be imported directly into Shopify."""
+
+        formatted_result = await call_gemini(user_prompt)
+        return {"success": True, "formatted": formatted_result}
+    
     except Exception as e:
-        return {"success": False, "error": f"Grok Mode error: {str(e)}"}
+        return {"success": False, "error": str(e)}
 
-@app.post("/grok-summary")
-async def grok_summary(request: Request):
-    if not gemini_client:
-        return {"success": False, "error": "GEMINI_API_KEY not set or invalid"}
-    
-    form = await request.form()
-    scraped = form.get("scraped_data")
-    
-    if not scraped:
-        return {"success": False, "error": "Missing scraped data"}
-    
-    data = json.loads(scraped)
-    
-    context_parts = []
-    if data.get('title'):
-        context_parts.append(f"Title: {data['title']}")
-    if data.get('description'):
-        context_parts.append(f"Description: {data['description']}")
-    if data.get('paragraphs'):
-        context_parts.append("\n".join(data['paragraphs'][:15]))
+# ------------------- Health & Test ------------------- #
+@app.get("/")
+def health():
+    return {"status": "Backend live 🚀", "gemini": "connected"}
 
-    try:
-        prompt = f"""
-Create a summary of this website data.
+@app.get("/test")
+def test():
+    return {"message": "AI Scraper Backend Working", "version": "2.0"}
 
-{context_parts}
-
-Give:
-1. MAIN TOPIC
-2. KEY POINTS
-3. CONCLUSION
-"""
-
-        answer = gemini_client.generate(prompt)
-
-        return {
-            "success": True,
-            "summary": answer,
-            "model": "gemini-3-flash-preview"
-        }
-
-    except Exception as e:
-        return {"success": False, "error": f"Summary error: {str(e)}"}
-
-@app.post("/export")
-async def export(request: Request):
-    body = await request.json()
-    fmt = body.get("format")
-    data = body.get("data")
-    
-    if not fmt or not data:
-        return {"success": False, "error": "Missing format or data"}
-    
-    filename = f"scraped_{int(time.time())}"
-    
-    handlers = {
-        "json": scraper.save_as_json,
-        "csv": scraper.save_as_csv,
-        "excel": scraper.save_as_excel,
-        "txt": scraper.save_as_text,
-        "pdf": scraper.save_as_pdf
-    }
-    
-    if fmt not in handlers:
-        return {"success": False, "error": f"Unsupported format: {fmt}"}
-    
-    path = handlers[fmt](data, filename)
-    return FileResponse(path, filename=os.path.basename(path))
-
-@app.post("/clear-cache")
-async def clear_cache():
-    """Clear cache (compatibility endpoint)"""
-    return {"success": True, "message": "Cache cleared"}
-
-@app.get("/status")
-async def status():
-    """Get API status"""
-    return {
-        "gemini_connected": gemini_client is not None,
-        "api_key_set": bool(GEMINI_API_KEY),
-        "model": "gemini-3-flash-preview"
-    }
-
+# ------------------- Local Run ------------------- #
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=PORT,
+        reload=True
+    )
