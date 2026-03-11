@@ -19,21 +19,24 @@ PIP=pip3
 PROJECT_DIR=/home/ec2-user/Ai-scraper
 
 # -----------------------------
-# Function to check if process is running
+# Kill existing processes more aggressively
 # -----------------------------
-check_process() {
-    if pgrep -f "$1" > /dev/null; then
-        echo "❌ Process $1 is running, killing..."
-        pkill -f "$1" || true
-        sleep 2
-    fi
-}
+echo "🛑 Killing existing processes on port 8000..."
 
-# -----------------------------
-# Kill existing processes
-# -----------------------------
-check_process "uvicorn app.app:app"
-check_process "python3 app/app.py"
+# Stop systemd service first
+sudo systemctl stop ai-scraper 2>/dev/null || true
+sleep 2
+
+# Kill any process using port 8000
+sudo fuser -k 8000/tcp 2>/dev/null || true
+
+# Kill uvicorn processes
+pkill -f "uvicorn" || true
+pkill -f "python.*app" || true
+pkill -f "app:app" || true
+
+# Also kill by port
+lsof -ti:8000 | xargs -r kill -9 2>/dev/null || true
 
 echo "⏳ Waiting for processes to stop..."
 sleep 3
@@ -106,9 +109,14 @@ if kill -0 $APP_PID 2>/dev/null; then
     echo "✅ Application is running successfully (PID: $APP_PID)"
     echo "🌐 Server should be available at: http://YOUR_SERVER_IP/"
 
-    # Restart systemd service if exists
-    echo "🔄 Restarting ai-scraper service..."
-    sudo systemctl restart ai-scraper || echo "⚠️ systemctl restart failed (service might not exist)"
+    # Stop systemd service if exists (to free port)
+    echo "🔄 Stopping ai-scraper service..."
+    sudo systemctl stop ai-scraper 2>/dev/null || echo "⚠️ systemctl stop failed (service might not exist)"
+    sleep 2
+    
+    # Ensure port is free
+    sudo fuser -k 8000/tcp 2>/dev/null || true
+    sleep 1
 
     # Health check
     echo "🔍 Performing health check..."
