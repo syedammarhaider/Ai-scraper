@@ -23,7 +23,7 @@ echo "⏳ Waiting for processes to stop..."
 sleep 3
 
 # Change to project directory
-cd /home/ubuntu/Ai-scraper || {
+cd /home/ec2-user/Ai-scraper || {
     echo "❌ Cannot change to project directory"
     exit 1
 }
