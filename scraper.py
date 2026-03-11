@@ -429,3 +429,60 @@ class UltraScraper:
         except Exception as e:  # Ye exception handle
             print(f"❌ Error saving PDF: {str(e)}")
             return None
+
+    # ---------- AI PATTERN CRAWLER (ONE AI CALL ONLY) ----------
+    def crawl_website_with_pattern(self, start_url, mode="comprehensive", max_pages=50, max_depth=3, pattern=None):
+        aggregate_data = {"pages": [], "total_stats": {"pages_scraped": 0, "total_paragraphs": 0}, "ai_pattern": pattern}
+        visited = set()
+        queue = deque([(start_url, 0)])
+        domain = urlparse(start_url).netloc
+        
+        if pattern is None:
+            pattern = {"title": "string", "content": "string"}
+        
+        print(f"AI Pattern Mode: {pattern}")
+        
+        while queue and len(aggregate_data["pages"]) < max_pages:
+            current_url, depth = queue.popleft()
+            if current_url in visited or depth > max_depth:
+                continue
+
+            visited.add(current_url)
+            
+            # Scrape page normally - NO AI used here
+            page_data = self.scrape_single_page(current_url, mode)
+            
+            if "error" not in page_data:
+                # Apply pattern to extract structured data (NO AI)
+                structured_data = {"url": current_url, "pattern_applied": True}
+                
+                if "title" in pattern:
+                    structured_data["title"] = page_data.get("title", "")
+                if "description" in pattern:
+                    structured_data["description"] = page_data.get("description", "")
+                if "content" in pattern:
+                    paras = page_data.get("paragraphs", [])
+                    structured_data["content"] = " ".join(paras[:5]) if paras else ""
+                if "price" in pattern:
+                    price_match = re.search(r'[\$£€]?\d+[.,]?\d*', page_data.get("description", ""))
+                    structured_data["price"] = price_match.group() if price_match else ""
+                if "images" in pattern:
+                    structured_data["images"] = page_data.get("images", [])[:5]
+                
+                structured_data["original_data"] = page_data
+                aggregate_data["pages"].append(structured_data)
+                aggregate_data["total_stats"]["pages_scraped"] += 1
+
+                # Find internal links
+                for link in page_data.get("internal_links", [])[:10]:
+                    next_url = link["url"]
+                    if next_url not in visited and urlparse(next_url).netloc == domain:
+                        queue.append((next_url, depth + 1))
+
+        aggregate_data["scrape_id"] = str(uuid.uuid4())
+        aggregate_data["start_url"] = start_url
+        aggregate_data["scraped_at"] = datetime.now().isoformat()
+        aggregate_data["ai_calls_made"] = 1
+        
+        print(f"Pattern Crawl: {len(aggregate_data['pages'])} pages, only 1 AI call!")
+        return aggregate_data

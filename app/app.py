@@ -71,6 +71,7 @@ async def scrape(request: Request):
     form = await request.form()
     url = form.get("url", "").strip()
     mode = form.get("mode", "comprehensive")
+    use_pattern = form.get("use_pattern", "false").lower() == "true"
 
     if not url:
         return {"success": False, "error": "URL required"}
@@ -79,15 +80,66 @@ async def scrape(request: Request):
         url = "https://" + url
 
     try:
-        if mode == "single":
-            data = scraper.scrape_single_page(url)
+        if use_pattern and gemini_client and mode != "single":
+            # AI Pattern Mode: Use AI once to learn pattern, then apply to all pages
+            print(f"🧠 Using AI Pattern Mode for: {url}")
+            
+            # Step 1: Scrape first page with full data
+            first_page = scraper.scrape_single_page(url, mode="comprehensive")
+            if "error" in first_page:
+                return {"success": False, "error": first_page["error"]}
+            
+            # Step 2: Ask AI to create extraction pattern (only ONE AI call)
+            pattern_prompt = f"""Analyze this scraped page data and create a structured extraction pattern.
+Return ONLY a JSON object with the field names and types to extract from similar pages.
+
+Page URL: {url}
+Page Title: {first_page.get('title', '')[:100]}
+Description: {first_page.get('description', '')[:200]}
+Headings: {first_page.get('headings', {})}
+First paragraph: {first_page.get('paragraphs', [''])[0][:200] if first_page.get('paragraphs') else ''}
+
+Return JSON like:
+{{
+    "title": "string - page title",
+    "description": "string - meta description", 
+    "price": "string - product price if found",
+    "content": "string - main content/description",
+    "images": "array - image URLs"
+}}
+
+Respond ONLY with JSON, no explanation."""
+
+            try:
+                pattern_response = gemini_client.generate(pattern_prompt)
+                # Extract JSON from response
+                import re
+                json_match = re.search(r'\{[\s\S]*\}', pattern_response)
+                if json_match:
+                    extraction_pattern = json.loads(json_match.group())
+                else:
+                    extraction_pattern = {"title": "string", "content": "string"}
+            except Exception as pe:
+                print(f"Pattern creation failed: {pe}")
+                extraction_pattern = {"title": "string", "content": "string"}
+            
+            # Step 3: Crawl remaining pages WITHOUT AI - use the pattern
+            aggregate_data = scraper.crawl_website_with_pattern(url, mode=mode, max_pages=40, max_depth=4, pattern=extraction_pattern)
+            aggregate_data["ai_pattern"] = extraction_pattern
+            aggregate_data["pattern_mode"] = True
+            
+            return {"success": True, "data": aggregate_data, "pattern": extraction_pattern}
         else:
-            data = scraper.crawl_website(url, mode=mode, max_pages=40, max_depth=4)
+            # Regular mode - no AI pattern
+            if mode == "single":
+                data = scraper.scrape_single_page(url)
+            else:
+                data = scraper.crawl_website(url, mode=mode, max_pages=40, max_depth=4)
 
-        if "error" in data:
-            return {"success": False, "error": data["error"]}
+            if "error" in data:
+                return {"success": False, "error": data["error"]}
 
-        return {"success": True, "data": data}
+            return {"success": True, "data": data}
 
     except Exception as e:
         return {"success": False, "error": str(e)}
