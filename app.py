@@ -22,7 +22,7 @@ scraper = UltraScraper()
 class GeminiClient:
     def __init__(self, api_key: str):
         self.api_key = api_key
-        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
     def generate(self, prompt: str) -> str:
         payload = {
@@ -47,7 +47,7 @@ gemini_client = None
 if GEMINI_API_KEY:
     try:
         gemini_client = GeminiClient(GEMINI_API_KEY)
-        print("Gemini client initialized (model = gemini-1.5-flash)")
+        print("Gemini client initialized (model = gemini-2.0-flash)")
     except Exception as e:
         print("Gemini init failed →", e)
 
@@ -62,7 +62,7 @@ async def health():
     return {
         "status": "ok",
         "gemini": "connected" if gemini_client else "not connected",
-        "model": "gemini-1.5-flash"
+        "model": "gemini-2.0-flash"
     }
 
 
@@ -128,7 +128,7 @@ Answer concisely and directly:"""
         return {
             "success": True,
             "response": answer.strip(),
-            "model": "gemini-1.5-flash"
+            "model": "gemini-2.0-flash"
         }
 
     except Exception as e:
@@ -200,7 +200,7 @@ async def universal_chat(request: Request):
         return {
             "success": True,
             "response": answer.strip(),
-            "mode": "gemini-1.5-flash"
+            "mode": "gemini-2.0-flash"
         }
     except Exception as e:
         return {"success": False, "error": str(e)}
