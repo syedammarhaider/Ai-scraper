@@ -3,7 +3,6 @@
 # ======================================================
 # Deployment script for AI Scraper - Uses Systemd ONLY
 # ======================================================
-set -e  # Exit on any error
 
 echo "🚀 Starting deployment..."
 
@@ -11,8 +10,6 @@ echo "🚀 Starting deployment..."
 # Project directory
 # -----------------------------
 PROJECT_DIR=/home/ec2-user/Ai-scraper
-PYTHON=python3
-PIP=pip3
 
 # -----------------------------
 # Stop any running instances first
@@ -23,10 +20,7 @@ sudo systemctl stop ai-scraper 2>/dev/null || true
 # Kill any remaining processes on port 8000
 sleep 2
 sudo fuser -k 8000/tcp 2>/dev/null || true
-
-# Kill any orphan uvicorn processes
-pkill -f "uvicorn.*app" 2>/dev/null || true
-sleep 2
+sleep 1
 
 # -----------------------------
 # Go to project directory
@@ -48,27 +42,18 @@ git pull origin main
 # Install dependencies
 # -----------------------------
 echo "📦 Installing dependencies..."
-$PIP install --user -r requirements.txt 2>/dev/null || {
-    echo "⚠️ Using pip3 install..."
-    pip3 install --user -r requirements.txt
-}
-
-# -----------------------------
-# Verify installation
-# -----------------------------
-echo "🔍 Checking installation..."
-$PYTHON -c "import fastapi, uvicorn; print('✅ Dependencies OK')"
+pip3 install --user -r requirements.txt 2>/dev/null || pip install --user -r requirements.txt
 
 # -----------------------------
 # Ensure systemd service uses correct module path
 # -----------------------------
-echo "🔧 Updating systemd service if needed..."
+echo "🔧 Updating systemd service..."
 SERVICE_FILE="/etc/systemd/system/ai-scraper.service"
 
 if [ -f "$SERVICE_FILE" ]; then
-    # Fix the ExecStart line if it has old path
+    # Fix the ExecStart line to use correct module path
     sudo sed -i 's/app\.app:app/app:app/g' $SERVICE_FILE
-    echo "✅ Systemd service updated"
+    echo "✅ Systemd service file updated"
     
     # Reload systemd
     sudo systemctl daemon-reload
@@ -84,14 +69,13 @@ sudo systemctl start ai-scraper
 # Wait for startup
 # -----------------------------
 echo "⏳ Waiting for application to start..."
-sleep 5
+sleep 8
 
 # -----------------------------
 # Check status
 # -----------------------------
 if sudo systemctl is-active --quiet ai-scraper; then
     echo "✅ Application is running successfully"
-    echo "🌐 Server should be available at: http://YOUR_SERVER_IP/"
     
     # Health check
     echo "🔍 Performing health check..."
@@ -101,8 +85,7 @@ if sudo systemctl is-active --quiet ai-scraper; then
         echo "🎉 Deployment completed successfully!"
         exit 0
     else
-        echo "⚠️ Service running but health endpoint not responding yet"
-        echo "📋 Service status:"
+        echo "⚠️ Service running but health endpoint not responding"
         sudo systemctl status ai-scraper -l --no-pager || true
         exit 0
     fi
@@ -111,7 +94,7 @@ else
     echo "📋 Service status:"
     sudo systemctl status ai-scraper -l --no-pager || true
     echo "📋 Recent logs:"
-    sudo journalctl -u ai-scraper -n 20 --no-pager || true
+    sudo journalctl -u ai-scraper -n 30 --no-pager || true
     exit 1
 fi
 
