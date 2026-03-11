@@ -1,9 +1,16 @@
 #!/bin/bash
 
-# Robust deployment c script for AI Scraper
+# Robust deployment script for AI Scraper
 set -e  # Exit on any error
 
 echo "🚀 Starting deployment..."
+
+# Set Python & Pip explicitly
+PYTHON=python3
+PIP=pip3
+
+# Project directory
+PROJECT_DIR=/home/ec2-user/Ai-scraper
 
 # Function to check if process is running
 check_process() {
@@ -16,19 +23,19 @@ check_process() {
 
 # Kill existing processes
 check_process "uvicorn app:app"
-check_process "python app.py"
+check_process "python3 app.py"
 
 # Wait for processes to stop
 echo "⏳ Waiting for processes to stop..."
 sleep 3
 
 # Change to project directory
-cd /home/ec2-user/Ai-scraper || {
-    echo "❌ Cannot change to project directory"
+cd $PROJECT_DIR || {
+    echo "❌ Cannot change to project directory ($PROJECT_DIR)"
     exit 1
 }
 
-# Reset to previous commit (as requested)
+# Reset to previous commit (if needed)
 echo "🔄 Resetting to previous commit..."
 git reset --hard HEAD~1 || echo "⚠️ Git reset failed"
 
@@ -45,41 +52,41 @@ fi
 # Install dependencies with error handling
 echo "📦 Installing dependencies..."
 if [ -f "requirements.txt" ]; then
-    pip install -r requirements.txt || {
+    $PIP install --user -r requirements.txt || {
         echo "⚠️ Installing missing packages individually..."
-        pip install fastapi uvicorn python-multipart requests beautifulsoup4 python-dotenv fpdf pandas openpyxl lxml urllib3
+        $PIP install --user fastapi uvicorn python-multipart requests beautifulsoup4 python-dotenv fpdf pandas openpyxl lxml urllib3
     }
 else
     echo "⚠️ requirements.txt not found, installing basic packages..."
-    pip install fastapi uvicorn python-multipart requests beautifulsoup4 python-dotenv fpdf pandas openpyxl lxml urllib3
+    $PIP install --user fastapi uvicorn python-multipart requests beautifulsoup4 python-dotenv fpdf pandas openpyxl lxml urllib3
 fi
 
 # Check if installation was successful
 echo "🔍 Checking installation..."
-python -c "import fastapi, uvicorn; print('✅ Dependencies OK')" || {
+$PYTHON -c "import fastapi, uvicorn; print('✅ Dependencies OK')" || {
     echo "❌ Dependency installation failed"
     exit 1
 }
 
-# Start the application with error handling
+# Start the application
 echo "🔥 Starting application..."
-export PYTHONPATH=/home/ubuntu/Ai-scraper:$PYTHONPATH
+export PYTHONPATH=$PROJECT_DIR:$PYTHONPATH
 
-# Try to start application
-python -m uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1 --access-log --log-level info > deployment.log 2>&1 &
+# Run Uvicorn in background and save logs
+$PYTHON -m uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1 --access-log --log-level info > deployment.log 2>&1 &
 
 # Get the PID
 APP_PID=$!
 echo "📋 Application started with PID: $APP_PID"
 
-# Wait a moment and check if it's still running
+# Wait a few seconds and check if it's running
 sleep 5
 
 if kill -0 $APP_PID 2>/dev/null; then
     echo "✅ Application is running successfully (PID: $APP_PID)"
-    echo "🌐 Server should be available at: http://3.95.32.144/"
+    echo "🌐 Server should be available at: http://YOUR_SERVER_IP/"
     
-    # Restart ai-scraper service
+    # Restart ai-scraper service if exists
     echo "🔄 Restarting ai-scraper service..."
     sudo systemctl restart ai-scraper || echo "⚠️ systemctl restart failed (service might not exist)"
     
@@ -93,13 +100,13 @@ if kill -0 $APP_PID 2>/dev/null; then
         exit 0
     else
         echo "❌ Health check failed"
-        echo "📋 Checking logs..."
+        echo "📋 Last 20 lines of deployment.log:"
         tail -20 deployment.log
         exit 1
     fi
 else
     echo "❌ Application failed to start"
-    echo "📋 Checking logs..."
+    echo "📋 Last 20 lines of deployment.log:"
     tail -20 deployment.log
     exit 1
 fi
