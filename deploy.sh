@@ -3,7 +3,7 @@
 # Robust deployment script for AI Scraper
 set -e  # Exit on any error
 
-echo "🚀 Starting deployment..."
+echo "🚀 Starting hdeployment..."
 
 # Set Python & Pip explicitly
 PYTHON=python3
