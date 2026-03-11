@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Robust deployment script for AI Scraper
+# Robust deployment c script for AI Scraper
 set -e  # Exit on any error
 
 echo "🚀 Starting deployment..."
