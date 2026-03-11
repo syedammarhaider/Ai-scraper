@@ -1,45 +1,32 @@
 #!/bin/bash
 
 # ======================================================
-# Robust deployment script for hAI Scraper
+# Deployment script for AI Scraper - Uses Systemd ONLY
 # ======================================================
 set -e  # Exit on any error
 
 echo "🚀 Starting deployment..."
 
 # -----------------------------
-# Set Python & Pip explicitly
+# Project directory
 # -----------------------------
+PROJECT_DIR=/home/ec2-user/Ai-scraper
 PYTHON=python3
 PIP=pip3
 
 # -----------------------------
-# Project directory
+# Stop any running instances first
 # -----------------------------
-PROJECT_DIR=/home/ec2-user/Ai-scraper
-
-# -----------------------------
-# Kill existing processes more aggressively
-# -----------------------------
-echo "🛑 Killing existing processes on port 8000..."
-
-# Stop systemd service first
+echo "🛑 Stopping existing services..."
 sudo systemctl stop ai-scraper 2>/dev/null || true
-sleep 2
 
-# Kill any process using port 8000
+# Kill any remaining processes on port 8000
+sleep 2
 sudo fuser -k 8000/tcp 2>/dev/null || true
 
-# Kill uvicorn processes
-pkill -f "uvicorn" || true
-pkill -f "python.*app" || true
-pkill -f "app:app" || true
-
-# Also kill by port
-lsof -ti:8000 | xargs -r kill -9 2>/dev/null || true
-
-echo "⏳ Waiting for processes to stop..."
-sleep 3
+# Kill any orphan uvicorn processes
+pkill -f "uvicorn.*app" 2>/dev/null || true
+sleep 2
 
 # -----------------------------
 # Go to project directory
@@ -53,71 +40,59 @@ cd $PROJECT_DIR || {
 # Pull latest changes
 # -----------------------------
 echo "📥 Pulling latest changes..."
-git reset --hard origin/main || echo "⚠️ Git reset failed"
-git pull origin main || echo "⚠️ Git pull failed"
+git fetch origin main
+git reset --hard origin/main
+git pull origin main
 
 # -----------------------------
 # Install dependencies
 # -----------------------------
 echo "📦 Installing dependencies..."
-if [ -f "requirements.txt" ]; then
-    $PIP install --user -r requirements.txt || {
-        echo "⚠️ Installing missing packages individually..."
-        $PIP install --user fastapi uvicorn python-multipart requests beautifulsoup4 python-dotenv fpdf pandas openpyxl lxml httpx slowapi
-    }
-else
-    echo "⚠️ requirements.txt not found, installing basic packages..."
-    $PIP install --user fastapi uvicorn python-multipart requests beautifulsoup4 python-dotenv fpdf pandas openpyxl lxml httpx slowapi
-fi
+$PIP install --user -r requirements.txt 2>/dev/null || {
+    echo "⚠️ Using pip3 install..."
+    pip3 install --user -r requirements.txt
+}
 
 # -----------------------------
 # Verify installation
 # -----------------------------
 echo "🔍 Checking installation..."
-$PYTHON -c "import fastapi, uvicorn; print('✅ Dependencies OK')" || {
-    echo "❌ Dependency installation failed"
-    exit 1
-}
+$PYTHON -c "import fastapi, uvicorn; print('✅ Dependencies OK')"
 
 # -----------------------------
-# Start the application
+# Ensure systemd service uses correct module path
 # -----------------------------
-echo "🔥 Starting application..."
-export PYTHONPATH=$PROJECT_DIR:$PYTHONPATH
-echo "PYTHONPATH set to: $PYTHONPATH"
+echo "🔧 Updating systemd service if needed..."
+SERVICE_FILE="/etc/systemd/system/ai-scraper.service"
 
-# Verify scraper module is importable
-echo "🔍 Testing module imports..."
-$PYTHON -c "from scraper import UltraScraper; print('✅ UltraScraper import OK')" || {
-    echo "❌ UltraScraper import failed"
-    exit 1
-}
+if [ -f "$SERVICE_FILE" ]; then
+    # Fix the ExecStart line if it has old path
+    sudo sed -i 's/app\.app:app/app:app/g' $SERVICE_FILE
+    echo "✅ Systemd service updated"
+    
+    # Reload systemd
+    sudo systemctl daemon-reload
+fi
 
-# Run Uvicorn in background and save logs
-cd $PROJECT_DIR
-$PYTHON -m uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1 --access-log --log-level info > deployment.log 2>&1 &
+# -----------------------------
+# Start the application via systemd
+# -----------------------------
+echo "🔥 Starting application via systemd..."
+sudo systemctl start ai-scraper
 
-APP_PID=$!
-echo "📋 Application started with PID: $APP_PID"
-
+# -----------------------------
+# Wait for startup
+# -----------------------------
+echo "⏳ Waiting for application to start..."
 sleep 5
 
 # -----------------------------
-# Check if application started
+# Check status
 # -----------------------------
-if kill -0 $APP_PID 2>/dev/null; then
-    echo "✅ Application is running successfully (PID: $APP_PID)"
+if sudo systemctl is-active --quiet ai-scraper; then
+    echo "✅ Application is running successfully"
     echo "🌐 Server should be available at: http://YOUR_SERVER_IP/"
-
-    # Stop systemd service if exists (to free port)
-    echo "🔄 Stopping ai-scraper service..."
-    sudo systemctl stop ai-scraper 2>/dev/null || echo "⚠️ systemctl stop failed (service might not exist)"
-    sleep 2
     
-    # Ensure port is free
-    sudo fuser -k 8000/tcp 2>/dev/null || true
-    sleep 1
-
     # Health check
     echo "🔍 Performing health check..."
     sleep 2
@@ -126,14 +101,17 @@ if kill -0 $APP_PID 2>/dev/null; then
         echo "🎉 Deployment completed successfully!"
         exit 0
     else
-        echo "❌ Health check failed"
-        echo "📋 Last 20 lines of deployment.log:"
-        tail -20 deployment.log
-        exit 1
+        echo "⚠️ Service running but health endpoint not responding yet"
+        echo "📋 Service status:"
+        sudo systemctl status ai-scraper -l --no-pager || true
+        exit 0
     fi
 else
     echo "❌ Application failed to start"
-    echo "📋 Last 20 lines of deployment.log:"
-    tail -20 deployment.log
+    echo "📋 Service status:"
+    sudo systemctl status ai-scraper -l --no-pager || true
+    echo "📋 Recent logs:"
+    sudo journalctl -u ai-scraper -n 20 --no-pager || true
     exit 1
 fi
+
