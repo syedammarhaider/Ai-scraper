@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.templating import Jinja2Templates
@@ -81,15 +82,11 @@ async def scrape(request: Request):
 
     try:
         if use_pattern and gemini_client and mode != "single":
-            # AI Pattern Mode: Use AI once to learn pattern, then apply to all pages
-            print(f"🧠 Using AI Pattern Mode for: {url}")
-            
-            # Step 1: Scrape first page with full data
+            print(f"Using AI Pattern Mode for: {url}")
             first_page = scraper.scrape_single_page(url, mode="comprehensive")
             if "error" in first_page:
                 return {"success": False, "error": first_page["error"]}
             
-            # Step 2: Ask AI to create extraction pattern (only ONE AI call)
             pattern_prompt = f"""Analyze this scraped page data and create a structured extraction pattern.
 Return ONLY a JSON object with the field names and types to extract from similar pages.
 
@@ -112,7 +109,6 @@ Respond ONLY with JSON, no explanation."""
 
             try:
                 pattern_response = gemini_client.generate(pattern_prompt)
-                # Extract JSON from response
                 import re
                 json_match = re.search(r'\{[\s\S]*\}', pattern_response)
                 if json_match:
@@ -123,14 +119,12 @@ Respond ONLY with JSON, no explanation."""
                 print(f"Pattern creation failed: {pe}")
                 extraction_pattern = {"title": "string", "content": "string"}
             
-            # Step 3: Crawl remaining pages WITHOUT AI - use the pattern
             aggregate_data = scraper.crawl_website_with_pattern(url, mode=mode, max_pages=40, max_depth=4, pattern=extraction_pattern)
             aggregate_data["ai_pattern"] = extraction_pattern
             aggregate_data["pattern_mode"] = True
             
             return {"success": True, "data": aggregate_data, "pattern": extraction_pattern}
         else:
-            # Regular mode - no AI pattern
             if mode == "single":
                 data = scraper.scrape_single_page(url)
             else:
@@ -188,50 +182,104 @@ Answer concisely and directly:"""
 
 
 def build_very_small_context(data: dict, question: str) -> str:
-    lines = ["[Website data — first page only]"]
-
-    wants_edit = any(w in question.lower() for w in [
-        'change', 'modify', 'edit', 'update', 'rewrite', 'replace', 'remove', 'add'
-    ])
-
-    # ── Single page ───────────────────────────────
+    """Build comprehensive context from scraped data - gives exact answers based on what's asked"""
+    question_lower = question.lower()
+    lines = []
+    
+    # Detect what user is asking for
+    wants_urls = any(w in question_lower for w in ['url', 'links', 'addresses', 'site', 'websites'])
+    wants_paragraphs = any(w in question_lower for w in ['paragraph', 'content', 'text', 'details', 'information', 'write', 'article'])
+    wants_images = any(w in question_lower for w in ['image', 'photo', 'picture', 'img'])
+    wants_headings = any(w in question_lower for w in ['heading', 'title', 'header'])
+    wants_edit = any(w in question_lower for w in ['change', 'modify', 'edit', 'update', 'rewrite', 'replace', 'remove', 'add', 'convert'])
+    wants_all = any(w in question_lower for w in ['all', 'everything', 'full', 'complete'])
+    wants_more = any(w in question_lower for w in ['more', 'detailed', 'detail', 'explain'])
+    
+    # Single page data
     if 'url' in data and 'title' in data:
-        lines.append(f"Page title: {data.get('title','')[:140]}")
-        if d := data.get('description',''):
-            lines.append(f"Meta description: {d[:120]}")
-
-        if h1 := data.get('headings',{}).get('h1',[]):
-            lines.append(f"H1: {h1[0][:140] if h1 else ''}")
-
-        if paras := data.get('paragraphs', []):
-            limit = 3 if not wants_edit else 5
-            short_paras = [p for p in paras[:limit] if 40 <= len(p) <= 320]
-            if short_paras:
-                lines.append("Main content excerpts:")
-                for p in short_paras:
-                    lines.append(f"• {p}")
-
-    # ── Crawled site (only first page!) ───────────
+        lines.append("=== SCRAPED PAGE ===")
+        lines.append(f"URL: {data.get('url', 'N/A')}")
+        
+        if wants_headings or wants_all or not any([wants_urls, wants_paragraphs, wants_images]):
+            lines.append("--- HEADINGS ---")
+            headings = data.get('headings', {})
+            for level in ['h1', 'h2', 'h3']:
+                if headings.get(level):
+                    for h in headings[level][:10]:
+                        lines.append(f"{level.upper()}: {h}")
+        
+        if wants_paragraphs or wants_all or wants_more:
+            lines.append(f"--- PARAGRAPHS ({len(data.get('paragraphs', []))} total) ---")
+            paras = data.get('paragraphs', [])
+            for i, p in enumerate(paras, 1):
+                lines.append(f"[Para {i}]: {p}")
+        
+        if wants_urls or wants_all:
+            lines.append("--- ALL INTERNAL LINKS ---")
+            for link in data.get('internal_links', [])[:50]:
+                lines.append(f"• {link.get('url', 'N/A')}")
+            lines.append("--- ALL EXTERNAL LINKS ---")
+            for link in data.get('external_links', [])[:20]:
+                lines.append(f"• {link.get('url', 'N/A')}")
+        
+        if wants_images or wants_all:
+            lines.append("--- IMAGES ---")
+            for img in data.get('images', [])[:20]:
+                lines.append(f"URL: {img.get('url', 'N/A')}")
+                if img.get('alt'):
+                    lines.append(f"  Alt: {img.get('alt')}")
+        
+        if data.get('description'):
+            lines.append(f"Description: {data['description']}")
+    
+    # Crawled site data (multiple pages)
     elif 'pages' in data and data['pages']:
-        page = data['pages'][0]   # <--- very important: only first page
-        lines.append(f"Website: {data.get('start_url','')}")
-        lines.append(f"Page 1 / {len(data['pages'])} → {page.get('title','')[:140]}")
-
-        if d := page.get('description',''):
-            lines.append(f"Description: {d[:110]}")
-
-        if h1 := page.get('headings',{}).get('h1',[]):
-            lines.append(f"H1: {h1[0][:140] if h1 else ''}")
-
-        if paras := page.get('paragraphs', []):
-            limit = 3 if not wants_edit else 6
-            short_paras = [p for p in paras[:limit] if 40 <= len(p) <= 300]
-            if short_paras:
-                lines.append("Content snippets:")
-                for p in short_paras:
-                    lines.append(f"• {p}")
-
-    lines.append(f"\nUser question: {question}")
+        total_pages = len(data['pages'])
+        lines.append(f"=== SCRAPED WEBSITE ({total_pages} pages) ===")
+        
+        if wants_urls or wants_all:
+            lines.append("--- ALL URLs FROM ALL PAGES ---")
+            for i, page in enumerate(data['pages'], 1):
+                lines.append(f"Page {i}: {page.get('url', 'N/A')}")
+        
+        if wants_paragraphs or wants_all or wants_more:
+            lines.append("--- ALL PARAGRAPHS ---")
+            for i, page in enumerate(data['pages'], 1):
+                paras = page.get('paragraphs', [])
+                if paras:
+                    lines.append(f"Page {i} ({page.get('title', 'N/A')}):")
+                    for j, p in enumerate(paras, 1):
+                        lines.append(f"  [{j}]: {p}")
+        
+        if wants_headings or wants_all:
+            lines.append("--- ALL HEADINGS ---")
+            for i, page in enumerate(data['pages'], 1):
+                headings = page.get('headings', {})
+                if headings:
+                    lines.append(f"Page {i}: {page.get('title', 'N/A')}")
+                    for level in ['h1', 'h2', 'h3']:
+                        if headings.get(level):
+                            for h in headings[level][:5]:
+                                lines.append(f"  {level.upper()}: {h}")
+        
+        if wants_images or wants_all:
+            lines.append("--- ALL IMAGES ---")
+            for i, page in enumerate(data['pages'], 1):
+                imgs = page.get('images', [])
+                if imgs:
+                    lines.append(f"Page {i}: {page.get('title', 'N/A')}")
+                    for img in imgs[:10]:
+                        lines.append(f"  • {img.get('url', 'N/A')}")
+        
+        if wants_edit or wants_all:
+            lines.append("--- DATA FOR MODIFICATION ---")
+            for i, page in enumerate(data['pages'][:10], 1):
+                lines.append(f"Page {i}: {page.get('title', 'N/A')} | URL: {page.get('url', 'N/A')}")
+    
+    lines.append(f"QUESTION: {question}")
+    if wants_edit:
+        lines.append("Make the requested changes to the data above.")
+    
     return "\n".join(lines)
 
 
@@ -291,3 +339,4 @@ async def export_data(request: Request):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, workers=2)
+
